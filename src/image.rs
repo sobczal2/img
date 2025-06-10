@@ -1,0 +1,77 @@
+use thiserror::Error;
+
+use crate::{
+    error::{IndexResult, OutOfBoundsError},
+    iter::{Pixels, PixelsMut},
+    pixel::{Pixel, PixelMut, PIXEL_SIZE},
+};
+
+#[derive(Debug, Error)]
+#[error("size does not match buffer size")]
+pub struct SizeBufferMismatch;
+
+/// Image representation
+pub struct Image {
+    size: (usize, usize),
+    buf: Box<[u8]>,
+}
+
+impl Image {
+    pub fn new(size: (usize, usize), buf: Box<[u8]>) -> Result<Self, SizeBufferMismatch> {
+        if buf.len() != size.0 * size.1 * PIXEL_SIZE {
+            return Err(SizeBufferMismatch);
+        }
+
+        Ok(Image { size, buf })
+    }
+
+    /// create empty image with specified size
+    pub fn empty(size: (usize, usize)) -> Self {
+        Self {
+            size,
+            buf: vec![0; size.0 * size.1 * PIXEL_SIZE].into_boxed_slice(),
+        }
+    }
+
+    /// get size of the image in pixels
+    pub fn size(&self) -> (usize, usize) {
+        self.size
+    }
+
+    /// get immutable pixel at selected cordinates
+    pub fn pixel(&self, (x, y): (usize, usize)) -> IndexResult<Pixel<'_>> {
+        let idx = (y * self.size.0 + x) * PIXEL_SIZE;
+        if idx > self.buf.len() {
+            return Err(OutOfBoundsError);
+        }
+
+        let buf = &self.buf[idx..idx + PIXEL_SIZE];
+        Ok(Pixel::new(buf.try_into().unwrap()))
+    }
+
+    /// get mutable pixel at selected cordinates
+    pub fn pixel_mut(&mut self, (x, y): (usize, usize)) -> IndexResult<PixelMut<'_>> {
+        let idx = (y * self.size.0 + x) * PIXEL_SIZE;
+        if idx > self.buf.len() {
+            return Err(OutOfBoundsError);
+        }
+
+        let buf = &mut self.buf[idx..idx + PIXEL_SIZE];
+        Ok(PixelMut::new(buf.try_into().unwrap()))
+    }
+
+    /// get readonly underlying buffer
+    pub fn buf(&self) -> &[u8] {
+        &self.buf
+    }
+
+    pub fn pixels(&self) -> Pixels {
+        // SAFETY: buffer here is always of size N * PIXEL_SIZE
+        Pixels::new(&self.buf).unwrap()
+    }
+
+    pub fn pixels_mut(&mut self) -> PixelsMut {
+        // SAFETY: buffer here is always of size N * PIXEL_SIZE
+        PixelsMut::new(&mut self.buf).unwrap()
+    }
+}

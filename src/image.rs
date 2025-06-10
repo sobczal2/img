@@ -2,7 +2,7 @@ use thiserror::Error;
 
 use crate::{
     error::{IndexResult, OutOfBoundsError},
-    iter::{Pixels, PixelsMut},
+    iter::{Pixels, PixelsMut, Rows, RowsMut},
     pixel::{Pixel, PixelMut, PIXEL_SIZE},
 };
 
@@ -49,6 +49,18 @@ impl Image {
         Ok(Pixel::new(buf.try_into().unwrap()))
     }
 
+    /// get immutable pixel at selected cordinates
+    /// without checking bounds
+    ///
+    /// # Safety
+    ///
+    /// this should be called only using valid x and y
+    pub unsafe fn pixel_unchecked(&self, (x, y): (usize, usize)) -> Pixel<'_> {
+        let idx = (y * self.size.0 + x) * PIXEL_SIZE;
+        let buf = &self.buf[idx..idx + PIXEL_SIZE];
+        Pixel::new(buf.try_into().unwrap())
+    }
+
     /// get mutable pixel at selected cordinates
     pub fn pixel_mut(&mut self, (x, y): (usize, usize)) -> IndexResult<PixelMut<'_>> {
         let idx = (y * self.size.0 + x) * PIXEL_SIZE;
@@ -58,6 +70,18 @@ impl Image {
 
         let buf = &mut self.buf[idx..idx + PIXEL_SIZE];
         Ok(PixelMut::new(buf.try_into().unwrap()))
+    }
+
+    /// get mutable pixel at selected cordinates
+    /// without checking bounds
+    ///
+    /// # Safety
+    ///
+    /// this should be called only using valid x and y
+    pub unsafe fn pixel_mut_unchecked(&mut self, (x, y): (usize, usize)) -> PixelMut<'_> {
+        let idx = (y * self.size.0 + x) * PIXEL_SIZE;
+        let buf = &mut self.buf[idx..idx + PIXEL_SIZE];
+        PixelMut::new(buf.try_into().unwrap())
     }
 
     /// get readonly underlying buffer
@@ -73,5 +97,15 @@ impl Image {
     pub fn pixels_mut(&mut self) -> PixelsMut {
         // SAFETY: buffer here is always of size N * PIXEL_SIZE
         PixelsMut::new(&mut self.buf).unwrap()
+    }
+
+    pub fn rows(&self) -> Rows {
+        // SAFETY: buffer here is always of size width * height * PIXEL_SIZE
+        Rows::new(&self.buf, self.size).unwrap()
+    }
+
+    pub fn rows_mut(&mut self) -> RowsMut {
+        // SAFETY: buffer here is always of size width * height * PIXEL_SIZE
+        RowsMut::new(&mut self.buf, self.size).unwrap()
     }
 }

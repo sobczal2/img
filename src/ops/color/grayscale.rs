@@ -7,6 +7,7 @@ use crate::{image::Image, pixel::PixelMut};
 pub fn grayscale(image: &mut Image) {
     #[cfg(feature = "parallel")]
     image.pixels_mut().par_bridge().for_each(px_to_grayscale);
+
     #[cfg(not(feature = "parallel"))]
     image.pixels_mut().for_each(px_to_grayscale);
 }
@@ -14,6 +15,7 @@ pub fn grayscale(image: &mut Image) {
 fn px_to_grayscale(mut px: PixelMut) {
     let value = 0.299 * px.r() as f32 + 0.587 * px.g() as f32 + 0.214 * px.b() as f32;
     let value = value as u8;
+
     *px.r_mut() = value;
     *px.g_mut() = value;
     *px.b_mut() = value;

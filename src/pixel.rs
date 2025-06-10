@@ -78,6 +78,11 @@ impl<'a> PixelMut<'a> {
     pub fn a_mut(&mut self) -> &mut u8 {
         &mut self.0[3]
     }
+
+    pub fn copy_from_pixel<'p>(&mut self, px: impl Into<Pixel<'p>>) {
+        let px: Pixel<'p> = px.into();
+        self.0.copy_from_slice(px.0);
+    }
 }
 
 impl<'a> From<PixelMut<'a>> for Pixel<'a> {

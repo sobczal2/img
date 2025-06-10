@@ -4,10 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+clap = { version = "4.5.40", features=["cargo"] }
+colored = "3.0.0"
 png = "0.17.16"
 rayon = { version = "1.10.0", optional = true }
 thiserror = "2.0.12"
 
 [features]
-default = ["parallel"]
+default = []
 parallel = ["dep:rayon"]

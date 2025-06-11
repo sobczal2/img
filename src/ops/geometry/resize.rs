@@ -1,28 +1,19 @@
 #[cfg(feature = "parallel")]
 use rayon::iter::{ParallelBridge, ParallelIterator};
+use thiserror::Error;
 
 use crate::image::Image;
 
-fn calculate_size(size: (usize, usize), scale: (f32, f32)) -> (usize, usize) {
-    let new_size = (size.0 as f32 * scale.0.abs(), size.1 as f32 * scale.1.abs());
-    (new_size.0 as usize, new_size.1 as usize)
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("size is zero")]
+    SizeZero,
 }
 
-fn nearest(xy: (usize, usize), scale: (f32, f32)) -> (usize, usize) {
-    debug_assert_ne!(scale.0, 0f32);
-    debug_assert_ne!(scale.1, 0f32);
+pub type Result<T> = std::result::Result<T, Error>;
 
-    (
-        (xy.0 as f32 / scale.0) as usize,
-        (xy.1 as f32 / scale.1) as usize,
-    )
-}
-
-pub fn resize(image: &Image, scale: (f32, f32)) -> Image {
-    if scale.0 == 0f32 || scale.1 == 0f32 {
-        return Image::empty((0, 0));
-    }
-
+pub fn resize(image: &Image, scale: (f32, f32)) -> Result<Image> {
+    validate(image, scale)?;
     let new_size = calculate_size(image.size(), scale);
     let mut new_image = Image::empty(new_size);
 
@@ -42,5 +33,26 @@ pub fn resize(image: &Image, scale: (f32, f32)) -> Image {
         });
     });
 
-    new_image
+    Ok(new_image)
+}
+
+fn validate(image: &Image, scale: (f32, f32)) -> Result<()> {
+    let min_scale = (1f32 / image.size().0 as f32, 1f32 / image.size().0 as f32);
+    if scale.0.abs() < min_scale.0 || scale.1.abs() < min_scale.1 {
+        return Err(Error::SizeZero);
+    }
+
+    Ok(())
+}
+
+fn calculate_size(size: (usize, usize), scale: (f32, f32)) -> (usize, usize) {
+    let new_size = (size.0 as f32 * scale.0.abs(), size.1 as f32 * scale.1.abs());
+    (new_size.0 as usize, new_size.1 as usize)
+}
+
+fn nearest(xy: (usize, usize), scale: (f32, f32)) -> (usize, usize) {
+    (
+        (xy.0 as f32 / scale.0) as usize,
+        (xy.1 as f32 / scale.1) as usize,
+    )
 }

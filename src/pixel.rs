@@ -1,3 +1,4 @@
+// pixel size of an image in bytes
 pub const PIXEL_SIZE: usize = 4;
 
 /// A immutable view of RGBA pixel in some image
@@ -59,24 +60,24 @@ impl<'a> PixelMut<'a> {
         self.0[3]
     }
 
-    /// get red value mutably
-    pub fn r_mut(&mut self) -> &mut u8 {
-        &mut self.0[0]
+    /// set red value
+    pub fn set_r(&mut self, value: u8) {
+        self.0[0] = value;
     }
 
-    /// get green value mutably
-    pub fn g_mut(&mut self) -> &mut u8 {
-        &mut self.0[1]
+    /// set green value
+    pub fn set_g(&mut self, value: u8) {
+        self.0[1] = value;
     }
 
-    /// get blue value mutably
-    pub fn b_mut(&mut self) -> &mut u8 {
-        &mut self.0[2]
+    /// set blue value
+    pub fn set_b(&mut self, value: u8) {
+        self.0[2] = value;
     }
 
-    /// get alpha value mutably
-    pub fn a_mut(&mut self) -> &mut u8 {
-        &mut self.0[3]
+    /// set alpha value
+    pub fn set_a(&mut self, value: u8) {
+        self.0[3] = value;
     }
 
     pub fn copy_from_pixel<'p>(&mut self, px: impl Into<Pixel<'p>>) {

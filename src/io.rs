@@ -94,10 +94,10 @@ impl ReadPng for Image {
             .zip(bytes.chunks(pixel_size_by_color_type(info.color_type)))
         {
             let mut target = PixelMut::new(target_px.try_into().unwrap());
-            *target.r_mut() = get_red(source_px, info.color_type);
-            *target.g_mut() = get_green(source_px, info.color_type);
-            *target.b_mut() = get_blue(source_px, info.color_type);
-            *target.a_mut() = get_alpha(source_px, info.color_type);
+            target.set_r(get_red(source_px, info.color_type));
+            target.set_g(get_green(source_px, info.color_type));
+            target.set_b(get_blue(source_px, info.color_type));
+            target.set_a(get_alpha(source_px, info.color_type));
         }
 
         Ok(Image::new((info.width as usize, info.height as usize), image_buf).unwrap())
@@ -140,10 +140,10 @@ mod test {
     #[test]
     fn write_read_same_image() {
         let mut image = Image::empty((2, 2));
-        *image.pixel_mut((0, 0)).unwrap().r_mut() = 1;
-        *image.pixel_mut((0, 1)).unwrap().r_mut() = 2;
-        *image.pixel_mut((1, 0)).unwrap().r_mut() = 3;
-        *image.pixel_mut((1, 1)).unwrap().r_mut() = 4;
+        image.pixel_mut((0, 0)).unwrap().set_r(1);
+        image.pixel_mut((0, 1)).unwrap().set_r(1);
+        image.pixel_mut((1, 0)).unwrap().set_r(1);
+        image.pixel_mut((1, 1)).unwrap().set_r(1);
 
         let mut data = Vec::new();
         image.write_png(&mut data).unwrap();

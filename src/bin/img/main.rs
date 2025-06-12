@@ -6,7 +6,7 @@ mod printing;
 use std::process::exit;
 
 use clap::{command, Command};
-use cmd::{crop, grayscale, resize};
+use cmd::{blur, crop, grayscale, resize};
 use printing::print_error;
 
 fn main() {
@@ -14,7 +14,8 @@ fn main() {
         .subcommand_required(true)
         .subcommand(grayscale::subcommand())
         .subcommand(resize::subcommand())
-        .subcommand(crop::subcommand());
+        .subcommand(crop::subcommand())
+        .subcommand(blur::subcommand());
 
     if let Err(e) = execute_command(command) {
         print_error(e.to_string());
@@ -28,6 +29,7 @@ fn execute_command(command: Command) -> anyhow::Result<()> {
         Some((grayscale::CMD_NAME, m)) => grayscale::action(m),
         Some((resize::CMD_NAME, m)) => resize::action(m),
         Some((crop::CMD_NAME, m)) => crop::action(m),
+        Some((blur::CMD_NAME, m)) => blur::action(m),
         _ => unreachable!(),
     }
 }

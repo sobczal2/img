@@ -16,9 +16,9 @@ fn px_to_grayscale(mut px: PixelMut) {
     let value = 0.299 * px.r() as f32 + 0.587 * px.g() as f32 + 0.214 * px.b() as f32;
     let value = value as u8;
 
-    *px.r_mut() = value;
-    *px.g_mut() = value;
-    *px.b_mut() = value;
+    px.set_r(value);
+    px.set_g(value);
+    px.set_b(value);
 }
 
 #[cfg(test)]

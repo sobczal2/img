@@ -1,0 +1,119 @@
+use std::f32::consts::{E, PI};
+
+use thiserror::Error;
+
+use crate::{
+    error::{IndexResult, OutOfBoundsError},
+    image::{idx_to_xy, Image},
+    math::{idx_to_xy, xy_to_idx},
+};
+
+/// Error returned by mean_blur function
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("radius too big for given image")]
+    RadiusTooBig,
+}
+
+pub type Result<T> = std::result::Result<T, Error>;
+
+/// perform mean blur on an image not in place
+/// this reduces size of an image by radius * 2 times
+/// so to receive image of an original size you should pad it
+pub fn mean_blur(image: &Image, radius: usize) -> Result<Image> {
+    validate(image, radius)?;
+
+    let diamater = radius * 2 + 1;
+    let mut new_image =
+        Image::empty((image.size().0 - diamater + 1, image.size().1 - diamater + 1));
+
+    new_image.rows_mut().for_each(|(y, row)| {
+        row.for_each(|(x, mut px)| {
+            let sum = (0..diamater)
+                .flat_map(|k_y| {
+                    (0..diamater).map(move |k_x| {
+                        let new_px = unsafe { image.pixel_unchecked((x + k_x, y + k_y)) };
+                        (new_px.r(), new_px.g(), new_px.b())
+                    })
+                })
+                .fold((0f32, 0f32, 0f32), |(acc_r, acc_g, acc_b), (r, g, b)| {
+                    (acc_r + r as u32, acc_g + g as u32, acc_b + b as u32)
+                });
+
+            px.set_r(sum.0 as u8);
+            px.set_g(sum.1 as u8);
+            px.set_b(sum.2 as u8);
+            px.set_a(unsafe { image.pixel_unchecked((x, y)).a() });
+        });
+    });
+
+    Ok(new_image)
+}
+
+fn validate(image: &Image, radius: usize) -> Result<()> {
+    if image.size().0 < radius * 2 + 1 || image.size().1 < radius * 2 + 1 {
+        return Err(Error::RadiusTooBig);
+    }
+
+    Ok(())
+}
+
+pub struct GaussianKernel {
+    values: Box<[f32]>,
+    radius: usize,
+}
+
+impl GaussianKernel {
+    pub fn new(radius: usize, sigma: f32) -> GaussianKernel {
+        let diameter = radius * 2 + 1;
+        let mut values = vec![0f32; diameter * diameter].into_boxed_slice();
+        let divisor_inverse = 1f32 / (diameter * diameter) as f32;
+
+        values.iter_mut().enumerate().for_each(|(idx, value)| {
+            let (x, y) = idx_to_xy(idx, radius);
+            let offset = (x as i32 - radius as i32, y as i32 - radius as i32);
+            *value = gaussian_fn(offset, sigma) * divisor_inverse;
+        });
+
+        GaussianKernel { values, radius }
+    }
+
+    pub fn size(&self) -> (usize, usize) {
+        let diameter = self.radius * 2 + 1;
+        (diameter, diameter)
+    }
+
+    pub fn value(&self, offset: (i32, i32)) -> IndexResult<f32> {
+        let xy = offset_to_xy(offset, self.radius)?;
+        let idx = xy_to_idx(xy, self.size().0);
+        if idx > self.values.len() {
+            return Err(OutOfBoundsError);
+        }
+
+        Ok(self.values[idx])
+    }
+
+    pub unsafe fn value_unchecked(&self, offset: (i32, i32)) -> f32 {
+        let xy = offset_to_xy(offset, self.radius).unwrap();
+        let idx = xy_to_idx(xy, self.size().0);
+        self.values[idx]
+    }
+}
+
+fn offset_to_xy(offset: (i32, i32), radius: usize) -> IndexResult<(usize, usize)> {
+    Ok((
+        (offset.0 + radius as i32)
+            .try_into()
+            .map_err(|_| OutOfBoundsError)?,
+        (offset.1 + radius as i32)
+            .try_into()
+            .map_err(|_| OutOfBoundsError)?,
+    ))
+}
+
+fn gaussian_fn(offset: (i32, i32), sigma: f32) -> f32 {
+    let (offset_x, offset_y) = offset;
+    let base = (1f32 / (2f32 * PI * sigma * sigma)) * E;
+    let exponent = -((offset_x * offset_x + offset_y * offset_y) as f32 / (2f32 * sigma * sigma));
+    base.powf(exponent)
+}

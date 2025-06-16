@@ -3,6 +3,7 @@ use thiserror::Error;
 use crate::{
     error::{IndexResult, OutOfBoundsError},
     iter::{Pixels, PixelsMut, Rows, RowsMut},
+    math::xy_to_idx,
     pixel::{Pixel, PixelMut, PIXEL_SIZE},
 };
 
@@ -39,8 +40,8 @@ impl Image {
     }
 
     /// get immutable pixel at selected cordinates
-    pub fn pixel(&self, (x, y): (usize, usize)) -> IndexResult<Pixel<'_>> {
-        let idx = (y * self.size.0 + x) * PIXEL_SIZE;
+    pub fn pixel(&self, xy: (usize, usize)) -> IndexResult<Pixel<'_>> {
+        let idx = xy_to_idx(xy, self.size.0) * PIXEL_SIZE;
         if idx > self.buf.len() {
             return Err(OutOfBoundsError);
         }
@@ -55,15 +56,15 @@ impl Image {
     /// # Safety
     ///
     /// this should be called only using valid x and y
-    pub unsafe fn pixel_unchecked(&self, (x, y): (usize, usize)) -> Pixel<'_> {
-        let idx = (y * self.size.0 + x) * PIXEL_SIZE;
+    pub unsafe fn pixel_unchecked(&self, xy: (usize, usize)) -> Pixel<'_> {
+        let idx = xy_to_idx(xy, self.size.0) * PIXEL_SIZE;
         let buf = &self.buf[idx..idx + PIXEL_SIZE];
         Pixel::new(buf.try_into().unwrap())
     }
 
     /// get mutable pixel at selected cordinates
-    pub fn pixel_mut(&mut self, (x, y): (usize, usize)) -> IndexResult<PixelMut<'_>> {
-        let idx = (y * self.size.0 + x) * PIXEL_SIZE;
+    pub fn pixel_mut(&mut self, xy: (usize, usize)) -> IndexResult<PixelMut<'_>> {
+        let idx = xy_to_idx(xy, self.size.0) * PIXEL_SIZE;
         if idx > self.buf.len() {
             return Err(OutOfBoundsError);
         }
@@ -78,8 +79,8 @@ impl Image {
     /// # Safety
     ///
     /// this should be called only using valid x and y
-    pub unsafe fn pixel_mut_unchecked(&mut self, (x, y): (usize, usize)) -> PixelMut<'_> {
-        let idx = (y * self.size.0 + x) * PIXEL_SIZE;
+    pub unsafe fn pixel_mut_unchecked(&mut self, xy: (usize, usize)) -> PixelMut<'_> {
+        let idx = xy_to_idx(xy, self.size.0) * PIXEL_SIZE;
         let buf = &mut self.buf[idx..idx + PIXEL_SIZE];
         PixelMut::new(buf.try_into().unwrap())
     }

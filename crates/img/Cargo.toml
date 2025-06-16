@@ -1,0 +1,13 @@
+[package]
+name = "img"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+png.workspace = true
+thiserror.workspace = true
+rayon = { workspace = true, optional = true }
+
+[features]
+default = []
+parallel = ["dep:rayon"]

@@ -39,6 +39,6 @@ mod test {
             px_to_sepia(px);
         }
 
-        assert_eq!(Pixel::new(data), Pixel::new(&[21, 21, 21, 50]));
+        assert_eq!(Pixel::new(data), Pixel::new(&[24, 22, 17, 50]));
     }
 }

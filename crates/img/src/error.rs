@@ -2,7 +2,7 @@ use thiserror::Error;
 
 /// Out of bounds error, may occur when trying
 /// to access image pixel by index
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 #[error("out of bounds")]
 pub struct OutOfBoundsError;
 

@@ -6,6 +6,7 @@ use crate::{
     error::{IndexResult, OutOfBoundsError},
     image::Image,
     math::{idx_to_xy, xy_to_idx},
+    pixel::PixelMut,
 };
 
 /// Error returned by mean_blur function
@@ -25,36 +26,14 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub fn gaussian_blur(image: &Image, radius: usize, sigma: f32) -> Result<Image> {
     validate(image, radius, sigma)?;
 
-    let kernel = &GaussianKernel::new(radius, sigma);
-    let diamater = radius * 2 + 1;
+    let kernel = GaussianKernel::new(radius, sigma);
+    let diameter = radius * 2 + 1;
     let mut new_image =
-        Image::empty((image.size().0 - diamater + 1, image.size().1 - diamater + 1));
-
-    let radius_i32 = radius as i32;
+        Image::empty((image.size().0 - diameter + 1, image.size().1 - diameter + 1));
 
     new_image.rows_mut().for_each(|(y, row)| {
         row.for_each(|(x, mut px)| {
-            let sum = (0..diamater)
-                .flat_map(|k_y| {
-                    (0..diamater).map(move |k_x| {
-                        let new_px = unsafe { image.pixel_unchecked((x + k_x, y + k_y)) };
-                        let offset = (k_x as i32 - radius_i32, k_y as i32 - radius_i32);
-                        let kernel_value = unsafe { kernel.value_unchecked(offset) };
-                        (
-                            new_px.r() as f32 * kernel_value,
-                            new_px.g() as f32 * kernel_value,
-                            new_px.b() as f32 * kernel_value,
-                        )
-                    })
-                })
-                .fold((0f32, 0f32, 0f32), |(acc_r, acc_g, acc_b), (r, g, b)| {
-                    (acc_r + r, acc_g + g, acc_b + b)
-                });
-
-            px.set_r(sum.0 as u8);
-            px.set_g(sum.1 as u8);
-            px.set_b(sum.2 as u8);
-            px.set_a(unsafe { image.pixel_unchecked((x, y)).a() });
+            process_pixel((x, y), &mut px, image, &kernel);
         });
     });
 
@@ -73,6 +52,38 @@ fn validate(image: &Image, radius: usize, sigma: f32) -> Result<()> {
     Ok(())
 }
 
+fn process_pixel(
+    xy: (usize, usize),
+    px: &mut PixelMut,
+    original_image: &Image,
+    kernel: &GaussianKernel,
+) {
+    let diameter = kernel.size().0;
+    let radius_i32 = kernel.size().0 as i32 / 2;
+    let (x, y) = xy;
+    let sum = (0..diameter)
+        .flat_map(|k_y| {
+            (0..diameter).map(move |k_x| {
+                let new_px = unsafe { original_image.pixel_unchecked((x + k_x, y + k_y)) };
+                let offset = (k_x as i32 - radius_i32, k_y as i32 - radius_i32);
+                let kernel_value = unsafe { kernel.value_unchecked(offset) };
+                (
+                    new_px.r() as f32 * kernel_value,
+                    new_px.g() as f32 * kernel_value,
+                    new_px.b() as f32 * kernel_value,
+                )
+            })
+        })
+        .fold((0f32, 0f32, 0f32), |(acc_r, acc_g, acc_b), (r, g, b)| {
+            (acc_r + r, acc_g + g, acc_b + b)
+        });
+
+    px.set_r(sum.0 as u8);
+    px.set_g(sum.1 as u8);
+    px.set_b(sum.2 as u8);
+    px.set_a(unsafe { original_image.pixel_unchecked((x, y)).a() });
+}
+
 #[derive(Debug)]
 pub struct GaussianKernel {
     values: Box<[f32]>,
@@ -80,6 +91,7 @@ pub struct GaussianKernel {
 }
 
 impl GaussianKernel {
+    /// create a gaussian kernel using radius and sigma
     pub fn new(radius: usize, sigma: f32) -> GaussianKernel {
         let diameter = radius * 2 + 1;
         let mut values = vec![0f32; diameter * diameter].into_boxed_slice();
@@ -98,11 +110,13 @@ impl GaussianKernel {
         GaussianKernel { values, radius }
     }
 
+    /// get kernel size
     pub fn size(&self) -> (usize, usize) {
         let diameter = self.radius * 2 + 1;
         (diameter, diameter)
     }
 
+    /// get kernel value given the offset
     pub fn value(&self, offset: (i32, i32)) -> IndexResult<f32> {
         let xy = offset_to_xy(offset, self.radius)?;
         let idx = xy_to_idx(xy, self.size().0);
@@ -113,6 +127,12 @@ impl GaussianKernel {
         Ok(self.values[idx])
     }
 
+    /// get kernel value given the offset
+    /// without checking bounds
+    ///
+    /// # Safety
+    ///
+    /// this should be called only using valid x and y
     pub unsafe fn value_unchecked(&self, offset: (i32, i32)) -> f32 {
         let xy = offset_to_xy(offset, self.radius).unwrap();
         let idx = xy_to_idx(xy, self.size().0);
@@ -121,6 +141,10 @@ impl GaussianKernel {
 }
 
 fn offset_to_xy(offset: (i32, i32), radius: usize) -> IndexResult<(usize, usize)> {
+    if offset.0.abs() > radius as i32 || offset.1.abs() > radius as i32 {
+        return Err(OutOfBoundsError);
+    }
+
     Ok((
         (offset.0 + radius as i32)
             .try_into()
@@ -142,4 +166,27 @@ fn gaussian_fn(offset: (i32, i32), sigma: f32) -> f32 {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn test_gaussian_fn() {
+        const PRECISION: f32 = 1e-8;
+
+        assert!((gaussian_fn((0, 0), 1f32) - 0.15915494).abs() <= PRECISION);
+        assert!((gaussian_fn((1, 0), 1f32) - 0.09653235).abs() <= PRECISION);
+        assert!((gaussian_fn((1, 1), 1f32) - 0.05854983).abs() <= PRECISION);
+        assert!((gaussian_fn((0, 0), 2f32) - 0.03978873).abs() <= PRECISION);
+
+        assert_eq!(gaussian_fn((1, 0), 1f32), gaussian_fn((0, 1), 1f32));
+        assert_eq!(gaussian_fn((1, 0), 2f32), gaussian_fn((0, 1), 2f32));
+        assert_eq!(gaussian_fn((1, 0), 3f32), gaussian_fn((0, 1), 3f32));
+    }
+
+    #[test]
+    fn test_offset_to_xy() {
+        assert_eq!(offset_to_xy((0, 0), 2), Ok((2, 2)));
+        assert_eq!(offset_to_xy((-2, -2), 2), Ok((0, 0)));
+        assert_eq!(offset_to_xy((2, 2), 2), Ok((4, 4)));
+        assert_eq!(offset_to_xy((3, 2), 2), Err(OutOfBoundsError));
+        assert_eq!(offset_to_xy((-3, -2), 2), Err(OutOfBoundsError));
+    }
 }

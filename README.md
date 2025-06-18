@@ -24,17 +24,21 @@ in terms of I/O, reading and writing is implemented for:
 
 # Cli installation
 
-// TODO: clone
+clone the repository using git
 
 ```bash
+git clone git@github.com:sobczal2/img.git
 
 ```
 
-// TODO: cargo install
+within repository directory invoke
 
 ```bash
+cargo install --path crates/img-cli
 
 ```
+
+to install the tool
 
 # Cli Usage
 
@@ -47,11 +51,13 @@ img --help
 ## Blur:
 
 ```bash
-img blur -i input.png -o output.png -r <radius>
+img blur -i input.png -o output.png -r <radius> -a <algorithm> -s <sigma>
 ```
 
 - radius - non-negative integer describing range of the
   blur kernel. Passing value of 0 results in 1x1 kernel, value 1 - 3x3, etc.
+- algorithm - either "mean" or "gaussian"
+- sigma - sigma value used in gaussian blur algorithm
 
 ## Grayscale
 

@@ -8,8 +8,9 @@ as well as a rust library for applying simpla image filters.
 
 img is a very young tool so support for different types of filters is limited to:
 
-- blur (implemented using mean blur, more algorithms to come)
+- blur (available algorithms: mean blur, gaussian blur)
 - grayscale filter
+- sepia filter
 
 it also allows for simple image manipulation:
 

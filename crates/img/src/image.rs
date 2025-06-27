@@ -18,6 +18,8 @@ pub struct Image {
 }
 
 impl Image {
+    /// create an image with the given size and buffer
+    /// fails if buf's length is not width * length * PIXEL_SIZE
     pub fn new(size: (usize, usize), buf: Box<[u8]>) -> Result<Self, SizeBufferMismatch> {
         if buf.len() != size.0 * size.1 * PIXEL_SIZE {
             return Err(SizeBufferMismatch);

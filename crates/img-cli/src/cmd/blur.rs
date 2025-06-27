@@ -1,10 +1,7 @@
 use std::path::PathBuf;
 
 use clap::{arg, value_parser, ArgMatches, Command, ValueEnum};
-use img::{
-    image::Image,
-    ops::blur::{gaussian::gaussian_blur, mean::mean_blur},
-};
+use img::prelude::*;
 
 use crate::io::{read_image, write_image};
 

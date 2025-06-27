@@ -1,7 +1,8 @@
-mod error;
+pub mod error;
 pub mod image;
 pub mod io;
-mod iter;
+pub mod iter;
 pub mod math;
 pub mod ops;
-mod pixel;
+pub mod pixel;
+pub mod prelude;

@@ -1,9 +1,7 @@
 use std::{fs::File, path::Path};
 
-use img::{
-    image::Image,
-    io::{ReadPng, WritePng},
-};
+use img::io::{ReadPng, WritePng};
+use img::prelude::Image;
 
 /// Read an image from png file specified in path
 pub fn read_image(path: impl AsRef<Path>) -> anyhow::Result<Image> {

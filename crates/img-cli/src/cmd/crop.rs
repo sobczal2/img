@@ -1,7 +1,7 @@
 use std::{path::PathBuf, str::FromStr};
 
 use clap::{arg, ArgMatches, Command};
-use img::ops::geometry::crop::crop;
+use img::prelude::*;
 
 use crate::{
     io::{read_image, write_image},

@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use clap::{arg, value_parser, ArgMatches, Command};
-use img::ops::color::gamma_correction::gamma_correction;
+use img::prelude::*;
 
 use crate::io::{read_image, write_image};
 

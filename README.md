@@ -102,6 +102,6 @@ From there, you can follow code documentation.
 
 # Parallelism
 
-This project can be compiled with "parallel" feature flag which enables parallel processing in some places using rayon.
+This project can be compiled with "parallel" feature flag which adds corresponding functions utilizing rayon parallelism.
 It is disabled by default since rayon's overhead usually makes filters run slower compared to non parallel version, but can be
 enabled when necessary.

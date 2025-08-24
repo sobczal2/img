@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 
-use clap::{arg, value_parser, ArgMatches, Command, ValueEnum};
+use clap::{ArgMatches, Command, ValueEnum, arg, value_parser};
 use img::{ops::blur::median::median_blur, prelude::*};
 
 use crate::io::{read_image, write_image};
 
-use super::common::{input_arg, output_arg, INPUT_ARG_NAME, OUTPUT_ARG_NAME};
+use super::common::{INPUT_ARG_NAME, OUTPUT_ARG_NAME, input_arg, output_arg};
 
 pub const CMD_NAME: &str = "blur";
 

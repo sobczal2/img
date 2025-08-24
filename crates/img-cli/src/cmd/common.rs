@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use clap::{arg, value_parser, Arg};
+use clap::{Arg, arg, value_parser};
 
 pub const INPUT_ARG_NAME: &str = "input";
 pub fn input_arg() -> Arg {

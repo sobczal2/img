@@ -34,14 +34,24 @@ pub fn gaussian_blur(image: &Image, radius: usize, sigma: f32) -> Result<Image> 
     let mut new_image =
         Image::empty((image.size().0 - diameter + 1, image.size().1 - diameter + 1));
 
-    #[cfg(not(feature = "parallel"))]
     new_image.rows_mut().for_each(|(y, row)| {
         row.for_each(|(x, mut px)| {
             process_pixel((x, y), &mut px, image, &kernel);
         });
     });
 
-    #[cfg(feature = "parallel")]
+    Ok(new_image)
+}
+
+#[cfg(feature = "parallel")]
+pub fn gaussian_blur_par(image: &Image, radius: usize, sigma: f32) -> Result<Image> {
+    validate(image, radius, sigma)?;
+
+    let kernel = GaussianKernel::new(radius, sigma);
+    let diameter = radius * 2 + 1;
+    let mut new_image =
+        Image::empty((image.size().0 - diameter + 1, image.size().1 - diameter + 1));
+
     new_image.rows_mut().par_bridge().for_each(|(y, row)| {
         row.for_each(|(x, mut px)| {
             process_pixel((x, y), &mut px, image, &kernel);

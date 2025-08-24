@@ -5,11 +5,12 @@ use crate::{image::Image, pixel::PixelMut};
 
 /// Transform image to grayscale in place
 pub fn sepia(image: &mut Image) {
-    #[cfg(feature = "parallel")]
-    image.pixels_mut().par_bridge().for_each(px_to_sepia);
-
-    #[cfg(not(feature = "parallel"))]
     image.pixels_mut().for_each(px_to_sepia);
+}
+
+#[cfg(feature = "parallel")]
+pub fn sepia_par(image: &mut Image) {
+    image.pixels_mut().par_bridge().for_each(px_to_sepia);
 }
 
 fn px_to_sepia(mut px: PixelMut) {

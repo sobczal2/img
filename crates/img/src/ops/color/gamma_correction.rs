@@ -1,3 +1,6 @@
+#[cfg(feature = "parallel")]
+use rayon::iter::{ParallelBridge, ParallelIterator};
+
 use crate::{
     image::Image,
     pixel::{PixelMut, ReadPixelRgbaf32, WritePixelRgbaf32},
@@ -8,6 +11,14 @@ pub const CMD_NAME: &str = "sepia";
 pub fn gamma_correction(image: &mut Image, gamma: f32) {
     image
         .pixels_mut()
+        .for_each(|mut px| px_gamma_correction(&mut px, gamma));
+}
+
+#[cfg(feature = "parallel")]
+pub fn gamma_correction_par(image: &mut Image, gamma: f32) {
+    image
+        .pixels_mut()
+        .par_bridge()
         .for_each(|mut px| px_gamma_correction(&mut px, gamma));
 }
 

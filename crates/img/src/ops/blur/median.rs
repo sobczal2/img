@@ -1,3 +1,6 @@
+#[cfg(feature = "parallel")]
+use rayon::iter::{ParallelBridge, ParallelIterator};
+
 use thiserror::Error;
 
 use crate::{
@@ -24,8 +27,27 @@ pub fn median_blur(image: &Image, radius: usize) -> Result<Image> {
 
     // TODO: consider switching dimensions since here most
     // nested access occurs on y value in this implementation
-    #[cfg(not(feature = "parallel"))]
     new_image.rows_mut().for_each(|(y, row)| {
+        let mut sets = init_sets(image, diamater, y);
+        row.for_each(|(x, mut px)| {
+            process_pixel((x, y), &mut px, image, radius, &mut sets);
+        });
+    });
+
+    Ok(new_image)
+}
+
+#[cfg(feature = "parallel")]
+pub fn median_blur_par(image: &Image, radius: usize) -> Result<Image> {
+    validate(image, radius)?;
+
+    let diamater = radius * 2 + 1;
+    let mut new_image =
+        Image::empty((image.size().0 - diamater + 1, image.size().1 - diamater + 1));
+
+    // TODO: consider switching dimensions since here most
+    // nested access occurs on y value in this implementation
+    new_image.rows_mut().par_bridge().for_each(|(y, row)| {
         let mut sets = init_sets(image, diamater, y);
         row.for_each(|(x, mut px)| {
             process_pixel((x, y), &mut px, image, radius, &mut sets);

@@ -1,6 +1,6 @@
 use std::{path::PathBuf, str::FromStr};
 
-use clap::{arg, ArgMatches, Command};
+use clap::{ArgMatches, Command, arg};
 use img::prelude::*;
 
 use crate::{
@@ -8,7 +8,7 @@ use crate::{
     param::size::Size,
 };
 
-use super::common::{input_arg, output_arg, INPUT_ARG_NAME, OUTPUT_ARG_NAME};
+use super::common::{INPUT_ARG_NAME, OUTPUT_ARG_NAME, input_arg, output_arg};
 
 pub const CMD_NAME: &str = "resize";
 

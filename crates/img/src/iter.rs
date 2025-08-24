@@ -1,6 +1,6 @@
 use crate::{
     error::{BufferLengthMismatchError, BufferLengthMismatchResult},
-    pixel::{Pixel, PixelMut, PIXEL_SIZE},
+    pixel::{PIXEL_SIZE, Pixel, PixelMut},
 };
 
 /// Iterator over immutable pixels of an image.

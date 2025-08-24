@@ -5,11 +5,12 @@ use crate::{image::Image, pixel::PixelMut};
 
 /// Transform image to grayscale in place
 pub fn grayscale(image: &mut Image) {
-    #[cfg(feature = "parallel")]
-    image.pixels_mut().par_bridge().for_each(px_to_grayscale);
-
-    #[cfg(not(feature = "parallel"))]
     image.pixels_mut().for_each(px_to_grayscale);
+}
+
+#[cfg(feature = "parallel")]
+pub fn grayscale_par(image: &mut Image) {
+    image.pixels_mut().par_bridge().for_each(px_to_grayscale);
 }
 
 fn px_to_grayscale(mut px: PixelMut) {

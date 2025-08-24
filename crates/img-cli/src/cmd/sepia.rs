@@ -5,7 +5,7 @@ use img::prelude::*;
 
 use crate::io::{read_image, write_image};
 
-use super::common::{input_arg, output_arg, INPUT_ARG_NAME, OUTPUT_ARG_NAME};
+use super::common::{INPUT_ARG_NAME, OUTPUT_ARG_NAME, input_arg, output_arg};
 
 pub const CMD_NAME: &str = "sepia";
 

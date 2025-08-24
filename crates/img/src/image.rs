@@ -4,7 +4,7 @@ use crate::{
     error::{IndexResult, OutOfBoundsError},
     iter::{Pixels, PixelsMut, Rows, RowsMut},
     math::xy_to_idx,
-    pixel::{Pixel, PixelMut, PIXEL_SIZE},
+    pixel::{PIXEL_SIZE, Pixel, PixelMut},
 };
 
 #[derive(Debug, Error)]

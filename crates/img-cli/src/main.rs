@@ -5,7 +5,7 @@ mod printing;
 
 use std::process::exit;
 
-use clap::{command, Command};
+use clap::{Command, command};
 use cmd::{blur, crop, gamma, grayscale, resize, sepia};
 use printing::print_error;
 

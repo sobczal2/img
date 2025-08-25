@@ -1,6 +1,7 @@
 use crate::{
     error::{BufferLengthMismatchError, BufferLengthMismatchResult},
-    pixel::{PIXEL_SIZE, Pixel, PixelMut},
+    image::Size,
+    pixel::{Pixel, PixelMut, PIXEL_SIZE},
 };
 
 /// Iterator over immutable pixels of an image.
@@ -23,13 +24,13 @@ impl<'a> Iterator for Pixels<'a> {
 }
 
 impl<'a> Pixels<'a> {
-    pub fn new(buf: &'a [u8]) -> BufferLengthMismatchResult<Self> {
-        if buf.len() % PIXEL_SIZE != 0 {
+    pub fn new(buffer: &'a [u8]) -> BufferLengthMismatchResult<Self> {
+        if buffer.len() % PIXEL_SIZE != 0 {
             return Err(BufferLengthMismatchError);
         }
 
         Ok(Pixels {
-            inner: buf.chunks_exact(PIXEL_SIZE),
+            inner: buffer.chunks_exact(PIXEL_SIZE),
         })
     }
 }
@@ -53,13 +54,13 @@ impl<'a> Iterator for PixelsMut<'a> {
 }
 
 impl<'a> PixelsMut<'a> {
-    pub fn new(buf: &'a mut [u8]) -> BufferLengthMismatchResult<Self> {
-        if buf.len() % PIXEL_SIZE != 0 {
+    pub fn new(buffer: &'a mut [u8]) -> BufferLengthMismatchResult<Self> {
+        if buffer.len() % PIXEL_SIZE != 0 {
             return Err(BufferLengthMismatchError);
         }
 
         Ok(PixelsMut {
-            inner: buf.chunks_exact_mut(PIXEL_SIZE),
+            inner: buffer.chunks_exact_mut(PIXEL_SIZE),
         })
     }
 }
@@ -85,9 +86,9 @@ impl<'a> Iterator for Row<'a> {
 }
 
 impl<'a> Row<'a> {
-    pub fn new(buf: &'a [u8]) -> BufferLengthMismatchResult<Self> {
+    pub fn new(buffer: &'a [u8]) -> BufferLengthMismatchResult<Self> {
         Ok(Row {
-            pixels: Pixels::new(buf)?,
+            pixels: Pixels::new(buffer)?,
             position: 0,
         })
     }
@@ -113,9 +114,9 @@ impl<'a> Iterator for RowMut<'a> {
 }
 
 impl<'a> RowMut<'a> {
-    pub fn new(buf: &'a mut [u8]) -> BufferLengthMismatchResult<Self> {
+    pub fn new(buffer: &'a mut [u8]) -> BufferLengthMismatchResult<Self> {
         Ok(RowMut {
-            pixels: PixelsMut::new(buf)?,
+            pixels: PixelsMut::new(buffer)?,
             position: 0,
         })
     }
@@ -142,13 +143,15 @@ impl<'a> Iterator for Rows<'a> {
 }
 
 impl<'a> Rows<'a> {
-    pub fn new(buf: &'a [u8], size: (usize, usize)) -> BufferLengthMismatchResult<Self> {
-        if buf.len() != size.0 * size.1 * PIXEL_SIZE {
+    pub fn new(buffer: &'a [u8], size: Size) -> BufferLengthMismatchResult<Self> {
+        let width: usize = size.width().into();
+        let height: usize = size.height().into();
+        if buffer.len() != width * height * PIXEL_SIZE {
             return Err(BufferLengthMismatchError);
         }
 
         Ok(Rows {
-            rows: buf.chunks_exact(size.0 * PIXEL_SIZE),
+            rows: buffer.chunks_exact(width * PIXEL_SIZE),
             position: 0,
         })
     }
@@ -175,13 +178,15 @@ impl<'a> Iterator for RowsMut<'a> {
 }
 
 impl<'a> RowsMut<'a> {
-    pub fn new(buf: &'a mut [u8], size: (usize, usize)) -> BufferLengthMismatchResult<Self> {
-        if buf.len() != size.0 * size.1 * PIXEL_SIZE {
+    pub fn new(buffer: &'a mut [u8], size: Size) -> BufferLengthMismatchResult<Self> {
+        let width: usize = size.width().into();
+        let height: usize = size.height().into();
+        if buffer.len() != width * height * PIXEL_SIZE {
             return Err(BufferLengthMismatchError);
         }
 
         Ok(RowsMut {
-            rows: buf.chunks_exact_mut(size.0 * PIXEL_SIZE),
+            rows: buffer.chunks_exact_mut(width * PIXEL_SIZE),
             position: 0,
         })
     }

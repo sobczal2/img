@@ -2,8 +2,8 @@ use png::{BitDepth, ColorType};
 
 use crate::{
     error::{IoError, IoResult},
-    image::Image,
-    pixel::{PIXEL_SIZE, PixelMut},
+    image::{Buffer, Image, Size},
+    pixel::{PixelMut, PIXEL_SIZE},
 };
 
 fn pixel_size_by_color_type(color_type: ColorType) -> usize {
@@ -100,7 +100,12 @@ impl ReadPng for Image {
             target.set_a(get_alpha(source_px, info.color_type));
         }
 
-        Ok(Image::new((info.width as usize, info.height as usize), image_buf).unwrap())
+        let width: usize = info.width.try_into().unwrap();
+        let height: usize = info.height.try_into().unwrap();
+        let width = width.try_into().expect("invalid width");
+        let height = height.try_into().expect("invalid height");
+
+        Ok(Image::new(Size::new(width, height), Buffer::from_iter(image_buf)).unwrap())
     }
 }
 
@@ -111,11 +116,14 @@ pub trait WritePng {
 
 impl WritePng for Image {
     fn write_png(&self, write: impl std::io::Write) -> Result<(), IoError> {
-        let mut encoder = png::Encoder::new(write, self.size().0 as u32, self.size().1 as u32);
+        let width: usize = self.size().width().into();
+        let height: usize = self.size().height().into();
+        let mut encoder =
+            png::Encoder::new(write, width.try_into().unwrap(), height.try_into().unwrap());
         encoder.set_color(png::ColorType::Rgba);
         encoder.set_depth(png::BitDepth::Eight);
         let mut writer = encoder.write_header().unwrap();
-        writer.write_image_data(self.buf()).unwrap();
+        writer.write_image_data(self.buffer().as_ref()).unwrap();
         Ok(())
     }
 }
@@ -134,12 +142,14 @@ mod test {
     #[test]
     fn write_png_success() {
         let data = Vec::new();
-        Image::empty((10, 10)).write_png(data).unwrap();
+        Image::empty(Size::from_usize(10, 10).unwrap())
+            .write_png(data)
+            .unwrap();
     }
 
     #[test]
     fn write_read_same_image() {
-        let mut image = Image::empty((2, 2));
+        let mut image = Image::empty(Size::from_usize(2, 2).unwrap());
         image.pixel_mut((0, 0)).unwrap().set_r(1);
         image.pixel_mut((0, 1)).unwrap().set_r(1);
         image.pixel_mut((1, 0)).unwrap().set_r(1);

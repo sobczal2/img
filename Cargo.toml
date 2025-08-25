@@ -10,3 +10,4 @@ clap = { version = "4.5.40", features=["cargo", "derive"] }
 colored = "3.0.0"
 png = "0.17.16"
 rayon = { version = "1.10.0" }
+itertools = { version = "0.14.0" }

@@ -3,7 +3,7 @@ use rayon::iter::{ParallelBridge, ParallelIterator};
 
 use thiserror::Error;
 
-use crate::image::Image;
+use crate::image::{Image, Size};
 
 #[derive(Debug, Error)]
 pub enum Error {
@@ -53,7 +53,7 @@ fn validate(image: &Image, scale: (f32, f32)) -> Result<()> {
     Ok(())
 }
 
-fn calculate_size(size: (usize, usize), scale: (f32, f32)) -> (usize, usize) {
+fn calculate_size(size: Size, scale: (f32, f32)) -> (usize, usize) {
     let new_size = (size.0 as f32 * scale.0.abs(), size.1 as f32 * scale.1.abs());
     (new_size.0 as usize, new_size.1 as usize)
 }

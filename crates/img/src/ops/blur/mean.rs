@@ -3,7 +3,7 @@ use rayon::iter::{ParallelBridge, ParallelIterator};
 
 use thiserror::Error;
 
-use crate::{image::Image, pixel::PixelMut};
+use crate::{image::Image, pixel::PixelMut, primitives::{point::Point, size::Size}};
 
 /// Error returned by mean_blur function
 #[derive(Debug, Error)]
@@ -23,11 +23,11 @@ pub fn mean_blur(image: &Image, radius: usize) -> Result<Image> {
     let diamater = radius * 2 + 1;
 
     let mut new_image =
-        Image::empty((image.size().0 - diamater + 1, image.size().1 - diamater + 1));
+        Image::empty(Size::from_usize(image.size().width() - diamater + 1, image.size().height() - diamater + 1).unwrap());
 
     new_image.rows_mut().for_each(|(y, row)| {
         row.for_each(|(x, mut px)| {
-            process_pixel((x, y), &mut px, image, radius);
+            process_pixel(Point::new(x, y), &mut px, image, radius);
         });
     });
 
@@ -53,22 +53,21 @@ pub fn mean_blur_par(image: &Image, radius: usize) -> Result<Image> {
 }
 
 fn validate(image: &Image, radius: usize) -> Result<()> {
-    if image.size().0 < radius * 2 + 1 || image.size().1 < radius * 2 + 1 {
+    if image.size().width() < radius * 2 + 1 || image.size().height() < radius * 2 + 1 {
         return Err(Error::RadiusTooBig);
     }
 
     Ok(())
 }
 
-fn process_pixel(xy: (usize, usize), px: &mut PixelMut, original_image: &Image, radius: usize) {
+fn process_pixel(point: Point, px: &mut PixelMut, original_image: &Image, radius: usize) {
     let diameter = radius * 2 + 1;
     let divisor_inv = 1f32 / (diameter * diameter) as f32;
-    let (x, y) = xy;
 
     let sum = (0..diameter)
         .flat_map(|k_y| {
             (0..diameter).map(move |k_x| {
-                let new_px = unsafe { original_image.pixel_unchecked((x + k_x, y + k_y)) };
+                let new_px = unsafe { original_image.pixel_unchecked(Point::new(point.x() + k_x, point.y() + k_y)) };
                 (new_px.r(), new_px.g(), new_px.b())
             })
         })

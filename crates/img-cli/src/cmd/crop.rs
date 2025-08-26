@@ -27,7 +27,7 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     let image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
     let target_size_offset = matches.get_one::<SizeOffset>("size").unwrap();
 
-    let size = target_size_offset.size.into();
+    let size = target_size_offset.size.try_into()?;
     let offset = target_size_offset.offset.into();
 
     let image = crop(&image, size, offset)?;

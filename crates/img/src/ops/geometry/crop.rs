@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-use crate::image::Image;
+use crate::{image::Image, primitives::{point::Point, size::Size}};
 
 #[derive(Debug, Error)]
 pub enum Error {
@@ -14,7 +14,7 @@ pub enum Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-pub fn crop(image: &Image, size: (usize, usize), offset: (usize, usize)) -> Result<Image> {
+pub fn crop(image: &Image, size: Size, offset: (usize, usize)) -> Result<Image> {
     validate(image, size, offset)?;
 
     let mut new_image = Image::empty(size);
@@ -22,23 +22,23 @@ pub fn crop(image: &Image, size: (usize, usize), offset: (usize, usize)) -> Resu
     new_image.rows_mut().for_each(|(y, row)| {
         row.for_each(|(x, mut px)| {
             // SAFETY: validate ensures any x/ + offset is within bounds
-            px.copy_from_pixel(unsafe { image.pixel_unchecked((x + offset.0, y + offset.1)) });
+            px.copy_from_pixel(unsafe { image.pixel_unchecked(Point::new(x + offset.0, y + offset.1)) });
         });
     });
 
     Ok(new_image)
 }
 
-fn validate(image: &Image, size: (usize, usize), offset: (usize, usize)) -> Result<()> {
-    if image.size().0 < size.0 || image.size().1 < size.1 {
+fn validate(image: &Image, size: Size, offset: (usize, usize)) -> Result<()> {
+    if !(image.size() > size) {
         return Err(Error::SizeTooBig);
     }
 
-    if image.size().0 < offset.0 || image.size().1 < offset.1 {
+    if image.size().width() < offset.0 || image.size().height() < offset.1 {
         return Err(Error::OffsetTooBig);
     }
 
-    if image.size().0 < offset.0 + size.0 || image.size().1 < offset.1 + size.1 {
+    if image.size().width() < offset.0 + size.width() || image.size().height() < offset.1 + size.height() {
         return Err(Error::OutOfBounds);
     }
 

@@ -1,15 +1,14 @@
 #[cfg(feature = "parallel")]
 use rayon::iter::{ParallelBridge, ParallelIterator};
 
-use std::f32::consts::{E, PI};
+use std::{f32::consts::{E, PI}, num::NonZero};
 
 use thiserror::Error;
 
 use crate::{
     error::{IndexResult, OutOfBoundsError},
     image::Image,
-    math::{idx_to_xy, xy_to_idx},
-    pixel::PixelMut,
+    pixel::PixelMut, primitives::{point::Point, size::Size},
 };
 
 /// Error returned by mean_blur function
@@ -32,11 +31,11 @@ pub fn gaussian_blur(image: &Image, radius: usize, sigma: f32) -> Result<Image> 
     let kernel = GaussianKernel::new(radius, sigma);
     let diameter = radius * 2 + 1;
     let mut new_image =
-        Image::empty((image.size().0 - diameter + 1, image.size().1 - diameter + 1));
+        Image::empty(Size::from_usize(image.size().width() - diameter + 1, image.size().height() - diameter + 1).unwrap());
 
     new_image.rows_mut().for_each(|(y, row)| {
         row.for_each(|(x, mut px)| {
-            process_pixel((x, y), &mut px, image, &kernel);
+            process_pixel(Point::new(x, y), &mut px, image, &kernel);
         });
     });
 
@@ -62,7 +61,7 @@ pub fn gaussian_blur_par(image: &Image, radius: usize, sigma: f32) -> Result<Ima
 }
 
 fn validate(image: &Image, radius: usize, sigma: f32) -> Result<()> {
-    if image.size().0 < radius * 2 + 1 || image.size().1 < radius * 2 + 1 {
+    if image.size().width() < radius * 2 + 1 || image.size().height() < radius * 2 + 1 {
         return Err(Error::RadiusTooBig);
     }
 
@@ -74,18 +73,19 @@ fn validate(image: &Image, radius: usize, sigma: f32) -> Result<()> {
 }
 
 fn process_pixel(
-    xy: (usize, usize),
+    point: Point,
     px: &mut PixelMut,
     original_image: &Image,
     kernel: &GaussianKernel,
 ) {
-    let diameter = kernel.size().0;
-    let radius_i32 = kernel.size().0 as i32 / 2;
-    let (x, y) = xy;
+    let diameter = kernel.size().width();
+    let radius = kernel.size().width() / 2;
+    // TODO: fix this unwrap
+    let radius_i32: i32 = radius.try_into().unwrap();
     let sum = (0..diameter)
         .flat_map(|k_y| {
             (0..diameter).map(move |k_x| {
-                let new_px = unsafe { original_image.pixel_unchecked((x + k_x, y + k_y)) };
+                let new_px = unsafe { original_image.pixel_unchecked(Point::new(point.x() + k_x, point.y() + k_y)) };
                 let offset = (k_x as i32 - radius_i32, k_y as i32 - radius_i32);
                 let kernel_value = unsafe { kernel.value_unchecked(offset) };
                 (
@@ -102,7 +102,7 @@ fn process_pixel(
     px.set_r(sum.0 as u8);
     px.set_g(sum.1 as u8);
     px.set_b(sum.2 as u8);
-    px.set_a(unsafe { original_image.pixel_unchecked((x, y)).a() });
+    px.set_a(unsafe { original_image.pixel_unchecked(point).a() });
 }
 
 #[derive(Debug)]
@@ -117,9 +117,15 @@ impl GaussianKernel {
         let diameter = radius * 2 + 1;
         let mut values = vec![0f32; diameter * diameter].into_boxed_slice();
 
-        values.iter_mut().enumerate().for_each(|(idx, value)| {
-            let (x, y) = idx_to_xy(idx, diameter);
-            let offset = (x as i32 - radius as i32, y as i32 - radius as i32);
+        // SAFETY: diameter always >= 1
+        let diameter = NonZero::new(diameter).unwrap();
+        let size = Size::new(diameter, diameter);
+
+        values.iter_mut().enumerate().for_each(|(index, value)| {
+
+            // SAFETY: we iterate over values which have size equal to size variable
+            let point = unsafe { Point::from_index_unchecked(index, size) };
+            let offset = (point.x() as i32 - radius as i32, point.y() as i32 - radius as i32);
             *value = gaussian_fn(offset, sigma);
         });
 
@@ -132,15 +138,17 @@ impl GaussianKernel {
     }
 
     /// get kernel size
-    pub fn size(&self) -> (usize, usize) {
+    pub fn size(&self) -> Size {
         let diameter = self.radius * 2 + 1;
-        (diameter, diameter)
+
+        // SAFETY: diameter always >= 1
+        Size::from_usize(diameter, diameter).unwrap()
     }
 
     /// get kernel value given the offset
     pub fn value(&self, offset: (i32, i32)) -> IndexResult<f32> {
-        let xy = offset_to_xy(offset, self.radius)?;
-        let idx = xy_to_idx(xy, self.size().0);
+        let point = offset_to_point(offset, self.radius)?;
+        let idx = unsafe { point.to_index_unchecked(self.size()) };
         if idx > self.values.len() {
             return Err(OutOfBoundsError);
         }
@@ -155,18 +163,18 @@ impl GaussianKernel {
     ///
     /// this should be called only using valid x and y
     pub unsafe fn value_unchecked(&self, offset: (i32, i32)) -> f32 {
-        let xy = offset_to_xy(offset, self.radius).unwrap();
-        let idx = xy_to_idx(xy, self.size().0);
+        let point = offset_to_point(offset, self.radius).unwrap();
+        let idx = unsafe { point.to_index_unchecked(self.size()) };
         self.values[idx]
     }
 }
 
-fn offset_to_xy(offset: (i32, i32), radius: usize) -> IndexResult<(usize, usize)> {
+fn offset_to_point(offset: (i32, i32), radius: usize) -> IndexResult<Point> {
     if offset.0.abs() > radius as i32 || offset.1.abs() > radius as i32 {
         return Err(OutOfBoundsError);
     }
 
-    Ok((
+    Ok(Point::new(
         (offset.0 + radius as i32)
             .try_into()
             .map_err(|_| OutOfBoundsError)?,
@@ -203,11 +211,11 @@ mod test {
     }
 
     #[test]
-    fn test_offset_to_xy() {
-        assert_eq!(offset_to_xy((0, 0), 2), Ok((2, 2)));
-        assert_eq!(offset_to_xy((-2, -2), 2), Ok((0, 0)));
-        assert_eq!(offset_to_xy((2, 2), 2), Ok((4, 4)));
-        assert_eq!(offset_to_xy((3, 2), 2), Err(OutOfBoundsError));
-        assert_eq!(offset_to_xy((-3, -2), 2), Err(OutOfBoundsError));
+    fn test_offset_to_point() {
+        assert_eq!(offset_to_point((0, 0), 2), Ok(Point::new(2, 2)));
+        assert_eq!(offset_to_point((-2, -2), 2), Ok(Point::new(0, 0)));
+        assert_eq!(offset_to_point((2, 2), 2), Ok(Point::new(4, 4)));
+        assert_eq!(offset_to_point((3, 2), 2), Err(OutOfBoundsError));
+        assert_eq!(offset_to_point((-3, -2), 2), Err(OutOfBoundsError));
     }
 }

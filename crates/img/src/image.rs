@@ -1,51 +1,14 @@
-use std::num::NonZeroUsize;
-
 use thiserror::Error;
 
 use crate::{
     error::{IndexResult, OutOfBoundsError},
     iter::{Pixels, PixelsMut, Rows, RowsMut},
-    math::xy_to_idx,
-    pixel::{Pixel, PixelMut, PIXEL_SIZE},
+    pixel::{Pixel, PixelMut, PIXEL_SIZE}, primitives::{point::Point, size::Size},
 };
 
 #[derive(Debug, Error)]
 #[error("size does not match buffer size")]
 pub struct SizeBufferMismatch;
-
-#[derive(Debug, Error)]
-pub enum SizeCreationError {
-    #[error("width is zero")]
-    WidthZero,
-    #[error("height is zero")]
-    HeightZero,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Size(NonZeroUsize, NonZeroUsize);
-
-impl Size {
-    pub fn new(width: NonZeroUsize, height: NonZeroUsize) -> Self {
-        Self(width, height)
-    }
-
-    pub fn from_usize(width: usize, height: usize) -> Result<Self, SizeCreationError> {
-        let width: NonZeroUsize = width.try_into().map_err(|_| SizeCreationError::WidthZero)?;
-        let height: NonZeroUsize = height
-            .try_into()
-            .map_err(|_| SizeCreationError::WidthZero)?;
-
-        Ok(Size(width, height))
-    }
-
-    pub fn width(&self) -> NonZeroUsize {
-        self.0
-    }
-
-    pub fn height(&self) -> NonZeroUsize {
-        self.0
-    }
-}
 
 pub struct Buffer(Box<[u8]>);
 
@@ -54,33 +17,37 @@ impl Buffer {
         self.0.len()
     }
 
-    pub fn get_data<'a>(&'a self, index: usize, length: usize) -> IndexResult<&'a [u8]> {
-        if index + length >= self.len() {
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    pub fn get_data(&self, index: usize, length: usize) -> IndexResult<&[u8]> {
+        if index + length > self.len() {
             return Err(OutOfBoundsError);
         }
 
-        Ok(&self.0[index..index + length])
+        Ok(unsafe { self.get_data_unchecked(index, length) })
     }
 
-    pub unsafe fn get_data_unchecked<'a>(&'a self, index: usize, length: usize) -> &'a [u8] {
-        debug_assert!(index + length >= self.len(), "buffer out of bounds access");
+    pub unsafe fn get_data_unchecked(&self, index: usize, length: usize) -> &[u8] {
+        debug_assert!(index + length <= self.len(), "buffer out of bounds access");
         &self.0[index..index + length]
     }
 
-    pub fn get_data_mut<'a>(
-        &'a mut self,
+    pub fn get_data_mut(
+        &mut self,
         index: usize,
         length: usize,
-    ) -> IndexResult<&'a mut [u8]> {
-        if index + length >= self.len() {
+    ) -> IndexResult<&mut [u8]> {
+        if index + length > self.len() {
             return Err(OutOfBoundsError);
         }
 
-        Ok(&mut self.0[index..index + length])
+        Ok(unsafe { self.get_data_mut_unchecked(index, length) })
     }
 
-    pub fn get_data_mut_unchecked<'a>(&'a mut self, index: usize, length: usize) -> &'a mut [u8] {
-        debug_assert!(index + length >= self.len(), "buffer out of bounds access");
+    pub unsafe fn get_data_mut_unchecked(&mut self, index: usize, length: usize) -> &mut [u8] {
+        debug_assert!(index + length <= self.len(), "buffer out of bounds access");
         &mut self.0[index..index + length]
     }
 }
@@ -104,8 +71,8 @@ impl AsMut<[u8]> for Buffer {
 }
 
 pub(crate) fn buffer_valid_for_size(buffer: &Buffer, size: Size) -> bool {
-    let width: usize = size.width().into();
-    let height: usize = size.height().into();
+    let width: usize = size.width();
+    let height: usize = size.height();
     buffer.len() == width * height * PIXEL_SIZE
 }
 
@@ -128,8 +95,8 @@ impl Image {
 
     /// create empty image with specified size
     pub fn empty(size: Size) -> Self {
-        let width: usize = size.width().into();
-        let height: usize = size.height().into();
+        let width: usize = size.width();
+        let height: usize = size.height();
 
         Self {
             size,
@@ -141,10 +108,12 @@ impl Image {
         self.size
     }
 
-    /// get immutable pixel at selected cordinates
-    pub fn pixel(&self, xy: (usize, usize)) -> IndexResult<Pixel<'_>> {
-        let index = xy_to_idx(xy, self.size.0) * PIXEL_SIZE;
-        let data = self.buffer.get_data(index, PIXEL_SIZE)?;
+    /// get immutable pixel at selected point
+    pub fn pixel(&self, point: Point) -> IndexResult<Pixel<'_>> {
+        let index = point.to_index(self.size())? * PIXEL_SIZE;
+
+        // SAFETY: index from point.to_idx is always valid
+        let data = unsafe { self.buffer.get_data_unchecked(index, PIXEL_SIZE) };
 
         // SAFETY: data is always PIXEL_SIZE so try_into never fails
         Ok(Pixel::new(data.try_into().unwrap()))
@@ -155,18 +124,17 @@ impl Image {
     ///
     /// # Safety
     ///
-    /// this should be called only using valid x and y
-    pub unsafe fn pixel_unchecked(&self, xy: (usize, usize)) -> Pixel<'_> {
-        let index = xy_to_idx(xy, self.size.0) * PIXEL_SIZE;
+    /// this should be called only using valid point
+    pub unsafe fn pixel_unchecked(&self, point: Point) -> Pixel<'_> {
+        let index = unsafe { point.to_index_unchecked(self.size()) } * PIXEL_SIZE;
         let data = unsafe { self.buffer.get_data_unchecked(index, PIXEL_SIZE) };
 
-        // SAFETY: data is always PIXEL_SIZE so try_into never fails
         Pixel::new(data.try_into().unwrap())
     }
 
     /// get mutable pixel at selected cordinates
-    pub fn pixel_mut(&mut self, xy: (usize, usize)) -> IndexResult<PixelMut<'_>> {
-        let index = xy_to_idx(xy, self.size.0) * PIXEL_SIZE;
+    pub fn pixel_mut(&mut self, point: Point) -> IndexResult<PixelMut<'_>> {
+        let index = point.to_index(self.size())? * PIXEL_SIZE;
         let data = self.buffer.get_data_mut(index, PIXEL_SIZE)?;
 
         // SAFETY: data is always PIXEL_SIZE so try_into never fails
@@ -179,8 +147,8 @@ impl Image {
     /// # Safety
     ///
     /// this should be called only using valid x and y
-    pub unsafe fn pixel_mut_unchecked(&mut self, xy: (usize, usize)) -> PixelMut<'_> {
-        let index = xy_to_idx(xy, self.size.0) * PIXEL_SIZE;
+    pub unsafe fn pixel_mut_unchecked(&mut self, point: Point) -> PixelMut<'_> {
+        let index = unsafe { point.to_index_unchecked(self.size()) } * PIXEL_SIZE;
         let data = self.buffer.get_data_mut_unchecked(index, PIXEL_SIZE);
 
         // SAFETY: data is always PIXEL_SIZE so try_into never fails
@@ -195,22 +163,22 @@ impl Image {
         &mut self.buffer
     }
 
-    pub fn pixels(&self) -> Pixels {
+    pub fn pixels(&self) -> Pixels<'_> {
         // SAFETY: buffer here is always of size N * PIXEL_SIZE
         Pixels::new(self.buffer.as_ref()).unwrap()
     }
 
-    pub fn pixels_mut(&mut self) -> PixelsMut {
+    pub fn pixels_mut(&mut self) -> PixelsMut<'_> {
         // SAFETY: buffer here is always of size N * PIXEL_SIZE
         PixelsMut::new(self.buffer.as_mut()).unwrap()
     }
 
-    pub fn rows(&self) -> Rows {
+    pub fn rows(&self) -> Rows<'_> {
         // SAFETY: buffer here is always of size width * height * PIXEL_SIZE
         Rows::new(self.buffer.as_ref(), self.size).unwrap()
     }
 
-    pub fn rows_mut(&mut self) -> RowsMut {
+    pub fn rows_mut(&mut self) -> RowsMut<'_> {
         // SAFETY: buffer here is always of size width * height * PIXEL_SIZE
         RowsMut::new(self.buffer.as_mut(), self.size).unwrap()
     }

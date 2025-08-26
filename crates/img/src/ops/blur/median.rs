@@ -6,7 +6,7 @@ use thiserror::Error;
 use crate::{
     collections::tracking_set::TrackingSet,
     image::Image,
-    pixel::{Pixel, PixelMut},
+    pixel::{Pixel, PixelMut}, primitives::{point::Point, size::Size},
 };
 
 /// Error returned by mean_blur function
@@ -23,14 +23,14 @@ pub fn median_blur(image: &Image, radius: usize) -> Result<Image> {
 
     let diamater = radius * 2 + 1;
     let mut new_image =
-        Image::empty((image.size().0 - diamater + 1, image.size().1 - diamater + 1));
+        Image::empty(Size::from_usize(image.size().width() - diamater + 1, image.size().height() - diamater + 1).unwrap());
 
     // TODO: consider switching dimensions since here most
     // nested access occurs on y value in this implementation
     new_image.rows_mut().for_each(|(y, row)| {
         let mut sets = init_sets(image, diamater, y);
         row.for_each(|(x, mut px)| {
-            process_pixel((x, y), &mut px, image, radius, &mut sets);
+            process_pixel(Point::new(x, y), &mut px, image, radius, &mut sets);
         });
     });
 
@@ -58,7 +58,7 @@ pub fn median_blur_par(image: &Image, radius: usize) -> Result<Image> {
 }
 
 fn validate(image: &Image, radius: usize) -> Result<()> {
-    if image.size().0 < radius * 2 + 1 || image.size().1 < radius * 2 + 1 {
+    if image.size().width() < radius * 2 + 1 || image.size().height() < radius * 2 + 1 {
         return Err(Error::RadiusTooBig);
     }
 
@@ -104,7 +104,7 @@ fn init_sets(image: &Image, diameter: usize, row_y: usize) -> MedianSets {
 
     (0..diameter).for_each(|y| {
         (0..diameter - 1).for_each(|x| {
-            let px = unsafe { image.pixel_unchecked((x, y + row_y)) };
+            let px = unsafe { image.pixel_unchecked(Point::new(x, y + row_y)) };
             r.push(px.r());
             g.push(px.g());
             b.push(px.b());
@@ -115,18 +115,17 @@ fn init_sets(image: &Image, diameter: usize, row_y: usize) -> MedianSets {
 }
 
 fn process_pixel(
-    xy: (usize, usize),
+    point: Point,
     px: &mut PixelMut,
     original_image: &Image,
     radius: usize,
     sets: &mut MedianSets,
 ) {
-    let (x, y) = xy;
     let diamater = radius * 2 + 1;
     sets.pop(diamater);
     (0..diamater).for_each(|c| {
-        let y = c + y;
-        let px = unsafe { original_image.pixel_unchecked((x, y)) };
+        let y = c + point.y();
+        let px = unsafe { original_image.pixel_unchecked(point) };
         sets.push(px);
     });
 
@@ -137,5 +136,5 @@ fn process_pixel(
     px.set_r(new_r);
     px.set_g(new_g);
     px.set_b(new_b);
-    px.set_a(unsafe { original_image.pixel_unchecked(xy).a() });
+    px.set_a(unsafe { original_image.pixel_unchecked(point).a() });
 }

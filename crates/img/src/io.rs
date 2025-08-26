@@ -2,8 +2,8 @@ use png::{BitDepth, ColorType};
 
 use crate::{
     error::{IoError, IoResult},
-    image::{Buffer, Image, Size},
-    pixel::{PixelMut, PIXEL_SIZE},
+    image::{Buffer, Image},
+    pixel::{PixelMut, PIXEL_SIZE}, primitives::size::Size,
 };
 
 fn pixel_size_by_color_type(color_type: ColorType) -> usize {
@@ -85,9 +85,12 @@ impl ReadPng for Image {
         }
 
         let bytes = &buf[..info.buffer_size()];
+        
+        let width: usize = info.width.try_into().unwrap();
+        let height: usize = info.height.try_into().unwrap();
 
-        let mut image_buf =
-            vec![0; info.width as usize * info.height as usize * PIXEL_SIZE].into_boxed_slice();
+        let mut image_buf = 
+            vec![0; width * height * PIXEL_SIZE].into_boxed_slice();
 
         for (target_px, source_px) in image_buf
             .chunks_mut(PIXEL_SIZE)
@@ -100,8 +103,6 @@ impl ReadPng for Image {
             target.set_a(get_alpha(source_px, info.color_type));
         }
 
-        let width: usize = info.width.try_into().unwrap();
-        let height: usize = info.height.try_into().unwrap();
         let width = width.try_into().expect("invalid width");
         let height = height.try_into().expect("invalid height");
 
@@ -116,8 +117,8 @@ pub trait WritePng {
 
 impl WritePng for Image {
     fn write_png(&self, write: impl std::io::Write) -> Result<(), IoError> {
-        let width: usize = self.size().width().into();
-        let height: usize = self.size().height().into();
+        let width: usize = self.size().width();
+        let height: usize = self.size().height();
         let mut encoder =
             png::Encoder::new(write, width.try_into().unwrap(), height.try_into().unwrap());
         encoder.set_color(png::ColorType::Rgba);
@@ -131,7 +132,7 @@ impl WritePng for Image {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::image::Image;
+    use crate::{image::Image, primitives::point::Point};
 
     #[test]
     fn read_png_success() {
@@ -150,19 +151,19 @@ mod test {
     #[test]
     fn write_read_same_image() {
         let mut image = Image::empty(Size::from_usize(2, 2).unwrap());
-        image.pixel_mut((0, 0)).unwrap().set_r(1);
-        image.pixel_mut((0, 1)).unwrap().set_r(1);
-        image.pixel_mut((1, 0)).unwrap().set_r(1);
-        image.pixel_mut((1, 1)).unwrap().set_r(1);
+        image.pixel_mut(Point::new(0, 0)).unwrap().set_r(1);
+        image.pixel_mut(Point::new(0, 1)).unwrap().set_r(1);
+        image.pixel_mut(Point::new(1, 0)).unwrap().set_r(1);
+        image.pixel_mut(Point::new(1, 1)).unwrap().set_r(1);
 
         let mut data = Vec::new();
         image.write_png(&mut data).unwrap();
 
         let image2 = Image::read_png(&data[..]).unwrap();
 
-        assert_eq!(image.pixel((0, 0)).unwrap(), image2.pixel((0, 0)).unwrap());
-        assert_eq!(image.pixel((0, 1)).unwrap(), image2.pixel((0, 1)).unwrap());
-        assert_eq!(image.pixel((1, 0)).unwrap(), image2.pixel((1, 0)).unwrap());
-        assert_eq!(image.pixel((1, 1)).unwrap(), image2.pixel((1, 1)).unwrap());
+        assert_eq!(image.pixel(Point::new(0, 0)).unwrap(), image2.pixel(Point::new(0, 0)).unwrap());
+        assert_eq!(image.pixel(Point::new(0, 1)).unwrap(), image2.pixel(Point::new(0, 1)).unwrap());
+        assert_eq!(image.pixel(Point::new(1, 0)).unwrap(), image2.pixel(Point::new(1, 0)).unwrap());
+        assert_eq!(image.pixel(Point::new(1, 1)).unwrap(), image2.pixel(Point::new(1, 1)).unwrap());
     }
 }

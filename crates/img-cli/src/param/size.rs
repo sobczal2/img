@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use anyhow::anyhow;
 use anyhow::bail;
+use img::primitives::size::SizeCreationError;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Size {
@@ -26,6 +27,14 @@ impl FromStr for Size {
             .map_err(|_| anyhow!("invalid width"))?;
 
         Ok(Size { width, height })
+    }
+}
+
+impl TryFrom<Size> for img::primitives::size::Size {
+    type Error = SizeCreationError;
+
+    fn try_from(value: Size) -> Result<Self, Self::Error> {
+        Self::from_usize(value.width, value.height)
     }
 }
 

@@ -1,8 +1,9 @@
 use thiserror::Error;
 
-use crate::primitives::{point::Point, size::{Size, SizeCreationError}};
-
-
+use crate::primitives::{
+    point::Point,
+    size::{Size, SizeCreationError},
+};
 
 #[derive(Error, Debug)]
 #[error("invalid scale")]

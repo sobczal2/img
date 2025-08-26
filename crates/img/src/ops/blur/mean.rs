@@ -3,7 +3,11 @@ use rayon::iter::{ParallelBridge, ParallelIterator};
 
 use thiserror::Error;
 
-use crate::{image::Image, pixel::PixelMut, primitives::{point::Point, size::Size}};
+use crate::{
+    image::Image,
+    pixel::PixelMut,
+    primitives::{point::Point, size::Size},
+};
 
 /// Error returned by mean_blur function
 #[derive(Debug, Error)]
@@ -22,8 +26,13 @@ pub fn mean_blur(image: &Image, radius: usize) -> Result<Image> {
 
     let diamater = radius * 2 + 1;
 
-    let mut new_image =
-        Image::empty(Size::from_usize(image.size().width() - diamater + 1, image.size().height() - diamater + 1).unwrap());
+    let mut new_image = Image::empty(
+        Size::from_usize(
+            image.size().width() - diamater + 1,
+            image.size().height() - diamater + 1,
+        )
+        .unwrap(),
+    );
 
     new_image.rows_mut().for_each(|(y, row)| {
         row.for_each(|(x, mut px)| {
@@ -67,7 +76,9 @@ fn process_pixel(point: Point, px: &mut PixelMut, original_image: &Image, radius
     let sum = (0..diameter)
         .flat_map(|k_y| {
             (0..diameter).map(move |k_x| {
-                let new_px = unsafe { original_image.pixel_unchecked(Point::new(point.x() + k_x, point.y() + k_y)) };
+                let new_px = unsafe {
+                    original_image.pixel_unchecked(Point::new(point.x() + k_x, point.y() + k_y))
+                };
                 (new_px.r(), new_px.g(), new_px.b())
             })
         })

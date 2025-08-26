@@ -3,7 +3,8 @@ use png::{BitDepth, ColorType};
 use crate::{
     error::{IoError, IoResult},
     image::{Buffer, Image},
-    pixel::{PixelMut, PIXEL_SIZE}, primitives::size::Size,
+    pixel::{PIXEL_SIZE, PixelMut},
+    primitives::size::Size,
 };
 
 fn pixel_size_by_color_type(color_type: ColorType) -> usize {
@@ -85,12 +86,11 @@ impl ReadPng for Image {
         }
 
         let bytes = &buf[..info.buffer_size()];
-        
+
         let width: usize = info.width.try_into().unwrap();
         let height: usize = info.height.try_into().unwrap();
 
-        let mut image_buf = 
-            vec![0; width * height * PIXEL_SIZE].into_boxed_slice();
+        let mut image_buf = vec![0; width * height * PIXEL_SIZE].into_boxed_slice();
 
         for (target_px, source_px) in image_buf
             .chunks_mut(PIXEL_SIZE)
@@ -161,9 +161,21 @@ mod test {
 
         let image2 = Image::read_png(&data[..]).unwrap();
 
-        assert_eq!(image.pixel(Point::new(0, 0)).unwrap(), image2.pixel(Point::new(0, 0)).unwrap());
-        assert_eq!(image.pixel(Point::new(0, 1)).unwrap(), image2.pixel(Point::new(0, 1)).unwrap());
-        assert_eq!(image.pixel(Point::new(1, 0)).unwrap(), image2.pixel(Point::new(1, 0)).unwrap());
-        assert_eq!(image.pixel(Point::new(1, 1)).unwrap(), image2.pixel(Point::new(1, 1)).unwrap());
+        assert_eq!(
+            image.pixel(Point::new(0, 0)).unwrap(),
+            image2.pixel(Point::new(0, 0)).unwrap()
+        );
+        assert_eq!(
+            image.pixel(Point::new(0, 1)).unwrap(),
+            image2.pixel(Point::new(0, 1)).unwrap()
+        );
+        assert_eq!(
+            image.pixel(Point::new(1, 0)).unwrap(),
+            image2.pixel(Point::new(1, 0)).unwrap()
+        );
+        assert_eq!(
+            image.pixel(Point::new(1, 1)).unwrap(),
+            image2.pixel(Point::new(1, 1)).unwrap()
+        );
     }
 }

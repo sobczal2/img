@@ -3,12 +3,15 @@ use rayon::iter::{ParallelBridge, ParallelIterator};
 
 use thiserror::Error;
 
-use crate::{image::Image, primitives::{point::Point, scale::Scale, size::SizeCreationError}};
+use crate::{
+    image::Image,
+    primitives::{point::Point, scale::Scale, size::SizeCreationError},
+};
 
 #[derive(Debug, Error)]
 pub enum Error {
     #[error("new size is invalid: {0}")]
-    NewSizeInvalid(#[from] SizeCreationError)
+    NewSizeInvalid(#[from] SizeCreationError),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

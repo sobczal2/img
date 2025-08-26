@@ -4,8 +4,6 @@ use thiserror::Error;
 
 use crate::primitives::point::Point;
 
-
-
 #[derive(Debug, Error)]
 pub enum SizeCreationError {
     #[error("width is zero")]
@@ -51,11 +49,11 @@ impl PartialOrd for Size {
         }
 
         if self.0 < other.0 && self.1 < other.1 {
-            return Some(Ordering::Less)
+            return Some(Ordering::Less);
         }
 
         if self.0 > other.0 && self.1 > other.1 {
-            return Some(Ordering::Less)
+            return Some(Ordering::Less);
         }
 
         None

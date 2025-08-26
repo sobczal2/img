@@ -6,7 +6,8 @@ use thiserror::Error;
 use crate::{
     collections::tracking_set::TrackingSet,
     image::Image,
-    pixel::{Pixel, PixelMut}, primitives::{point::Point, size::Size},
+    pixel::{Pixel, PixelMut},
+    primitives::{point::Point, size::Size},
 };
 
 /// Error returned by mean_blur function
@@ -22,8 +23,13 @@ pub fn median_blur(image: &Image, radius: usize) -> Result<Image> {
     validate(image, radius)?;
 
     let diamater = radius * 2 + 1;
-    let mut new_image =
-        Image::empty(Size::from_usize(image.size().width() - diamater + 1, image.size().height() - diamater + 1).unwrap());
+    let mut new_image = Image::empty(
+        Size::from_usize(
+            image.size().width() - diamater + 1,
+            image.size().height() - diamater + 1,
+        )
+        .unwrap(),
+    );
 
     // TODO: consider switching dimensions since here most
     // nested access occurs on y value in this implementation
@@ -125,7 +131,7 @@ fn process_pixel(
     sets.pop(diamater);
     (0..diamater).for_each(|c| {
         let y = c + point.y();
-        let px = unsafe { original_image.pixel_unchecked(point) };
+        let px = unsafe { original_image.pixel_unchecked(Point::new(point.x(), y)) };
         sets.push(px);
     });
 

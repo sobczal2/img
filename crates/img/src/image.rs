@@ -3,7 +3,8 @@ use thiserror::Error;
 use crate::{
     error::{IndexResult, OutOfBoundsError},
     iter::{Pixels, PixelsMut, Rows, RowsMut},
-    pixel::{Pixel, PixelMut, PIXEL_SIZE}, primitives::{point::Point, size::Size},
+    pixel::{PIXEL_SIZE, Pixel, PixelMut},
+    primitives::{point::Point, size::Size},
 };
 
 #[derive(Debug, Error)]
@@ -29,16 +30,21 @@ impl Buffer {
         Ok(unsafe { self.get_data_unchecked(index, length) })
     }
 
+    /// .
+    ///
+    /// # Panics
+    ///
+    /// Panics in debug if index + length <= buffer len.
+    ///
+    /// # Safety
+    /// - index + length have to be within buffer size
+    ///
     pub unsafe fn get_data_unchecked(&self, index: usize, length: usize) -> &[u8] {
         debug_assert!(index + length <= self.len(), "buffer out of bounds access");
         &self.0[index..index + length]
     }
 
-    pub fn get_data_mut(
-        &mut self,
-        index: usize,
-        length: usize,
-    ) -> IndexResult<&mut [u8]> {
+    pub fn get_data_mut(&mut self, index: usize, length: usize) -> IndexResult<&mut [u8]> {
         if index + length > self.len() {
             return Err(OutOfBoundsError);
         }
@@ -46,6 +52,15 @@ impl Buffer {
         Ok(unsafe { self.get_data_mut_unchecked(index, length) })
     }
 
+    /// .
+    ///
+    /// # Panics
+    ///
+    /// Panics in debug if index + length <= buffer len.
+    ///
+    /// # Safety
+    /// - index + length have to be within buffer size
+    ///
     pub unsafe fn get_data_mut_unchecked(&mut self, index: usize, length: usize) -> &mut [u8] {
         debug_assert!(index + length <= self.len(), "buffer out of bounds access");
         &mut self.0[index..index + length]
@@ -145,11 +160,11 @@ impl Image {
     /// without checking bounds
     ///
     /// # Safety
+    /// - point must be within image bounds
     ///
-    /// this should be called only using valid x and y
     pub unsafe fn pixel_mut_unchecked(&mut self, point: Point) -> PixelMut<'_> {
         let index = unsafe { point.to_index_unchecked(self.size()) } * PIXEL_SIZE;
-        let data = self.buffer.get_data_mut_unchecked(index, PIXEL_SIZE);
+        let data = unsafe { self.buffer.get_data_mut_unchecked(index, PIXEL_SIZE) };
 
         // SAFETY: data is always PIXEL_SIZE so try_into never fails
         PixelMut::new(data.try_into().unwrap())

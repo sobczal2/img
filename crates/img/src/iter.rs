@@ -1,6 +1,7 @@
 use crate::{
     error::{BufferLengthMismatchError, BufferLengthMismatchResult},
-    pixel::{Pixel, PixelMut, PIXEL_SIZE}, primitives::size::Size,
+    pixel::{PIXEL_SIZE, Pixel, PixelMut},
+    primitives::size::Size,
 };
 
 /// Iterator over immutable pixels of an image.
@@ -143,8 +144,8 @@ impl<'a> Iterator for Rows<'a> {
 
 impl<'a> Rows<'a> {
     pub fn new(buffer: &'a [u8], size: Size) -> BufferLengthMismatchResult<Self> {
-        let width: usize = size.width().into();
-        let height: usize = size.height().into();
+        let width: usize = size.width();
+        let height: usize = size.height();
         if buffer.len() != width * height * PIXEL_SIZE {
             return Err(BufferLengthMismatchError);
         }
@@ -178,8 +179,8 @@ impl<'a> Iterator for RowsMut<'a> {
 
 impl<'a> RowsMut<'a> {
     pub fn new(buffer: &'a mut [u8], size: Size) -> BufferLengthMismatchResult<Self> {
-        let width: usize = size.width().into();
-        let height: usize = size.height().into();
+        let width: usize = size.width();
+        let height: usize = size.height();
         if buffer.len() != width * height * PIXEL_SIZE {
             return Err(BufferLengthMismatchError);
         }

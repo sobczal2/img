@@ -1,14 +1,18 @@
 #[cfg(feature = "parallel")]
 use rayon::iter::{ParallelBridge, ParallelIterator};
 
-use std::{f32::consts::{E, PI}, num::NonZero};
+use std::{
+    f32::consts::{E, PI},
+    num::NonZero,
+};
 
 use thiserror::Error;
 
 use crate::{
     error::{IndexResult, OutOfBoundsError},
     image::Image,
-    pixel::PixelMut, primitives::{point::Point, size::Size},
+    pixel::PixelMut,
+    primitives::{point::Point, size::Size},
 };
 
 /// Error returned by mean_blur function
@@ -30,8 +34,13 @@ pub fn gaussian_blur(image: &Image, radius: usize, sigma: f32) -> Result<Image> 
 
     let kernel = GaussianKernel::new(radius, sigma);
     let diameter = radius * 2 + 1;
-    let mut new_image =
-        Image::empty(Size::from_usize(image.size().width() - diameter + 1, image.size().height() - diameter + 1).unwrap());
+    let mut new_image = Image::empty(
+        Size::from_usize(
+            image.size().width() - diameter + 1,
+            image.size().height() - diameter + 1,
+        )
+        .unwrap(),
+    );
 
     new_image.rows_mut().for_each(|(y, row)| {
         row.for_each(|(x, mut px)| {
@@ -72,12 +81,7 @@ fn validate(image: &Image, radius: usize, sigma: f32) -> Result<()> {
     Ok(())
 }
 
-fn process_pixel(
-    point: Point,
-    px: &mut PixelMut,
-    original_image: &Image,
-    kernel: &GaussianKernel,
-) {
+fn process_pixel(point: Point, px: &mut PixelMut, original_image: &Image, kernel: &GaussianKernel) {
     let diameter = kernel.size().width();
     let radius = kernel.size().width() / 2;
     // TODO: fix this unwrap
@@ -85,7 +89,9 @@ fn process_pixel(
     let sum = (0..diameter)
         .flat_map(|k_y| {
             (0..diameter).map(move |k_x| {
-                let new_px = unsafe { original_image.pixel_unchecked(Point::new(point.x() + k_x, point.y() + k_y)) };
+                let new_px = unsafe {
+                    original_image.pixel_unchecked(Point::new(point.x() + k_x, point.y() + k_y))
+                };
                 let offset = (k_x as i32 - radius_i32, k_y as i32 - radius_i32);
                 let kernel_value = unsafe { kernel.value_unchecked(offset) };
                 (
@@ -122,10 +128,12 @@ impl GaussianKernel {
         let size = Size::new(diameter, diameter);
 
         values.iter_mut().enumerate().for_each(|(index, value)| {
-
             // SAFETY: we iterate over values which have size equal to size variable
             let point = unsafe { Point::from_index_unchecked(index, size) };
-            let offset = (point.x() as i32 - radius as i32, point.y() as i32 - radius as i32);
+            let offset = (
+                point.x() as i32 - radius as i32,
+                point.y() as i32 - radius as i32,
+            );
             *value = gaussian_fn(offset, sigma);
         });
 

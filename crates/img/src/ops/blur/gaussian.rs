@@ -57,12 +57,17 @@ pub fn gaussian_blur_par(image: &Image, radius: usize, sigma: f32) -> Result<Ima
 
     let kernel = GaussianKernel::new(radius, sigma);
     let diameter = radius * 2 + 1;
-    let mut new_image =
-        Image::empty((image.size().0 - diameter + 1, image.size().1 - diameter + 1));
+    let mut new_image = Image::empty(
+        Size::from_usize(
+            image.size().width() - diameter + 1,
+            image.size().height() - diameter + 1,
+        )
+        .unwrap(),
+    );
 
     new_image.rows_mut().par_bridge().for_each(|(y, row)| {
         row.for_each(|(x, mut px)| {
-            process_pixel((x, y), &mut px, image, &kernel);
+            process_pixel(Point::new(x, y), &mut px, image, &kernel);
         });
     });
 

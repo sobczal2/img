@@ -2,9 +2,9 @@ use png::{BitDepth, ColorType};
 
 use crate::{
     error::{IoError, IoResult},
-    image::{Buffer, Image},
+    image::Image,
     pixel::{PIXEL_SIZE, PixelMut},
-    primitives::size::Size,
+    primitives::{buffer::Buffer, size::Size},
 };
 
 fn pixel_size_by_color_type(color_type: ColorType) -> usize {

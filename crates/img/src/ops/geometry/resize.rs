@@ -31,15 +31,14 @@ pub fn resize(image: &Image, scale: Scale) -> Result<Image> {
 }
 
 #[cfg(feature = "parallel")]
-pub fn resize_par(image: &Image, scale: (f32, f32)) -> Result<Image> {
-    validate(image, scale)?;
-    let new_size = calculate_size(image.size(), scale);
+pub fn resize_par(image: &Image, scale: Scale) -> Result<Image> {
+    let new_size = scale.apply(image.size())?;
     let mut new_image = Image::empty(new_size);
 
     new_image.rows_mut().par_bridge().for_each(|(y, row)| {
         row.for_each(|(x, mut px)| {
             // SAFETY: nearest function should always return a valid point in original image
-            px.copy_from_pixel(unsafe { image.pixel_unchecked(nearest((x, y), scale)) });
+            px.copy_from_pixel(unsafe { image.pixel_unchecked(scale.translate(Point::new(x, y))) });
         });
     });
 

@@ -48,15 +48,20 @@ pub fn median_blur_par(image: &Image, radius: usize) -> Result<Image> {
     validate(image, radius)?;
 
     let diamater = radius * 2 + 1;
-    let mut new_image =
-        Image::empty((image.size().0 - diamater + 1, image.size().1 - diamater + 1));
+    let mut new_image = Image::empty(
+        Size::from_usize(
+            image.size().width() - diamater + 1,
+            image.size().height() - diamater + 1,
+        )
+        .unwrap(),
+    );
 
     // TODO: consider switching dimensions since here most
     // nested access occurs on y value in this implementation
     new_image.rows_mut().par_bridge().for_each(|(y, row)| {
         let mut sets = init_sets(image, diamater, y);
         row.for_each(|(x, mut px)| {
-            process_pixel((x, y), &mut px, image, radius, &mut sets);
+            process_pixel(Point::new(x, y), &mut px, image, radius, &mut sets);
         });
     });
 

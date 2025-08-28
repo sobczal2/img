@@ -53,7 +53,7 @@ impl PartialOrd for Size {
         }
 
         if self.0 > other.0 && self.1 > other.1 {
-            return Some(Ordering::Less);
+            return Some(Ordering::Greater);
         }
 
         None

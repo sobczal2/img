@@ -11,6 +11,10 @@ impl Point {
         Self(x, y)
     }
 
+    pub fn zero() -> Self {
+        Self(0, 0)
+    }
+
     pub fn x(&self) -> usize {
         self.0
     }

@@ -3,8 +3,8 @@ use thiserror::Error;
 use crate::{
     error::IndexResult,
     iter::{Pixels, PixelsMut, Rows, RowsMut},
-    pixel::{PIXEL_SIZE, Pixel, PixelMut},
-    primitives::{buffer::Buffer, point::Point, size::Size},
+    pixel::{Pixel, PixelMut, PIXEL_SIZE},
+    primitives::{buffer::Buffer, point::Point, size::Size}, view::{ElementsIterator, View},
 };
 
 #[derive(Debug, Error)]
@@ -43,6 +43,12 @@ impl Image {
             size,
             buffer: Buffer::from_iter(vec![0; width * height * PIXEL_SIZE]),
         }
+    }
+
+    pub fn from_view<'a>(view: impl View<Pixel<'a>>) -> Self {
+        let mut image = Self::empty(view.size());
+        image.pixels_mut().zip(ElementsIterator::new(&view)).for_each(|(mut target, source)| target.copy_from_pixel(source));
+        image
     }
 
     pub fn size(&self) -> Size {

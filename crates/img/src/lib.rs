@@ -1,4 +1,5 @@
 pub mod collections;
+pub mod view;
 pub mod error;
 pub mod image;
 pub mod io;

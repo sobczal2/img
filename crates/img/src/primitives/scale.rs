@@ -207,16 +207,43 @@ impl PartialEq for Scale {
 impl Eq for Scale {}
 
 impl PartialOrd for Scale {
+
+    /// Returns ordering of scales or none if it is not possible to compare them.
+    ///
+    /// A scale `a` is less than or equal to `b` if both `x` and `y` components
+    /// are less than or equal. If one component is greater and other is smaller
+    /// then it returns `None`.
+    ///
+    /// # Examples
+    /// ```
+    /// use img::primitives::scale::Scale;
+    /// use std::cmp::Ordering;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// assert_eq!(Scale::new(10.0, 10.0)?.partial_cmp(&Scale::new(10.0, 10.0)?), Some(Ordering::Equal));
+    /// assert_eq!(Scale::new(10.0, 10.0)?.partial_cmp(&Scale::new(20.0, 20.0)?), Some(Ordering::Less));
+    /// assert_eq!(Scale::new(10.0, 10.0)?.partial_cmp(&Scale::new(10.0, 20.0)?), Some(Ordering::Less));
+    /// assert_eq!(Scale::new(10.0, 10.0)?.partial_cmp(&Scale::new(20.0, 10.0)?), Some(Ordering::Less));
+    /// assert_eq!(Scale::new(20.0, 20.0)?.partial_cmp(&Scale::new(10.0, 10.0)?),
+    /// Some(Ordering::Greater));
+    /// assert_eq!(Scale::new(20.0, 10.0)?.partial_cmp(&Scale::new(10.0, 10.0)?),
+    /// Some(Ordering::Greater));
+    /// assert_eq!(Scale::new(10.0, 20.0)?.partial_cmp(&Scale::new(10.0, 10.0)?),
+    /// Some(Ordering::Greater));
+    /// assert_eq!(Scale::new(20.0, 10.0)?.partial_cmp(&Scale::new(10.0, 20.0)?), None);
+    /// assert_eq!(Scale::new(10.0, 20.0)?.partial_cmp(&Scale::new(20.0, 10.0)?), None);
+    /// # Ok(())
+    /// # }
+    /// ```
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         if self.eq(other) {
             return Some(Ordering::Equal);
         }
 
-        if self.0 < other.0 && self.1 < other.1 {
+        if self.0 <= other.0 && self.1 <= other.1 {
             return Some(Ordering::Less);
         }
 
-        if self.0 > other.0 && self.1 > other.1 {
+        if self.0 >= other.0 && self.1 >= other.1 {
             return Some(Ordering::Greater);
         }
 

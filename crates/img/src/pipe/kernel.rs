@@ -35,7 +35,7 @@ where
         }
 
         if source.size().height() < kernel.size().height() {
-            return Err(KernelPipeCreationError::KernelTooBigX);
+            return Err(KernelPipeCreationError::KernelTooBigY);
         }
 
         let margin = Margin::from_size(kernel.size());

@@ -22,13 +22,13 @@ pub enum ScaleCreationError {
 /// use img::primitive::scale::Scale;
 ///
 /// // Crate a scale that doubles width and triples height
-/// let scale = Scale::new(2.0, 3.0);
+/// let scale = Scale::new(2.0, 3.0).unwrap();
 ///
 /// // Create a scale that halves width and height
-/// let half_scale = Scale::new(0.5, 0.5);
+/// let half_scale = Scale::new(0.5, 0.5).unwrap();
 ///
 /// // Tries to create scale, but x value is invalid
-/// let invalid_scale = Scale::new(0.00001, 1.0); // return ScaleCreationError::ScaleXInvalid
+/// let invalid_scale = Scale::new(0.00001, 1.0).unwrap_err(); // return ScaleCreationError::ScaleXInvalid
 /// ```
 #[derive(Debug, Copy, Clone)]
 pub struct Scale(f32, f32);
@@ -75,6 +75,7 @@ impl Scale {
     /// assert!(Scale::new(0.00009, 1.0).is_err()); // x too small
     /// assert!(Scale::new(1.0, 10000.1).is_err()); // y too large
     /// assert!(Scale::new(f32::NAN, 1.0).is_err()); // NaN not allowed
+    /// assert!(Scale::new(f32::INFINITY, 1.0).is_err()); // NaN not allowed
     ///
     /// # Ok(())
     /// }

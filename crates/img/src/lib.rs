@@ -1,10 +1,9 @@
 pub mod collections;
-pub mod view;
 pub mod error;
 pub mod image;
 pub mod io;
-pub mod iter;
 pub mod ops;
+pub mod pipe;
 pub mod pixel;
 pub mod prelude;
 pub mod primitives;

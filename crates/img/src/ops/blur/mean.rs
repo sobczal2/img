@@ -5,7 +5,6 @@ use thiserror::Error;
 
 use crate::{
     image::Image,
-    pixel::PixelMut,
     primitives::{point::Point, size::Size},
 };
 
@@ -21,6 +20,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// perform mean blur on an image not in place
 /// this reduces size of an image by radius * 2 times
 /// so to receive image of an original size you should pad it
+#[cfg(false)]
 pub fn mean_blur(image: &Image, radius: usize) -> Result<Image> {
     validate(image, radius)?;
 
@@ -74,6 +74,7 @@ fn validate(image: &Image, radius: usize) -> Result<()> {
     Ok(())
 }
 
+#[cfg(false)]
 fn process_pixel(point: Point, px: &mut PixelMut, original_image: &Image, radius: usize) {
     let diameter = radius * 2 + 1;
     let divisor_inv = 1f32 / (diameter * diameter) as f32;

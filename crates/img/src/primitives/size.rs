@@ -37,6 +37,10 @@ impl Size {
         self.1.into()
     }
 
+    pub fn area(&self) -> usize {
+        self.width() * self.height()
+    }
+
     pub fn contains(&self, point: Point) -> bool {
         point.x() < self.width() && point.y() < self.height()
     }

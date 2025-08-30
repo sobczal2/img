@@ -6,7 +6,7 @@ use thiserror::Error;
 use crate::{
     collections::tracking_set::TrackingSet,
     image::Image,
-    pixel::{Pixel, PixelMut},
+    pixel::Pixel,
     primitives::{point::Point, size::Size},
 };
 
@@ -19,6 +19,7 @@ pub enum Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
+#[cfg(false)]
 pub fn median_blur(image: &Image, radius: usize) -> Result<Image> {
     validate(image, radius)?;
 
@@ -98,54 +99,54 @@ impl MedianSets {
     }
 }
 
-/// fill out sets withinital data of an image.
-/// This does it like for "imaginary" pixel 1 to the left
-/// from the starting pixel.
-/// this way we can iterate over all without special checks
-fn init_sets(image: &Image, diameter: usize, row_y: usize) -> MedianSets {
-    let mut r = TrackingSet::new();
-    let mut g = TrackingSet::new();
-    let mut b = TrackingSet::new();
-
-    (0..diameter).for_each(|_| {
-        r.push(0);
-        g.push(0);
-        b.push(0);
-    });
-
-    (0..diameter).for_each(|y| {
-        (0..diameter - 1).for_each(|x| {
-            let px = unsafe { image.pixel_unchecked(Point::new(x, y + row_y)) };
-            r.push(px.r());
-            g.push(px.g());
-            b.push(px.b());
-        });
-    });
-
-    MedianSets { r, g, b }
-}
-
-fn process_pixel(
-    point: Point,
-    px: &mut PixelMut,
-    original_image: &Image,
-    radius: usize,
-    sets: &mut MedianSets,
-) {
-    let diamater = radius * 2 + 1;
-    sets.pop(diamater);
-    (0..diamater).for_each(|c| {
-        let y = c + point.y();
-        let px = unsafe { original_image.pixel_unchecked(Point::new(point.x(), y)) };
-        sets.push(px);
-    });
-
-    let new_r = *sets.r.mid().unwrap();
-    let new_g = *sets.g.mid().unwrap();
-    let new_b = *sets.b.mid().unwrap();
-
-    px.set_r(new_r);
-    px.set_g(new_g);
-    px.set_b(new_b);
-    px.set_a(unsafe { original_image.pixel_unchecked(point).a() });
-}
+// fill out sets withinital data of an image.
+// This does it like for "imaginary" pixel 1 to the left
+// from the starting pixel.
+// this way we can iterate over all without special checks
+// fn init_sets(image: &Image, diameter: usize, row_y: usize) -> MedianSets {
+//     let mut r = TrackingSet::new();
+//     let mut g = TrackingSet::new();
+//     let mut b = TrackingSet::new();
+//
+//     (0..diameter).for_each(|_| {
+//         r.push(0);
+//         g.push(0);
+//         b.push(0);
+//     });
+//
+//     (0..diameter).for_each(|y| {
+//         (0..diameter - 1).for_each(|x| {
+//             let px = unsafe { image.pixel_unchecked(Point::new(x, y + row_y)) };
+//             r.push(px.r());
+//             g.push(px.g());
+//             b.push(px.b());
+//         });
+//     });
+//
+//     MedianSets { r, g, b }
+// }
+//
+// fn process_pixel(
+//     point: Point,
+//     px: &mut Pixel,
+//     original_image: &Image,
+//     radius: usize,
+//     sets: &mut MedianSets,
+// ) {
+//     let diamater = radius * 2 + 1;
+//     sets.pop(diamater);
+//     (0..diamater).for_each(|c| {
+//         let y = c + point.y();
+//         let px = unsafe { original_image.pixel_unchecked(Point::new(point.x(), y)) };
+//         sets.push(px);
+//     });
+//
+//     let new_r = *sets.r.mid().unwrap();
+//     let new_g = *sets.g.mid().unwrap();
+//     let new_b = *sets.b.mid().unwrap();
+//
+//     px.set_r(new_r);
+//     px.set_g(new_g);
+//     px.set_b(new_b);
+//     px.set_a(unsafe { original_image.pixel_unchecked(point).a() });
+// }

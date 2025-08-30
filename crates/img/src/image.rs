@@ -2,36 +2,34 @@ use thiserror::Error;
 
 use crate::{
     error::IndexResult,
-    iter::{Pixels, PixelsMut, Rows, RowsMut},
-    pixel::{Pixel, PixelMut, PIXEL_SIZE},
-    primitives::{buffer::Buffer, point::Point, size::Size}, view::{ElementsIterator, View},
+    pipe::{
+        FromPipe, IntoPipe, Pipe,
+        image::ImagePipe,
+        iter::{Elements, Rows},
+    },
+    pixel::{PIXEL_SIZE, Pixel},
+    primitives::{point::Point, size::Size},
 };
 
 #[derive(Debug, Error)]
-#[error("size does not match buffer size")]
-pub struct SizeBufferMismatch;
-
-pub(crate) fn buffer_valid_for_size(buffer: &Buffer, size: Size) -> bool {
-    let width: usize = size.width();
-    let height: usize = size.height();
-    buffer.len() == width * height * PIXEL_SIZE
-}
+#[error("size does not match pixels size")]
+pub struct SizePixelsMismatch;
 
 /// Image representation
 pub struct Image {
     size: Size,
-    buffer: Buffer,
+    pixels: Box<[Pixel]>,
 }
 
 impl Image {
     /// create an image with the given size and buffer
     /// fails if buf's length is not width * length * PIXEL_SIZE
-    pub fn new(size: Size, buffer: Buffer) -> Result<Self, SizeBufferMismatch> {
-        if !buffer_valid_for_size(&buffer, size) {
-            return Err(SizeBufferMismatch);
+    pub fn new(size: Size, pixels: Box<[Pixel]>) -> Result<Self, SizePixelsMismatch> {
+        if pixels.len() != size.area() {
+            return Err(SizePixelsMismatch);
         }
 
-        Ok(Image { size, buffer })
+        Ok(Image { size, pixels })
     }
 
     /// create empty image with specified size
@@ -41,14 +39,8 @@ impl Image {
 
         Self {
             size,
-            buffer: Buffer::from_iter(vec![0; width * height * PIXEL_SIZE]),
+            pixels: vec![Pixel::zero(); width * height].into_boxed_slice(),
         }
-    }
-
-    pub fn from_view<'a>(view: impl View<Pixel<'a>>) -> Self {
-        let mut image = Self::empty(view.size());
-        image.pixels_mut().zip(ElementsIterator::new(&view)).for_each(|(mut target, source)| target.copy_from_pixel(source));
-        image
     }
 
     pub fn size(&self) -> Size {
@@ -56,14 +48,11 @@ impl Image {
     }
 
     /// get immutable pixel at selected point
-    pub fn pixel(&self, point: Point) -> IndexResult<Pixel<'_>> {
-        let index = point.to_index(self.size())? * PIXEL_SIZE;
+    pub fn pixel(&self, point: Point) -> IndexResult<&Pixel> {
+        let index = point.to_index(self.size())?;
 
         // SAFETY: index from point.to_idx is always valid
-        let data = unsafe { self.buffer.get_data_unchecked(index, PIXEL_SIZE) };
-
-        // SAFETY: data is always PIXEL_SIZE so try_into never fails
-        Ok(Pixel::new(data.try_into().unwrap()))
+        Ok(&self.pixels[index])
     }
 
     /// get immutable pixel at selected cordinates
@@ -72,20 +61,17 @@ impl Image {
     /// # Safety
     ///
     /// this should be called only using valid point
-    pub unsafe fn pixel_unchecked(&self, point: Point) -> Pixel<'_> {
-        let index = unsafe { point.to_index_unchecked(self.size()) } * PIXEL_SIZE;
-        let data = unsafe { self.buffer.get_data_unchecked(index, PIXEL_SIZE) };
-
-        Pixel::new(data.try_into().unwrap())
+    pub unsafe fn pixel_unchecked(&self, point: Point) -> &Pixel {
+        let index = unsafe { point.to_index_unchecked(self.size()) };
+        &self.pixels[index]
     }
 
     /// get mutable pixel at selected cordinates
-    pub fn pixel_mut(&mut self, point: Point) -> IndexResult<PixelMut<'_>> {
-        let index = point.to_index(self.size())? * PIXEL_SIZE;
-        let data = self.buffer.get_data_mut(index, PIXEL_SIZE)?;
+    pub fn pixel_mut(&mut self, point: Point) -> IndexResult<&mut Pixel> {
+        let index = point.to_index(self.size())?;
 
-        // SAFETY: data is always PIXEL_SIZE so try_into never fails
-        Ok(PixelMut::new(data.try_into().unwrap()))
+        // SAFETY: index from point.to_idx is always valid
+        Ok(&mut self.pixels[index])
     }
 
     /// get mutable pixel at selected cordinates
@@ -94,39 +80,51 @@ impl Image {
     /// # Safety
     /// - point must be within image bounds
     ///
-    pub unsafe fn pixel_mut_unchecked(&mut self, point: Point) -> PixelMut<'_> {
-        let index = unsafe { point.to_index_unchecked(self.size()) } * PIXEL_SIZE;
-        let data = unsafe { self.buffer.get_data_mut_unchecked(index, PIXEL_SIZE) };
-
-        // SAFETY: data is always PIXEL_SIZE so try_into never fails
-        PixelMut::new(data.try_into().unwrap())
+    pub unsafe fn pixel_mut_unchecked(&mut self, point: Point) -> &mut Pixel {
+        let index = unsafe { point.to_index_unchecked(self.size()) };
+        &mut self.pixels[index]
     }
 
-    pub fn buffer(&self) -> &Buffer {
-        &self.buffer
+    pub fn rows(&self) -> Rows<&Pixel, ImagePipe> {
+        Rows::new(self.into_pipe())
     }
 
-    pub fn buffer_mut(&mut self) -> &mut Buffer {
-        &mut self.buffer
+    pub fn elements(&self) -> Elements<&Pixel, ImagePipe> {
+        Elements::new(self.into_pipe())
     }
 
-    pub fn pixels(&self) -> Pixels<'_> {
-        // SAFETY: buffer here is always of size N * PIXEL_SIZE
-        Pixels::new(self.buffer.as_ref()).unwrap()
+    pub fn buffer(&self) -> Box<[u8]> {
+        self.pixels
+            .iter()
+            .flat_map(|px| px.buffer())
+            .cloned()
+            .collect()
     }
+}
 
-    pub fn pixels_mut(&mut self) -> PixelsMut<'_> {
-        // SAFETY: buffer here is always of size N * PIXEL_SIZE
-        PixelsMut::new(self.buffer.as_mut()).unwrap()
+impl<'a> IntoPipe for &'a Image {
+    type Item = &'a Pixel;
+
+    type IntoPipe = ImagePipe<'a>;
+
+    fn into_pipe(self) -> Self::IntoPipe {
+        ImagePipe::new(self)
     }
+}
 
-    pub fn rows(&self) -> Rows<'_> {
-        // SAFETY: buffer here is always of size width * height * PIXEL_SIZE
-        Rows::new(self.buffer.as_ref(), self.size).unwrap()
-    }
+impl<'a> FromPipe<Pixel> for Image {
+    fn from_pipe<P>(pipe: P) -> Self
+    where
+        P: IntoPipe<Item = Pixel>,
+    {
+        let pipe = pipe.into_pipe();
+        let mut image = Image::empty(pipe.size());
 
-    pub fn rows_mut(&mut self) -> RowsMut<'_> {
-        // SAFETY: buffer here is always of size width * height * PIXEL_SIZE
-        RowsMut::new(self.buffer.as_mut(), self.size).unwrap()
+        image
+            .pixels
+            .iter_mut()
+            .zip(pipe.elements())
+            .for_each(|(target, source)| *target = source);
+        image
     }
 }

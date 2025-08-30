@@ -23,7 +23,7 @@ pub enum ScaleCreationError {
 ///
 /// // Crate a scale that doubles width and triples height
 /// let scale = Scale::new(2.0, 3.0);
-/// 
+///
 /// // Create a scale that halves width and height
 /// let half_scale = Scale::new(0.5, 0.5);
 ///
@@ -45,7 +45,7 @@ impl Scale {
     /// Both x and y must be within range `[Scale::MIN, Scale::MAX]` inclusive.
     ///
     /// # Arguments
-    /// 
+    ///
     /// * `x` - The horizontal scaling factor
     /// * `y` - The vertical scaling factor
     ///
@@ -70,7 +70,7 @@ impl Scale {
     /// let normal = Scale::new(1.0, 1.0)?; // Identity scale
     /// let enlarge = Scale::new(2.0, 1.5)?; // Enlarge width 2x, height 1.5x
     /// let shrink = Scale::new(0.5, 0.25)?; // Shrink to half width, quarter height
-    /// 
+    ///
     /// // Invalid scales
     /// assert!(Scale::new(0.00009, 1.0).is_err()); // x too small
     /// assert!(Scale::new(1.0, 10000.1).is_err()); // y too large
@@ -96,7 +96,7 @@ impl Scale {
     pub fn x(&self) -> f32 {
         self.0
     }
-    
+
     /// Returns the y (vertical) scaling factor.
     pub fn y(&self) -> f32 {
         self.1
@@ -160,7 +160,6 @@ impl Scale {
         Size::from_usize(new_width.round() as usize, new_height.round() as usize)
     }
 
-
     /// Transform the point to scaled coordinate space.
     /// Rounds results to the nearest integer or further from zero if value is in the
     /// middle.
@@ -207,7 +206,6 @@ impl PartialEq for Scale {
 impl Eq for Scale {}
 
 impl PartialOrd for Scale {
-
     /// Returns ordering of scales or none if it is not possible to compare them.
     ///
     /// A scale `a` is less than or equal to `b` if both `x` and `y` components

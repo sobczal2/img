@@ -19,6 +19,7 @@ pub enum Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
+#[cfg(false)]
 pub fn crop(image: &Image, size: Size, offset: (usize, usize)) -> Result<Image> {
     validate(image, size, offset)?;
 

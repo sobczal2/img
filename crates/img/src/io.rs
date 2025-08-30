@@ -3,8 +3,8 @@ use png::{BitDepth, ColorType};
 use crate::{
     error::{IoError, IoResult},
     image::Image,
-    pixel::{PIXEL_SIZE, PixelMut},
-    primitives::{buffer::Buffer, size::Size},
+    pixel::{PIXEL_SIZE, Pixel},
+    primitives::size::Size,
 };
 
 fn pixel_size_by_color_type(color_type: ColorType) -> usize {
@@ -90,23 +90,22 @@ impl ReadPng for Image {
         let width: usize = info.width.try_into().unwrap();
         let height: usize = info.height.try_into().unwrap();
 
-        let mut image_buf = vec![0; width * height * PIXEL_SIZE].into_boxed_slice();
+        let mut pixels = vec![Pixel::zero(); width * height].into_boxed_slice();
 
-        for (target_px, source_px) in image_buf
-            .chunks_mut(PIXEL_SIZE)
+        for (target_px, source_px) in pixels
+            .iter_mut()
             .zip(bytes.chunks(pixel_size_by_color_type(info.color_type)))
         {
-            let mut target = PixelMut::new(target_px.try_into().unwrap());
-            target.set_r(get_red(source_px, info.color_type));
-            target.set_g(get_green(source_px, info.color_type));
-            target.set_b(get_blue(source_px, info.color_type));
-            target.set_a(get_alpha(source_px, info.color_type));
+            target_px.set_r(get_red(source_px, info.color_type));
+            target_px.set_g(get_green(source_px, info.color_type));
+            target_px.set_b(get_blue(source_px, info.color_type));
+            target_px.set_a(get_alpha(source_px, info.color_type));
         }
 
         let width = width.try_into().expect("invalid width");
         let height = height.try_into().expect("invalid height");
 
-        Ok(Image::new(Size::new(width, height), Buffer::from_iter(image_buf)).unwrap())
+        Ok(Image::new(Size::new(width, height), pixels).unwrap())
     }
 }
 

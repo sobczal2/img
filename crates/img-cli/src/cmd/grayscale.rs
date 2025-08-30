@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use clap::{ArgMatches, Command};
-use img::prelude::*;
+use img::ops::color::grayscale::grayscale;
 
 use crate::io::{read_image, write_image};
 
@@ -14,8 +14,8 @@ pub fn subcommand() -> Command {
 }
 
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
-    let mut image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
-    grayscale(&mut image);
+    let image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
+    let image = grayscale(image);
     write_image(&image, matches.get_one::<PathBuf>(OUTPUT_ARG_NAME).unwrap())?;
     Ok(())
 }

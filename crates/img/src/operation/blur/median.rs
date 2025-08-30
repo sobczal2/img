@@ -3,12 +3,7 @@ use rayon::iter::{ParallelBridge, ParallelIterator};
 
 use thiserror::Error;
 
-use crate::{
-    collection::tracking_set::TrackingSet,
-    image::Image,
-    pixel::Pixel,
-    primitive::{point::Point, size::Size},
-};
+use crate::{collection::tracking_set::TrackingSet, image::Image, pixel::Pixel};
 
 /// Error returned by mean_blur function
 #[derive(Debug, Error)]

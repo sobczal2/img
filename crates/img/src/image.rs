@@ -85,11 +85,11 @@ impl Image {
         &mut self.pixels[index]
     }
 
-    pub fn rows(&self) -> Rows<ImagePipe> {
+    pub fn rows(&self) -> Rows<ImagePipe<'_>> {
         Rows::new(self.into_pipe())
     }
 
-    pub fn elements(&self) -> Elements<ImagePipe> {
+    pub fn elements(&self) -> Elements<ImagePipe<'_>> {
         Elements::new(self.into_pipe())
     }
 

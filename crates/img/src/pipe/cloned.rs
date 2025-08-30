@@ -1,4 +1,8 @@
-use crate::{error::IndexResult, pipe::Pipe, primitive::{point::Point, size::Size}};
+use crate::{
+    error::IndexResult,
+    pipe::Pipe,
+    primitive::{point::Point, size::Size},
+};
 
 pub struct ClonedPipe<P> {
     source: P,

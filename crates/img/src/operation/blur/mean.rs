@@ -3,10 +3,7 @@ use rayon::iter::{ParallelBridge, ParallelIterator};
 
 use thiserror::Error;
 
-use crate::{
-    image::Image,
-    primitive::{point::Point, size::Size},
-};
+use crate::image::Image;
 
 /// Error returned by mean_blur function
 #[derive(Debug, Error)]

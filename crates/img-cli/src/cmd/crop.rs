@@ -4,7 +4,8 @@ use clap::{ArgMatches, Command, arg};
 use img::operation::geometry::crop::crop;
 
 use crate::{
-io::{read_image, write_image}, param::size_offset::SizeOffset
+    io::{read_image, write_image},
+    param::size_offset::SizeOffset,
 };
 
 use super::common::{INPUT_ARG_NAME, OUTPUT_ARG_NAME, input_arg, output_arg};

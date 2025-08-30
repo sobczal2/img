@@ -5,7 +5,7 @@ use thiserror::Error;
 
 use crate::{
     image::Image,
-    primitives::{point::Point, size::Size},
+    primitive::{point::Point, size::Size},
 };
 
 /// Error returned by mean_blur function

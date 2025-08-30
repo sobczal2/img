@@ -1,6 +1,6 @@
 use crate::{
     error::{IndexResult, OutOfBoundsError},
-    primitives::size::Size,
+    primitive::size::Size,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

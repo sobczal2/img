@@ -3,7 +3,7 @@ use crate::{
     image::Image,
     pipe::Pipe,
     pixel::Pixel,
-    primitives::{point::Point, size::Size},
+    primitive::{point::Point, size::Size},
 };
 
 pub struct ImagePipe<'a>(&'a Image);

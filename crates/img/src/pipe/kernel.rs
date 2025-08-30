@@ -1,17 +1,19 @@
-use std::marker::PhantomData;
-
 use thiserror::Error;
 
 use crate::{
     error::IndexResult,
     pipe::Pipe,
-    primitives::{point::Point, size::Size},
+    primitive::{point::Point, size::Size},
 };
 
-pub trait Kernel<S, T> {
-    fn apply<P>(&self, pipe: &P, point: Point) -> IndexResult<T>
+pub trait Kernel {
+    type Out;
+    type In;
+
+    fn apply<P>(&self, pipe: &P, point: Point) -> IndexResult<Self::Out>
     where
-        P: Pipe<Item = S>;
+        P: Pipe<Item = Self::In>;
+
     fn size(&self) -> Size;
 }
 
@@ -23,24 +25,14 @@ pub enum KernelPipeCreationError {
     KernelTooBigY,
 }
 
-pub struct KernelPipe<S, T, V, K>
-where
-    V: Pipe<Item = S>,
-    K: Kernel<S, T>,
-{
-    source: V,
+pub struct KernelPipe<P, K> {
+    source: P,
     kernel: K,
     size: Size,
-    _phantom_s: PhantomData<S>,
-    _phantom_t: PhantomData<T>,
 }
 
-impl<S, T, V, K> KernelPipe<S, T, V, K>
-where
-    V: Pipe<Item = S>,
-    K: Kernel<S, T>,
-{
-    pub fn new(source: V, kernel: K) -> Result<Self, KernelPipeCreationError> {
+impl<P: Pipe, K: Kernel> KernelPipe<P, K> {
+    pub fn new(source: P, kernel: K) -> Result<Self, KernelPipeCreationError> {
         if source.size().width() < kernel.size().width() {
             return Err(KernelPipeCreationError::KernelTooBigX);
         }
@@ -62,20 +54,17 @@ where
             source,
             kernel,
             size,
-            _phantom_s: Default::default(),
-            _phantom_t: Default::default(),
         })
     }
 }
 
-impl<S, T, V, K> Pipe for KernelPipe<S, T, V, K>
+impl<P, K: Kernel> Pipe for KernelPipe<P, K>
 where
-    V: Pipe<Item = S>,
-    K: Kernel<S, T>,
+    P: Pipe<Item = K::In>,
 {
-    type Item = T;
+    type Item = K::Out;
 
-    fn get(&self, point: Point) -> IndexResult<T> {
+    fn get(&self, point: Point) -> IndexResult<Self::Item> {
         let margin_x = self.kernel.size().width() / 2;
         let margin_y = self.kernel.size().height() / 2;
 

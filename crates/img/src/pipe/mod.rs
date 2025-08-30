@@ -1,40 +1,64 @@
 use crate::{
     error::IndexResult,
     pipe::{
+        cloned::ClonedPipe,
         iter::{Elements, Rows},
         map::MapPipe,
+        remap::RemapPipe,
     },
-    primitives::{point::Point, size::Size},
+    primitive::{point::Point, size::Size},
 };
 
+pub mod cloned;
 pub mod image;
 pub mod iter;
 pub mod kernel;
 pub mod map;
+pub mod remap;
 
 pub trait Pipe {
     type Item;
 
     fn get(&self, point: Point) -> IndexResult<Self::Item>;
+
     fn size(&self) -> Size;
-    fn rows(self) -> Rows<Self::Item, Self>
+
+    fn rows(self) -> Rows<Self>
     where
         Self: Sized,
     {
         Rows::new(self)
     }
-    fn elements(self) -> Elements<Self::Item, Self>
+
+    fn elements(self) -> Elements<Self>
     where
         Self: Sized,
     {
         Elements::new(self)
     }
-    fn map<T, F>(self, f: F) -> MapPipe<Self::Item, T, Self, F>
+
+    fn map<T, F>(self, f: F) -> MapPipe<Self, F>
     where
-        F: Fn(Self::Item) -> T,
         Self: Sized,
+        F: Fn(Self::Item) -> T,
     {
         MapPipe::new(self, f)
+    }
+
+    fn remap<T, F>(self, f: F, size: Size) -> RemapPipe<Self, F>
+    where
+        Self: Sized,
+        F: Fn(&Self, Point) -> T,
+    {
+        RemapPipe::new(self, f, size)
+    }
+
+    fn cloned<'a>(self) -> ClonedPipe<Self>
+    where
+        Self: Sized,
+        Self::Item: Clone + 'a,
+    {
+        ClonedPipe::new(self)
     }
 }
 

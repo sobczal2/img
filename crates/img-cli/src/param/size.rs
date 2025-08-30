@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use anyhow::anyhow;
 use anyhow::bail;
-use img::primitives::size::SizeCreationError;
+use img::primitive::size::SizeCreationError;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Size {
@@ -30,7 +30,7 @@ impl FromStr for Size {
     }
 }
 
-impl TryFrom<Size> for img::primitives::size::Size {
+impl TryFrom<Size> for img::primitive::size::Size {
     type Error = SizeCreationError;
 
     fn try_from(value: Size) -> Result<Self, Self::Error> {

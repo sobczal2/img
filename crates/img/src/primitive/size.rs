@@ -2,7 +2,7 @@ use std::{cmp::Ordering, num::NonZeroUsize};
 
 use thiserror::Error;
 
-use crate::primitives::point::Point;
+use crate::primitive::point::Point;
 
 #[derive(Debug, Error)]
 pub enum SizeCreationError {

@@ -3,8 +3,8 @@ use png::{BitDepth, ColorType};
 use crate::{
     error::{IoError, IoResult},
     image::Image,
-    pixel::{PIXEL_SIZE, Pixel},
-    primitives::size::Size,
+    pixel::Pixel,
+    primitive::size::Size,
 };
 
 fn pixel_size_by_color_type(color_type: ColorType) -> usize {

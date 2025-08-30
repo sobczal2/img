@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 
 use thiserror::Error;
 
-use crate::primitives::{
+use crate::primitive::{
     point::Point,
     size::{Size, SizeCreationError},
 };

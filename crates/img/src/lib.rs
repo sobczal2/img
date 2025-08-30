@@ -1,9 +1,9 @@
-pub mod collections;
+pub mod collection;
 pub mod error;
 pub mod image;
 pub mod io;
-pub mod ops;
+pub mod operation;
 pub mod pipe;
 pub mod pixel;
 pub mod prelude;
-pub mod primitives;
+pub mod primitive;

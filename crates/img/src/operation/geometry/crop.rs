@@ -4,7 +4,8 @@ use thiserror::Error;
 
 use crate::{
     image::Image,
-    primitives::{point::Point, size::Size},
+    pipe::{FromPipe, IntoPipe, Pipe},
+    primitive::{point::Point, size::Size},
 };
 
 #[derive(Debug, Error)]
@@ -19,22 +20,22 @@ pub enum Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[cfg(false)]
 pub fn crop(image: &Image, size: Size, offset: (usize, usize)) -> Result<Image> {
     validate(image, size, offset)?;
 
-    let mut new_image = Image::empty(size);
+    let pipe = image
+        .into_pipe()
+        .remap(
+            |pipe, point| {
+                pipe.get(Point::new(point.x() + offset.0, point.y() + offset.1))
+                    .unwrap()
+            },
+            size,
+        )
+        .cloned();
+    let image = Image::from_pipe(pipe);
 
-    new_image.rows_mut().for_each(|(y, row)| {
-        row.for_each(|(x, mut px)| {
-            // SAFETY: validate ensures any x/ + offset is within bounds
-            px.copy_from_pixel(unsafe {
-                image.pixel_unchecked(Point::new(x + offset.0, y + offset.1))
-            });
-        });
-    });
-
-    Ok(new_image)
+    Ok(image)
 }
 
 fn validate(image: &Image, size: Size, offset: (usize, usize)) -> Result<()> {

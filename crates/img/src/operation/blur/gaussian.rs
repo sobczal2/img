@@ -1,78 +1,54 @@
-#[cfg(feature = "parallel")]
-use rayon::iter::{ParallelBridge, ParallelIterator};
-
-use std::{
-    f32::consts::{E, PI},
-    num::NonZero,
-};
-
-use thiserror::Error;
-
-use crate::{
-    error::{IndexResult, OutOfBoundsError},
-    image::Image,
-    primitives::{point::Point, size::Size},
-};
-
-/// Error returned by mean_blur function
-#[derive(Debug, Error)]
-pub enum Error {
-    #[error("radius too big for given image")]
-    RadiusTooBig,
-    #[error("invalid sigma - has to be positive")]
-    InvalidSigma,
-}
-
-pub type Result<T> = std::result::Result<T, Error>;
-
-/// perform mean blur on an image not in place
-/// this reduces size of an image by radius * 2 times
-/// so to receive image of an original size you should pad it
-#[cfg(false)]
-pub fn gaussian_blur(image: &Image, radius: usize, sigma: f32) -> Result<Image> {
-    validate(image, radius, sigma)?;
-
-    let kernel = GaussianKernel::new(radius, sigma);
-    let diameter = radius * 2 + 1;
-    let mut new_image = Image::empty(
-        Size::from_usize(
-            image.size().width() - diameter + 1,
-            image.size().height() - diameter + 1,
-        )
-        .unwrap(),
-    );
-
-    new_image.rows_mut().for_each(|(y, row)| {
-        row.for_each(|(x, mut px)| {
-            process_pixel(Point::new(x, y), &mut px, image, &kernel);
-        });
-    });
-
-    Ok(new_image)
-}
-
-#[cfg(feature = "parallel")]
-pub fn gaussian_blur_par(image: &Image, radius: usize, sigma: f32) -> Result<Image> {
-    validate(image, radius, sigma)?;
-
-    let kernel = GaussianKernel::new(radius, sigma);
-    let diameter = radius * 2 + 1;
-    let mut new_image = Image::empty(
-        Size::from_usize(
-            image.size().width() - diameter + 1,
-            image.size().height() - diameter + 1,
-        )
-        .unwrap(),
-    );
-
-    new_image.rows_mut().par_bridge().for_each(|(y, row)| {
-        row.for_each(|(x, mut px)| {
-            process_pixel(Point::new(x, y), &mut px, image, &kernel);
-        });
-    });
-
-    Ok(new_image)
-}
+// #[cfg(feature = "parallel")]
+// use rayon::iter::{ParallelBridge, ParallelIterator};
+//
+// use std::{
+//     f32::consts::{E, PI},
+//     num::NonZero,
+// };
+//
+// use thiserror::Error;
+//
+// use crate::{
+//     error::{IndexResult, OutOfBoundsError},
+//     image::Image,
+//     primitives::{point::Point, size::Size},
+// };
+//
+// /// Error returned by mean_blur function
+// #[derive(Debug, Error)]
+// pub enum Error {
+//     #[error("radius too big for given image")]
+//     RadiusTooBig,
+//     #[error("invalid sigma - has to be positive")]
+//     InvalidSigma,
+// }
+//
+// pub type Result<T> = std::result::Result<T, Error>;
+//
+// /// perform mean blur on an image not in place
+// /// this reduces size of an image by radius * 2 times
+// /// so to receive image of an original size you should pad it
+// pub fn gaussian_blur(image: &Image, radius: usize, sigma: f32) -> Result<Image> {
+//     validate(image, radius, sigma)?;
+//
+//     let kernel = GaussianKernel::new(radius, sigma);
+//     let diameter = radius * 2 + 1;
+//     let mut new_image = Image::empty(
+//         Size::from_usize(
+//             image.size().width() - diameter + 1,
+//             image.size().height() - diameter + 1,
+//         )
+//         .unwrap(),
+//     );
+//
+//     new_image.rows_mut().for_each(|(y, row)| {
+//         row.for_each(|(x, mut px)| {
+//             process_pixel(Point::new(x, y), &mut px, image, &kernel);
+//         });
+//     });
+//
+//     Ok(new_image)
+// }
 
 // fn validate(image: &Image, radius: usize, sigma: f32) -> Result<()> {
 //     if image.size().width() < radius * 2 + 1 || image.size().height() < radius * 2 + 1 {

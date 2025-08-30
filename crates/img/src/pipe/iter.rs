@@ -1,19 +1,13 @@
 use std::rc::Rc;
 
-use crate::{pipe::Pipe, primitives::point::Point};
+use crate::{pipe::Pipe, primitive::point::Point};
 
-pub struct Rows<T, P>
-where
-    P: Pipe<Item = T>,
-{
+pub struct Rows<P> {
     pipe: Rc<P>,
     current: usize,
 }
 
-impl<T, P> Rows<T, P>
-where
-    P: Pipe<Item = T>,
-{
+impl<P> Rows<P> {
     pub fn new(pipe: P) -> Self {
         Self {
             pipe: Rc::new(pipe),
@@ -22,11 +16,8 @@ where
     }
 }
 
-impl<T, P> Iterator for Rows<T, P>
-where
-    P: Pipe<Item = T>,
-{
-    type Item = RowElements<T, P>;
+impl<P: Pipe> Iterator for Rows<P> {
+    type Item = RowElements<P>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.current == self.pipe.size().height() {
@@ -39,18 +30,12 @@ where
     }
 }
 
-pub struct RowElements<T, P>
-where
-    P: Pipe<Item = T>,
-{
+pub struct RowElements<P> {
     pipe: Rc<P>,
     current: Point,
 }
 
-impl<T, P> RowElements<T, P>
-where
-    P: Pipe<Item = T>,
-{
+impl<P> RowElements<P> {
     fn new(pipe: Rc<P>, row: usize) -> Self {
         Self {
             pipe,
@@ -59,11 +44,8 @@ where
     }
 }
 
-impl<T, P> Iterator for RowElements<T, P>
-where
-    P: Pipe<Item = T>,
-{
-    type Item = T;
+impl<P: Pipe> Iterator for RowElements<P> {
+    type Item = P::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.current.x() == self.pipe.size().width() {
@@ -80,28 +62,19 @@ where
     }
 }
 
-pub struct Elements<T, P>
-where
-    P: Pipe<Item = T>,
-{
+pub struct Elements<P> {
     pipe: P,
     current: usize,
 }
 
-impl<T, P> Elements<T, P>
-where
-    P: Pipe<Item = T>,
-{
+impl<P> Elements<P> {
     pub fn new(pipe: P) -> Self {
         Self { pipe, current: 0 }
     }
 }
 
-impl<T, P> Iterator for Elements<T, P>
-where
-    P: Pipe<Item = T>,
-{
-    type Item = T;
+impl<P: Pipe> Iterator for Elements<P> {
+    type Item = P::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
         let point = match Point::from_index(self.current, self.pipe.size()) {

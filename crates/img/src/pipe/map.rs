@@ -1,45 +1,31 @@
-use std::marker::PhantomData;
+use crate::{
+    error::IndexResult,
+    pipe::Pipe,
+    primitive::{point::Point, size::Size},
+};
 
-use crate::{error::IndexResult, pipe::Pipe, primitives::point::Point};
-
-pub struct MapPipe<S, T, P, F>
-where
-    P: Pipe<Item = S>,
-    F: Fn(S) -> T,
-{
+pub struct MapPipe<P, F> {
     source: P,
-    r#fn: F,
-    _phantom_s: PhantomData<S>,
-    _phantom_t: PhantomData<T>,
+    f: F,
 }
 
-impl<S, T, V, F> MapPipe<S, T, V, F>
-where
-    V: Pipe<Item = S>,
-    F: Fn(S) -> T,
-{
-    pub fn new(source: V, r#fn: F) -> Self {
-        Self {
-            source,
-            r#fn,
-            _phantom_s: Default::default(),
-            _phantom_t: Default::default(),
-        }
+impl<P, F> MapPipe<P, F> {
+    pub fn new(source: P, f: F) -> Self {
+        Self { source, f }
     }
 }
 
-impl<S, T, V, F> Pipe for MapPipe<S, T, V, F>
+impl<T, P: Pipe, F> Pipe for MapPipe<P, F>
 where
-    V: Pipe<Item = S>,
-    F: Fn(S) -> T,
+    F: Fn(P::Item) -> T,
 {
     type Item = T;
 
-    fn get(&self, point: Point) -> IndexResult<T> {
-        Ok((self.r#fn)(self.source.get(point)?))
+    fn get(&self, point: Point) -> IndexResult<Self::Item> {
+        Ok((self.f)(self.source.get(point)?))
     }
 
-    fn size(&self) -> crate::primitives::size::Size {
+    fn size(&self) -> Size {
         self.source.size()
     }
 }

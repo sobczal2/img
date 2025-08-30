@@ -7,8 +7,8 @@ use crate::{
         image::ImagePipe,
         iter::{Elements, Rows},
     },
-    pixel::{PIXEL_SIZE, Pixel},
-    primitives::{point::Point, size::Size},
+    pixel::Pixel,
+    primitive::{point::Point, size::Size},
 };
 
 #[derive(Debug, Error)]
@@ -85,11 +85,11 @@ impl Image {
         &mut self.pixels[index]
     }
 
-    pub fn rows(&self) -> Rows<&Pixel, ImagePipe> {
+    pub fn rows(&self) -> Rows<ImagePipe> {
         Rows::new(self.into_pipe())
     }
 
-    pub fn elements(&self) -> Elements<&Pixel, ImagePipe> {
+    pub fn elements(&self) -> Elements<ImagePipe> {
         Elements::new(self.into_pipe())
     }
 
@@ -112,7 +112,7 @@ impl<'a> IntoPipe for &'a Image {
     }
 }
 
-impl<'a> FromPipe<Pixel> for Image {
+impl FromPipe<Pixel> for Image {
     fn from_pipe<P>(pipe: P) -> Self
     where
         P: IntoPipe<Item = Pixel>,

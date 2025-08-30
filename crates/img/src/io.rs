@@ -131,7 +131,7 @@ impl WritePng for Image {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::{image::Image, primitives::point::Point};
+    use crate::{image::Image, primitive::point::Point};
 
     #[test]
     fn read_png_success() {

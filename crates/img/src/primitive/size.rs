@@ -29,6 +29,11 @@ impl Size {
         Ok(Size(width, height))
     }
 
+    pub fn from_radius(radius: usize) -> Self {
+        let diameter = 2 * radius + 1;
+        Self::from_usize(diameter, diameter).unwrap()
+    }
+
     pub fn width(&self) -> usize {
         self.0.into()
     }
@@ -39,6 +44,10 @@ impl Size {
 
     pub fn area(&self) -> usize {
         self.width() * self.height()
+    }
+
+    pub fn center(&self) -> Point {
+        Point::new(self.width() / 2, self.height() / 2)
     }
 
     pub fn contains(&self, point: Point) -> bool {

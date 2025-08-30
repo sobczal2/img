@@ -1,7 +1,22 @@
+use std::{
+    isize,
+    ops::{Add, Sub},
+};
+
+use thiserror::Error;
+
 use crate::{
     error::{IndexResult, OutOfBoundsError},
-    primitive::size::Size,
+    primitive::{offset::Offset, size::Size},
 };
+
+#[derive(Debug, Error)]
+pub enum PointCreationError {
+    #[error("invalid x value")]
+    InvalidX,
+    #[error("invalid y value")]
+    InvalidY,
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Point(usize, usize);
@@ -57,6 +72,37 @@ impl Point {
     /// .
     pub unsafe fn from_index_unchecked(index: usize, size: Size) -> Self {
         Point::new(index % size.width(), index / size.width())
+    }
+
+    pub fn offset_by(&self, offset: Offset) -> Result<Point, PointCreationError> {
+        let x = self.0 as isize + offset.x();
+        let y = self.1 as isize + offset.y();
+
+        let x: usize = x.try_into().map_err(|_| PointCreationError::InvalidX)?;
+        let y: usize = y.try_into().map_err(|_| PointCreationError::InvalidY)?;
+
+        Ok(Point(x, y))
+    }
+}
+
+impl Sub for Point {
+    type Output = Offset;
+
+    ///
+    /// # Examples
+    /// ```
+    /// use img::primitive::{point::Point, offset::Offset};
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// assert_eq!(Point::new(10, 20) - Point::new(5, 10), Offset::new(5, 10));
+    /// assert_eq!(Point::new(10, 20) - Point::new(20, 10), Offset::new(-10, 10));
+    /// assert_eq!(Point::new(10, 20) - Point::new(20, 40), Offset::new(-10, -20));
+    /// # Ok(())
+    /// # }
+    fn sub(self, rhs: Self) -> Self::Output {
+        let x = self.0 as isize - rhs.0 as isize;
+        let y = self.1 as isize - rhs.1 as isize;
+
+        Offset::new(x, y)
     }
 }
 

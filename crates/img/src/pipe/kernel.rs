@@ -1,21 +1,13 @@
+use std::marker::PhantomData;
+
 use thiserror::Error;
 
 use crate::{
+    component::kernel::Kernel,
     error::IndexResult,
     pipe::Pipe,
-    primitive::{point::Point, size::Size},
+    primitive::{margin::Margin, point::Point, size::Size},
 };
-
-pub trait Kernel {
-    type Out;
-    type In;
-
-    fn apply<P>(&self, pipe: &P, point: Point) -> IndexResult<Self::Out>
-    where
-        P: Pipe<Item = Self::In>;
-
-    fn size(&self) -> Size;
-}
 
 #[derive(Debug, Error)]
 pub enum KernelPipeCreationError {
@@ -25,13 +17,18 @@ pub enum KernelPipeCreationError {
     KernelTooBigY,
 }
 
-pub struct KernelPipe<P, K> {
+pub struct KernelPipe<P, K, T> {
     source: P,
     kernel: K,
     size: Size,
+    margin: Margin,
+    _phantom_data: PhantomData<T>,
 }
 
-impl<P: Pipe, K: Kernel> KernelPipe<P, K> {
+impl<P: Pipe, K, T> KernelPipe<P, K, T>
+where
+    K: Kernel<P::Item, T>,
+{
     pub fn new(source: P, kernel: K) -> Result<Self, KernelPipeCreationError> {
         if source.size().width() < kernel.size().width() {
             return Err(KernelPipeCreationError::KernelTooBigX);
@@ -41,11 +38,10 @@ impl<P: Pipe, K: Kernel> KernelPipe<P, K> {
             return Err(KernelPipeCreationError::KernelTooBigX);
         }
 
-        let margin_x = kernel.size().width() / 2;
-        let margin_y = kernel.size().height() / 2;
+        let margin = Margin::from_size(kernel.size());
 
-        let width = source.size().width() - 2 * margin_x;
-        let height = source.size().height() - 2 * margin_y;
+        let width = source.size().width() - margin.left() - margin.right();
+        let height = source.size().height() - margin.top() - margin.bottom();
 
         // SAFETY: width, height are not zero after earlier checks
         let size = Size::from_usize(width, height).unwrap();
@@ -54,21 +50,23 @@ impl<P: Pipe, K: Kernel> KernelPipe<P, K> {
             source,
             kernel,
             size,
+            margin,
+            _phantom_data: Default::default(),
         })
     }
 }
 
-impl<P, K: Kernel> Pipe for KernelPipe<P, K>
+impl<P: Pipe, K, T> Pipe for KernelPipe<P, K, T>
 where
-    P: Pipe<Item = K::In>,
+    K: Kernel<P::Item, T>,
 {
-    type Item = K::Out;
+    type Item = T;
 
     fn get(&self, point: Point) -> IndexResult<Self::Item> {
-        let margin_x = self.kernel.size().width() / 2;
-        let margin_y = self.kernel.size().height() / 2;
-
-        let source_point = Point::new(point.x() + margin_x, point.y() + margin_y);
+        let source_point = Point::new(
+            point.x() + self.margin.left(),
+            point.y() + self.margin.top(),
+        );
 
         self.kernel.apply(&self.source, source_point)
     }

@@ -9,6 +9,8 @@ use clap::{Command, command};
 use cmd::{crop, gamma, grayscale, resize, sepia};
 use printing::print_error;
 
+use crate::cmd::blur;
+
 fn main() {
     let command = command!()
         .subcommand_required(true)
@@ -16,7 +18,7 @@ fn main() {
         .subcommand(sepia::subcommand())
         .subcommand(resize::subcommand())
         .subcommand(crop::subcommand())
-        // .subcommand(blur::subcommand())
+        .subcommand(blur::subcommand())
         .subcommand(gamma::subcommand());
 
     if let Err(e) = execute_command(command) {
@@ -32,7 +34,7 @@ fn execute_command(command: Command) -> anyhow::Result<()> {
         Some((sepia::CMD_NAME, m)) => sepia::action(m),
         Some((resize::CMD_NAME, m)) => resize::action(m),
         Some((crop::CMD_NAME, m)) => crop::action(m),
-        // Some((blur::CMD_NAME, m)) => blur::action(m),
+        Some((blur::CMD_NAME, m)) => blur::action(m),
         Some((gamma::CMD_NAME, m)) => gamma::action(m),
         _ => unreachable!(),
     }

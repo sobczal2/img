@@ -108,3 +108,9 @@ impl WritePixelRgbaf32 for Pixel {
         self.set_a((value * 255.0).clamp(0f32, 255f32) as u8);
     }
 }
+
+impl AsRef<Pixel> for Pixel {
+    fn as_ref(&self) -> &Pixel {
+        self
+    }
+}

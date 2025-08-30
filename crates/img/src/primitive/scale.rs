@@ -19,7 +19,7 @@ pub enum ScaleCreationError {
 ///
 /// # Examples
 /// ```
-/// use img::primitives::scale::Scale;
+/// use img::primitive::scale::Scale;
 ///
 /// // Crate a scale that doubles width and triples height
 /// let scale = Scale::new(2.0, 3.0);
@@ -64,7 +64,7 @@ impl Scale {
     /// # Examples
     ///
     /// ```
-    /// use img::primitives::scale::Scale;
+    /// use img::primitive::scale::Scale;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let normal = Scale::new(1.0, 1.0)?; // Identity scale
@@ -106,7 +106,7 @@ impl Scale {
     ///
     /// # Examples
     /// ```
-    /// use img::primitives::scale::Scale;
+    /// use img::primitive::scale::Scale;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let identity = Scale::new(1.0, 1.0)?;
@@ -137,7 +137,7 @@ impl Scale {
     /// # Examples
     ///
     /// ```
-    /// use img::primitives::{size::Size, scale::Scale};
+    /// use img::primitive::{size::Size, scale::Scale};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let identity = Scale::new(1.0, 1.0)?;
@@ -171,7 +171,7 @@ impl Scale {
     /// # Examples
     ///
     /// ```
-    /// use img::primitives::{point::Point, scale::Scale};
+    /// use img::primitive::{point::Point, scale::Scale};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let identity = Scale::new(1.0, 1.0)?;
@@ -214,7 +214,7 @@ impl PartialOrd for Scale {
     ///
     /// # Examples
     /// ```
-    /// use img::primitives::scale::Scale;
+    /// use img::primitive::scale::Scale;
     /// use std::cmp::Ordering;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// assert_eq!(Scale::new(10.0, 10.0)?.partial_cmp(&Scale::new(10.0, 10.0)?), Some(Ordering::Equal));

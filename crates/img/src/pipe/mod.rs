@@ -1,8 +1,10 @@
 use crate::{
+    component::kernel::Kernel,
     error::IndexResult,
     pipe::{
         cloned::ClonedPipe,
         iter::{Elements, Rows},
+        kernel::{KernelPipe, KernelPipeCreationError},
         map::MapPipe,
         remap::RemapPipe,
     },
@@ -59,6 +61,14 @@ pub trait Pipe {
         Self::Item: Clone + 'a,
     {
         ClonedPipe::new(self)
+    }
+
+    fn kernel<K, T>(self, kernel: K) -> Result<KernelPipe<Self, K, T>, KernelPipeCreationError>
+    where
+        Self: Sized,
+        K: Kernel<Self::Item, T>,
+    {
+        KernelPipe::new(self, kernel)
     }
 }
 

@@ -1,13 +1,13 @@
 use crate::{
     image::Image,
-    pipe::{FromPipe, IntoPipe, Pipe},
+    pipe::{FromPipe, Pipe},
     pixel::{Pixel, ReadPixelRgbaf32, WritePixelRgbaf32},
 };
 
 pub const CMD_NAME: &str = "sepia";
 
 pub fn gamma_correction(image: &Image, gamma: f32) -> Image {
-    let pipe = image.into_pipe().map(|px| map_px(px, gamma));
+    let pipe = image.pipe().map(|px| map_px(px, gamma));
     Image::from_pipe(pipe)
 }
 

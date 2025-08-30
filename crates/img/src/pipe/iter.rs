@@ -1,23 +1,22 @@
-use std::rc::Rc;
-
 use crate::{pipe::Pipe, primitive::point::Point};
 
-pub struct Rows<P> {
-    pipe: Rc<P>,
+#[derive(Clone)]
+pub struct Rows<'a, P> {
+    pipe: &'a P,
     current: usize,
 }
 
-impl<P> Rows<P> {
-    pub fn new(pipe: P) -> Self {
-        Self {
-            pipe: Rc::new(pipe),
-            current: 0,
-        }
+impl<'a, P> Rows<'a, P> {
+    pub fn new(pipe: &'a P) -> Self {
+        Self { pipe, current: 0 }
     }
 }
 
-impl<P: Pipe> Iterator for Rows<P> {
-    type Item = RowElements<P>;
+impl<'a, P> Iterator for Rows<'a, P>
+where
+    P: Pipe,
+{
+    type Item = RowElements<'a, P>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.current == self.pipe.size().height() {
@@ -26,17 +25,18 @@ impl<P: Pipe> Iterator for Rows<P> {
 
         self.current += 1;
 
-        Some(RowElements::new(self.pipe.clone(), self.current - 1))
+        Some(RowElements::new(self.pipe, self.current - 1))
     }
 }
 
-pub struct RowElements<P> {
-    pipe: Rc<P>,
+#[derive(Clone)]
+pub struct RowElements<'a, P> {
+    pipe: &'a P,
     current: Point,
 }
 
-impl<P> RowElements<P> {
-    fn new(pipe: Rc<P>, row: usize) -> Self {
+impl<'a, P> RowElements<'a, P> {
+    fn new(pipe: &'a P, row: usize) -> Self {
         Self {
             pipe,
             current: Point::new(0, row),
@@ -44,7 +44,10 @@ impl<P> RowElements<P> {
     }
 }
 
-impl<P: Pipe> Iterator for RowElements<P> {
+impl<'a, P: Pipe> Iterator for RowElements<'a, P>
+where
+    P: Pipe,
+{
     type Item = P::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -62,18 +65,22 @@ impl<P: Pipe> Iterator for RowElements<P> {
     }
 }
 
-pub struct Elements<P> {
-    pipe: P,
+#[derive(Clone)]
+pub struct Elements<'a, P> {
+    pipe: &'a P,
     current: usize,
 }
 
-impl<P> Elements<P> {
-    pub fn new(pipe: P) -> Self {
+impl<'a, P> Elements<'a, P> {
+    pub fn new(pipe: &'a P) -> Self {
         Self { pipe, current: 0 }
     }
 }
 
-impl<P: Pipe> Iterator for Elements<P> {
+impl<'a, P: Pipe> Iterator for Elements<'a, P>
+where
+    P: Pipe,
+{
     type Item = P::Item;
 
     fn next(&mut self) -> Option<Self::Item> {

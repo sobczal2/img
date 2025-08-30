@@ -3,7 +3,7 @@ use thiserror::Error;
 use crate::{
     component::kernel::gaussian::GaussianKernel,
     image::Image,
-    pipe::{FromPipe, IntoPipe, Pipe},
+    pipe::{FromPipe, Pipe},
     primitive::size::Size,
 };
 
@@ -25,7 +25,7 @@ pub fn gaussian_blur(image: &Image, radius: usize, sigma: f32) -> Result<Image> 
     validate(image, radius, sigma)?;
 
     let kernel = GaussianKernel::new(Size::from_radius(radius), sigma);
-    let pipe = image.into_pipe().kernel(kernel).unwrap();
+    let pipe = image.pipe().kernel(kernel).unwrap();
 
     Ok(Image::from_pipe(pipe))
 }

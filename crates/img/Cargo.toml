@@ -10,5 +10,5 @@ rayon = { workspace = true, optional = true }
 itertools.workspace = true
 
 [features]
-default = []
+default = ["parallel"]
 parallel = ["dep:rayon"]

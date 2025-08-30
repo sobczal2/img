@@ -2,11 +2,7 @@ use thiserror::Error;
 
 use crate::{
     error::IndexResult,
-    pipe::{
-        FromPipe, IntoPipe, Pipe,
-        image::ImagePipe,
-        iter::{Elements, Rows},
-    },
+    pipe::{FromPipe, FromPipePar, Pipe, image::ImagePipe},
     pixel::Pixel,
     primitive::{point::Point, size::Size},
 };
@@ -85,14 +81,6 @@ impl Image {
         &mut self.pixels[index]
     }
 
-    pub fn rows(&self) -> Rows<ImagePipe<'_>> {
-        Rows::new(self.into_pipe())
-    }
-
-    pub fn elements(&self) -> Elements<ImagePipe<'_>> {
-        Elements::new(self.into_pipe())
-    }
-
     pub fn buffer(&self) -> Box<[u8]> {
         self.pixels
             .iter()
@@ -100,31 +88,51 @@ impl Image {
             .cloned()
             .collect()
     }
-}
 
-impl<'a> IntoPipe for &'a Image {
-    type Item = &'a Pixel;
-
-    type IntoPipe = ImagePipe<'a>;
-
-    fn into_pipe(self) -> Self::IntoPipe {
+    pub fn pipe(&self) -> ImagePipe<'_> {
         ImagePipe::new(self)
     }
 }
 
-impl FromPipe<Pixel> for Image {
+impl<T: Into<Pixel>> FromPipe<T> for Image {
     fn from_pipe<P>(pipe: P) -> Self
     where
-        P: IntoPipe<Item = Pixel>,
+        P: Pipe<Item = T>,
     {
-        let pipe = pipe.into_pipe();
         let mut image = Image::empty(pipe.size());
 
         image
             .pixels
             .iter_mut()
             .zip(pipe.elements())
-            .for_each(|(target, source)| *target = source);
+            .for_each(|(target, source)| *target = source.into());
+        image
+    }
+}
+
+#[cfg(feature = "parallel")]
+impl<T: Into<Pixel> + Send> FromPipePar<T> for Image {
+    fn from_pipe_par<P>(pipe: P) -> Self
+    where
+        P: Pipe<Item = T> + Send + Sync,
+        P::Item: Send,
+    {
+        use rayon::iter::{ParallelBridge, ParallelIterator};
+
+        let mut image = Image::empty(pipe.size());
+        pipe.elements().par_bridge();
+
+        image
+            .pixels
+            .chunks_mut(image.size().width())
+            .zip(pipe.rows())
+            .par_bridge()
+            .for_each(|(chunk, row)| {
+                chunk
+                    .iter_mut()
+                    .zip(row)
+                    .for_each(|(target, source)| *target = source.into());
+            });
         image
     }
 }

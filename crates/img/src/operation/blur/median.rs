@@ -39,7 +39,7 @@ pub fn median_blur(image: &Image, radius: usize) -> Result<Image> {
     Ok(new_image)
 }
 
-#[cfg(feature = "parallel")]
+#[cfg(false)]
 pub fn median_blur_par(image: &Image, radius: usize) -> Result<Image> {
     validate(image, radius)?;
 

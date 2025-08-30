@@ -4,7 +4,7 @@ use thiserror::Error;
 
 use crate::{
     image::Image,
-    pipe::{FromPipe, IntoPipe, Pipe},
+    pipe::{FromPipe, Pipe},
     primitive::{point::Point, size::Size},
 };
 
@@ -24,7 +24,7 @@ pub fn crop(image: &Image, size: Size, offset: (usize, usize)) -> Result<Image> 
     validate(image, size, offset)?;
 
     let pipe = image
-        .into_pipe()
+        .pipe()
         .remap(
             |pipe, point| {
                 pipe.get(Point::new(point.x() + offset.0, point.y() + offset.1))

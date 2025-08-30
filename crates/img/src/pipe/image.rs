@@ -6,6 +6,7 @@ use crate::{
     primitive::{point::Point, size::Size},
 };
 
+#[derive(Clone)]
 pub struct ImagePipe<'a>(&'a Image);
 
 impl<'a> ImagePipe<'a> {

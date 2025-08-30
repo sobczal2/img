@@ -1,7 +1,4 @@
-use std::{
-    borrow::Borrow,
-    f32::consts::{E, PI},
-};
+use std::f32::consts::{E, PI};
 
 use crate::{
     component::kernel::Kernel,

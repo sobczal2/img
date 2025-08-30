@@ -25,14 +25,14 @@ pub trait Pipe {
 
     fn size(&self) -> Size;
 
-    fn rows(self) -> Rows<Self>
+    fn rows(&self) -> Rows<'_, Self>
     where
         Self: Sized,
     {
         Rows::new(self)
     }
 
-    fn elements(self) -> Elements<Self>
+    fn elements(&self) -> Elements<'_, Self>
     where
         Self: Sized,
     {
@@ -72,24 +72,16 @@ pub trait Pipe {
     }
 }
 
-pub trait IntoPipe {
-    type Item;
-    type IntoPipe: Pipe<Item = Self::Item>;
-
-    fn into_pipe(self) -> Self::IntoPipe;
-}
-
-impl<P: Pipe> IntoPipe for P {
-    type Item = P::Item;
-    type IntoPipe = P;
-
-    fn into_pipe(self) -> Self::IntoPipe {
-        self
-    }
-}
-
 pub trait FromPipe<T>: Sized {
     fn from_pipe<P>(pipe: P) -> Self
     where
-        P: IntoPipe<Item = T>;
+        P: Pipe<Item = T>;
+}
+
+#[cfg(feature = "parallel")]
+pub trait FromPipePar<T>: Sized {
+    fn from_pipe_par<P>(pipe: P) -> Self
+    where
+        P: Pipe<Item = T> + Send + Sync,
+        P::Item: Send;
 }

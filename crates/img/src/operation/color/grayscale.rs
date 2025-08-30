@@ -1,12 +1,12 @@
 use crate::{
     image::Image,
-    pipe::{FromPipe, IntoPipe, Pipe},
+    pipe::{FromPipe, Pipe},
     pixel::Pixel,
 };
 
 /// Transform image to grayscale in place
 pub fn grayscale(image: &Image) -> Image {
-    let view = image.into_pipe().map(map_px);
+    let view = image.pipe().map(map_px);
     Image::from_pipe(view)
 }
 

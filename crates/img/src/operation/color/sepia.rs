@@ -1,11 +1,11 @@
 use crate::{
     image::Image,
-    pipe::{FromPipe, IntoPipe, Pipe},
+    pipe::{FromPipe, Pipe},
     pixel::Pixel,
 };
 
 pub fn sepia(image: &Image) -> Image {
-    let pipe = image.into_pipe().map(map_px);
+    let pipe = image.pipe().map(map_px);
     Image::from_pipe(pipe)
 }
 

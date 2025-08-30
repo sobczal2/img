@@ -48,8 +48,8 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn apply_mean(image: &Image, matches: &ArgMatches) -> anyhow::Result<Image> {
-    let target_radius = matches.get_one::<usize>("radius").unwrap();
+fn apply_mean(_image: &Image, matches: &ArgMatches) -> anyhow::Result<Image> {
+    let _target_radius = matches.get_one::<usize>("radius").unwrap();
     // Ok(mean_blur(image, *target_radius)?)
     todo!()
 }
@@ -60,8 +60,8 @@ fn apply_gaussian(image: &Image, matches: &ArgMatches) -> anyhow::Result<Image> 
     Ok(gaussian_blur(image, *target_radius, *sigma)?)
 }
 
-fn apply_median(image: &Image, matches: &ArgMatches) -> anyhow::Result<Image> {
-    let target_radius = matches.get_one::<usize>("radius").unwrap();
+fn apply_median(_image: &Image, matches: &ArgMatches) -> anyhow::Result<Image> {
+    let _target_radius = matches.get_one::<usize>("radius").unwrap();
     // Ok(median_blur(image, *target_radius)?)
     todo!()
 }

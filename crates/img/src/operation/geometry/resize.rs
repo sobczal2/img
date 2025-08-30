@@ -2,7 +2,7 @@ use thiserror::Error;
 
 use crate::{
     image::Image,
-    pipe::{FromPipe, IntoPipe, Pipe},
+    pipe::{FromPipe, Pipe},
     primitive::{scale::Scale, size::SizeCreationError},
 };
 
@@ -19,7 +19,7 @@ pub fn resize(image: &Image, scale: Scale) -> Result<Image> {
     let inverse_scale = scale.inverse();
 
     let pipe = image
-        .into_pipe()
+        .pipe()
         .remap(
             |pipe, point| {
                 pipe.get(inverse_scale.translate(point))

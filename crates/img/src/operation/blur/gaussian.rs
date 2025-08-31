@@ -15,13 +15,8 @@ use crate::{
         Pixel,
         PixelFlags,
     },
-    primitive::
-        size::Size
-    ,
+    primitive::size::Size,
 };
-
-#[cfg(feature = "parallel")]
-use crate::pipe::FromPipePar;
 
 /// Error returned by mean_blur function
 #[derive(Debug, Error)]
@@ -67,6 +62,8 @@ pub fn gaussian_blur_par(
     sigma: f32,
     flags: PixelFlags,
 ) -> CreationResult<Image> {
+    use crate::pipe::FromPipePar;
+
     let pipe = gaussian_blur_pipe(image.pipe(), radius, sigma, flags)?;
     Ok(Image::from_pipe_par(pipe))
 }

@@ -2,8 +2,14 @@ use thiserror::Error;
 
 use crate::{
     image::Image,
-    pipe::{FromPipe, Pipe},
-    primitive::{scale::Scale, size},
+    pipe::{
+        FromPipe,
+        Pipe,
+    },
+    primitive::{
+        scale::Scale,
+        size,
+    },
 };
 
 #[derive(Debug, Error)]
@@ -22,8 +28,7 @@ pub fn resize(image: &Image, scale: Scale) -> Result<Image> {
         .pipe()
         .remap(
             |pipe, point| {
-                pipe.get(inverse_scale.translate(point))
-                    .expect("out of bounds in resize")
+                pipe.get(inverse_scale.translate(point)).expect("out of bounds in resize")
             },
             size,
         )

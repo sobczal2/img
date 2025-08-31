@@ -3,7 +3,10 @@ use crate::{
     image::Image,
     pipe::Pipe,
     pixel::Pixel,
-    primitive::{point::Point, size::Size},
+    primitive::{
+        point::Point,
+        size::Size,
+    },
 };
 
 #[derive(Clone)]

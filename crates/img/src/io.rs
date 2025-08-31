@@ -1,7 +1,13 @@
-use png::{BitDepth, ColorType};
+use png::{
+    BitDepth,
+    ColorType,
+};
 
 use crate::{
-    error::{IoError, IoResult},
+    error::{
+        IoError,
+        IoResult,
+    },
     image::Image,
     pixel::Pixel,
     primitive::size::Size,
@@ -74,15 +80,11 @@ impl ReadPng for Image {
         let info = reader.next_frame(&mut buf)?;
 
         if info.bit_depth != BitDepth::Eight {
-            return Err(IoError::Unsupported(
-                "bit depth different than 8".to_owned(),
-            ));
+            return Err(IoError::Unsupported("bit depth different than 8".to_owned()));
         }
 
         if info.color_type == ColorType::Indexed {
-            return Err(IoError::Unsupported(
-                "indexed color type unsupported".to_owned(),
-            ));
+            return Err(IoError::Unsupported("indexed color type unsupported".to_owned()));
         }
 
         let bytes = &buf[..info.buffer_size()];
@@ -92,9 +94,8 @@ impl ReadPng for Image {
 
         let mut pixels = vec![Pixel::zero(); width * height].into_boxed_slice();
 
-        for (target_px, source_px) in pixels
-            .iter_mut()
-            .zip(bytes.chunks(pixel_size_by_color_type(info.color_type)))
+        for (target_px, source_px) in
+            pixels.iter_mut().zip(bytes.chunks(pixel_size_by_color_type(info.color_type)))
         {
             target_px.set_r(get_red(source_px, info.color_type));
             target_px.set_g(get_green(source_px, info.color_type));
@@ -131,7 +132,10 @@ impl WritePng for Image {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::{image::Image, primitive::point::Point};
+    use crate::{
+        image::Image,
+        primitive::point::Point,
+    };
 
     #[test]
     fn read_png_success() {
@@ -142,9 +146,7 @@ mod test {
     #[test]
     fn write_png_success() {
         let data = Vec::new();
-        Image::empty(Size::from_usize(10, 10).unwrap())
-            .write_png(data)
-            .unwrap();
+        Image::empty(Size::from_usize(10, 10).unwrap()).write_png(data).unwrap();
     }
 
     #[test]
@@ -160,21 +162,9 @@ mod test {
 
         let image2 = Image::read_png(&data[..]).unwrap();
 
-        assert_eq!(
-            image.pixel(Point::new(0, 0)).unwrap(),
-            image2.pixel(Point::new(0, 0)).unwrap()
-        );
-        assert_eq!(
-            image.pixel(Point::new(0, 1)).unwrap(),
-            image2.pixel(Point::new(0, 1)).unwrap()
-        );
-        assert_eq!(
-            image.pixel(Point::new(1, 0)).unwrap(),
-            image2.pixel(Point::new(1, 0)).unwrap()
-        );
-        assert_eq!(
-            image.pixel(Point::new(1, 1)).unwrap(),
-            image2.pixel(Point::new(1, 1)).unwrap()
-        );
+        assert_eq!(image.pixel(Point::new(0, 0)).unwrap(), image2.pixel(Point::new(0, 0)).unwrap());
+        assert_eq!(image.pixel(Point::new(0, 1)).unwrap(), image2.pixel(Point::new(0, 1)).unwrap());
+        assert_eq!(image.pixel(Point::new(1, 0)).unwrap(), image2.pixel(Point::new(1, 0)).unwrap());
+        assert_eq!(image.pixel(Point::new(1, 1)).unwrap(), image2.pixel(Point::new(1, 1)).unwrap());
     }
 }

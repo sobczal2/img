@@ -1,4 +1,7 @@
-use crate::{pipe::Pipe, primitive::point::Point};
+use crate::{
+    pipe::Pipe,
+    primitive::point::Point,
+};
 
 #[derive(Clone)]
 pub struct Rows<'a, P> {
@@ -37,10 +40,7 @@ pub struct RowElements<'a, P> {
 
 impl<'a, P> RowElements<'a, P> {
     fn new(pipe: &'a P, row: usize) -> Self {
-        Self {
-            pipe,
-            current: Point::new(0, row),
-        }
+        Self { pipe, current: Point::new(0, row) }
     }
 }
 
@@ -55,10 +55,7 @@ where
             return None;
         }
 
-        let value = self
-            .pipe
-            .get(self.current)
-            .expect("bug in pipe implementation");
+        let value = self.pipe.get(self.current).expect("bug in pipe implementation");
         self.current = Point::new(self.current.x() + 1, self.current.y());
 
         Some(value)

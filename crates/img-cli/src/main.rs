@@ -5,8 +5,17 @@ mod printing;
 
 use std::process::exit;
 
-use clap::{Command, command};
-use cmd::{crop, gamma, grayscale, resize, sepia};
+use clap::{
+    Command,
+    command,
+};
+use cmd::{
+    crop,
+    gamma,
+    grayscale,
+    resize,
+    sepia,
+};
 use printing::print_error;
 
 use crate::cmd::blur;

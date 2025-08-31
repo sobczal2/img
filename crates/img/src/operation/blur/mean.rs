@@ -1,29 +1,80 @@
 use thiserror::Error;
 
-use crate::{component::kernel::mean::MeanKernel, image::Image, pipe::{FromPipe, Pipe}, primitive::size::Size};
+use crate::{
+    component::kernel::{
+        self,
+        mean::MeanKernel,
+    },
+    error::IndexResult,
+    image::Image,
+    pipe::{
+        self,
+        FromPipe,
+        Pipe,
+        kernel::KernelPipe,
+    },
+    pixel::{
+        Pixel,
+        PixelFlags,
+    },
+    primitive::{
+        point::Point,
+        size::Size,
+    },
+};
 
-/// Error returned by mean_blur function
 #[derive(Debug, Error)]
-pub enum Error {
-    #[error("radius too big for given image")]
-    RadiusTooBig,
+pub enum CreationError {
+    #[error("failed to create mean kernel: {0}")]
+    KernelCreation(#[from] kernel::mean::CreationError),
+    #[error("failed to create kernel pipe: {0}")]
+    KernelPipeCreation(#[from] pipe::kernel::CreationError),
 }
 
-pub type Result<T> = std::result::Result<T, Error>;
+pub type CreationResult<T> = std::result::Result<T, CreationError>;
 
-pub fn mean_blur(image: &Image, radius: usize) -> Result<Image> {
-    validate(image, radius)?;
+type Inner<S> = KernelPipe<S, MeanKernel, Pixel>;
 
-    let kernel = MeanKernel::new(Size::from_radius(radius));
-    let pipe = image.pipe().kernel(kernel).unwrap();
+pub struct MeanBlurPipe<S> {
+    inner: Inner<S>,
+}
 
+impl<S> MeanBlurPipe<S>
+where
+    S: Pipe,
+    S::Item: AsRef<Pixel>,
+{
+    pub fn new(source: S, radius: usize, flags: PixelFlags) -> CreationResult<Self> {
+        let kernel = MeanKernel::new(Size::from_radius(radius), flags)?;
+        Ok(Self { inner: source.kernel(kernel)? })
+    }
+}
+
+impl<S> Pipe for MeanBlurPipe<S>
+where
+    S: Pipe,
+    S::Item: AsRef<Pixel>,
+{
+    type Item = Pixel;
+
+    fn get(&self, point: Point) -> IndexResult<Self::Item> {
+        self.inner.get(point)
+    }
+
+    fn size(&self) -> Size {
+        self.inner.size()
+    }
+}
+
+pub fn mean_blur(image: &Image, radius: usize, flags: PixelFlags) -> CreationResult<Image> {
+    let pipe = MeanBlurPipe::new(image.pipe(), radius, flags)?;
     Ok(Image::from_pipe(pipe))
 }
 
-fn validate(image: &Image, radius: usize) -> Result<()> {
-    if image.size().width() < radius * 2 + 1 || image.size().height() < radius * 2 + 1 {
-        return Err(Error::RadiusTooBig);
-    }
+#[cfg(feature = "parallel")]
+pub fn mean_blur_par(image: &Image, radius: usize, flags: PixelFlags) -> CreationResult<Image> {
+    use crate::pipe::FromPipePar;
 
-    Ok(())
+    let pipe = MeanBlurPipe::new(image.pipe(), radius, flags)?;
+    Ok(Image::from_pipe_par(pipe))
 }

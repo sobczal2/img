@@ -1,7 +1,14 @@
 use crate::{
     image::Image,
-    pipe::{FromPipe, Pipe},
-    pixel::{Pixel, ReadPixelRgbaf32, WritePixelRgbaf32},
+    pipe::{
+        FromPipe,
+        Pipe,
+    },
+    pixel::{
+        Pixel,
+        ReadPixelRgbaf32,
+        WritePixelRgbaf32,
+    },
 };
 
 pub const CMD_NAME: &str = "sepia";

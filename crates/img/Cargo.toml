@@ -8,6 +8,7 @@ png.workspace = true
 thiserror.workspace = true
 rayon = { workspace = true, optional = true }
 itertools.workspace = true
+bitflags.workspace = true
 
 [features]
 default = ["parallel"]

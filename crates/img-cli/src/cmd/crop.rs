@@ -1,26 +1,38 @@
-use std::{path::PathBuf, str::FromStr};
+use std::{
+    path::PathBuf,
+    str::FromStr,
+};
 
-use clap::{ArgMatches, Command, arg};
+use clap::{
+    ArgMatches,
+    Command,
+    arg,
+};
 use img::operation::geometry::crop::crop;
 
 use crate::{
-    io::{read_image, write_image},
+    io::{
+        read_image,
+        write_image,
+    },
     param::size_offset::SizeOffset,
 };
 
-use super::common::{INPUT_ARG_NAME, OUTPUT_ARG_NAME, input_arg, output_arg};
+use super::common::{
+    INPUT_ARG_NAME,
+    OUTPUT_ARG_NAME,
+    input_arg,
+    output_arg,
+};
 
 pub const CMD_NAME: &str = "crop";
 
 pub fn subcommand() -> Command {
-    Command::new(CMD_NAME)
-        .arg(input_arg())
-        .arg(output_arg())
-        .arg(
-            arg!(-s --size <size_offset> "target size with offset")
-                .required(true)
-                .value_parser(SizeOffset::from_str),
-        )
+    Command::new(CMD_NAME).arg(input_arg()).arg(output_arg()).arg(
+        arg!(-s --size <size_offset> "target size with offset")
+            .required(true)
+            .value_parser(SizeOffset::from_str),
+    )
 }
 
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {

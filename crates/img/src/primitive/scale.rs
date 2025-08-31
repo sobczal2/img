@@ -4,7 +4,10 @@ use thiserror::Error;
 
 use crate::primitive::{
     point::Point,
-    size::{self, Size},
+    size::{
+        self,
+        Size,
+    },
 };
 
 #[derive(Error, Debug)]
@@ -51,10 +54,10 @@ impl Scale {
     ///
     /// # Errors
     ///
-    /// * `ScaleCreationError::ScaleXInvalid` - if `x` is not within `[Scale::MIN, Scale::MAX]`,
-    ///   is `NAN`, or is `INFINITE`
-    /// * `ScaleCreationError::ScaleYInvalid` - if `y` is not within `[Scale::MIN, Scale::MAX]`,
-    ///   is `NAN`, or is `INFINITE`
+    /// * `ScaleCreationError::ScaleXInvalid` - if `x` is not within `[Scale::MIN, Scale::MAX]`, is
+    ///   `NAN`, or is `INFINITE`
+    /// * `ScaleCreationError::ScaleYInvalid` - if `y` is not within `[Scale::MIN, Scale::MAX]`, is
+    ///   `NAN`, or is `INFINITE`
     ///
     /// # Examples
     ///
@@ -131,7 +134,10 @@ impl Scale {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{size::Size, scale::Scale};
+    /// use img::primitive::{
+    ///     scale::Scale,
+    ///     size::Size,
+    /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let identity = Scale::new(1.0, 1.0)?;
@@ -163,7 +169,10 @@ impl Scale {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{point::Point, scale::Scale};
+    /// use img::primitive::{
+    ///     point::Point,
+    ///     scale::Scale,
+    /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let identity = Scale::new(1.0, 1.0)?;
@@ -209,16 +218,25 @@ impl PartialOrd for Scale {
     /// use img::primitive::scale::Scale;
     /// use std::cmp::Ordering;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// assert_eq!(Scale::new(10.0, 10.0)?.partial_cmp(&Scale::new(10.0, 10.0)?), Some(Ordering::Equal));
+    /// assert_eq!(
+    ///     Scale::new(10.0, 10.0)?.partial_cmp(&Scale::new(10.0, 10.0)?),
+    ///     Some(Ordering::Equal)
+    /// );
     /// assert_eq!(Scale::new(10.0, 10.0)?.partial_cmp(&Scale::new(20.0, 20.0)?), Some(Ordering::Less));
     /// assert_eq!(Scale::new(10.0, 10.0)?.partial_cmp(&Scale::new(10.0, 20.0)?), Some(Ordering::Less));
     /// assert_eq!(Scale::new(10.0, 10.0)?.partial_cmp(&Scale::new(20.0, 10.0)?), Some(Ordering::Less));
-    /// assert_eq!(Scale::new(20.0, 20.0)?.partial_cmp(&Scale::new(10.0, 10.0)?),
-    /// Some(Ordering::Greater));
-    /// assert_eq!(Scale::new(20.0, 10.0)?.partial_cmp(&Scale::new(10.0, 10.0)?),
-    /// Some(Ordering::Greater));
-    /// assert_eq!(Scale::new(10.0, 20.0)?.partial_cmp(&Scale::new(10.0, 10.0)?),
-    /// Some(Ordering::Greater));
+    /// assert_eq!(
+    ///     Scale::new(20.0, 20.0)?.partial_cmp(&Scale::new(10.0, 10.0)?),
+    ///     Some(Ordering::Greater)
+    /// );
+    /// assert_eq!(
+    ///     Scale::new(20.0, 10.0)?.partial_cmp(&Scale::new(10.0, 10.0)?),
+    ///     Some(Ordering::Greater)
+    /// );
+    /// assert_eq!(
+    ///     Scale::new(10.0, 20.0)?.partial_cmp(&Scale::new(10.0, 10.0)?),
+    ///     Some(Ordering::Greater)
+    /// );
     /// assert_eq!(Scale::new(20.0, 10.0)?.partial_cmp(&Scale::new(10.0, 20.0)?), None);
     /// assert_eq!(Scale::new(10.0, 20.0)?.partial_cmp(&Scale::new(20.0, 10.0)?), None);
     /// # Ok(())

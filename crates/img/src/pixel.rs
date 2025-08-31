@@ -1,6 +1,22 @@
-#![allow(unused)]
+use bitflags::bitflags;
+
 // pixel size of an image in bytes
 pub const PIXEL_SIZE: usize = 4;
+
+bitflags! {
+    #[derive(Clone, Copy)]
+    pub struct PixelFlags: u8 {
+        const RED = 0b1000;
+        const GREEN = 0b0100;
+        const BLUE = 0b0010;
+        const ALPHA = 0b0001;
+    }
+}
+
+impl PixelFlags {
+    pub const RGBA: PixelFlags = PixelFlags::all();
+    pub const RGB: PixelFlags = PixelFlags::from_bits_truncate(0b1110);
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Pixel([u8; PIXEL_SIZE]);
@@ -57,6 +73,24 @@ impl Pixel {
     pub fn buffer(&self) -> &[u8] {
         &self.0
     }
+
+    pub fn set_with_flags(&mut self, r: u8, g: u8, b: u8, a: u8, flags: PixelFlags) {
+        if flags.contains(PixelFlags::RED) {
+            self.set_r(r);
+        }
+
+        if flags.contains(PixelFlags::GREEN) {
+            self.set_g(g);
+        }
+
+        if flags.contains(PixelFlags::BLUE) {
+            self.set_b(b);
+        }
+
+        if flags.contains(PixelFlags::ALPHA) {
+            self.set_a(a);
+        }
+    }
 }
 
 pub trait ReadPixelRgbaf32 {
@@ -89,6 +123,7 @@ pub trait WritePixelRgbaf32 {
     fn set_g_f32(&mut self, value: f32);
     fn set_b_f32(&mut self, value: f32);
     fn set_a_f32(&mut self, value: f32);
+    fn set_with_flags_f32(&mut self, r: f32, g: f32, b: f32, a: f32, flags: PixelFlags);
 }
 
 impl WritePixelRgbaf32 for Pixel {
@@ -106,6 +141,24 @@ impl WritePixelRgbaf32 for Pixel {
 
     fn set_a_f32(&mut self, value: f32) {
         self.set_a((value * 255.0).clamp(0f32, 255f32) as u8);
+    }
+
+    fn set_with_flags_f32(&mut self, r: f32, g: f32, b: f32, a: f32, flags: PixelFlags) {
+        if flags.contains(PixelFlags::RED) {
+            self.set_r_f32(r);
+        }
+
+        if flags.contains(PixelFlags::GREEN) {
+            self.set_g_f32(g);
+        }
+
+        if flags.contains(PixelFlags::BLUE) {
+            self.set_b_f32(b);
+        }
+
+        if flags.contains(PixelFlags::ALPHA) {
+            self.set_a_f32(a);
+        }
     }
 }
 

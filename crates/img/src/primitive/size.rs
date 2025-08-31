@@ -1,4 +1,7 @@
-use std::{cmp::Ordering, num::NonZeroUsize};
+use std::{
+    cmp::Ordering,
+    num::NonZeroUsize,
+};
 use thiserror::Error;
 
 use crate::primitive::point::Point;
@@ -82,9 +85,7 @@ impl Size {
     /// ```
     pub fn from_usize(width: usize, height: usize) -> CreationResult {
         let width: NonZeroUsize = width.try_into().map_err(|_| CreationError::WidthZero)?;
-        let height: NonZeroUsize = height
-            .try_into()
-            .map_err(|_| CreationError::HeightZero)?;
+        let height: NonZeroUsize = height.try_into().map_err(|_| CreationError::HeightZero)?;
 
         Ok(Size(width, height))
     }
@@ -141,7 +142,10 @@ impl Size {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{size::Size, point::Point};
+    /// use img::primitive::{
+    ///     point::Point,
+    ///     size::Size,
+    /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let smallest = Size::from_usize(1, 1)?;
@@ -165,7 +169,10 @@ impl Size {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{size::Size, point::Point};
+    /// use img::primitive::{
+    ///     point::Point,
+    ///     size::Size,
+    /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let small = Size::from_usize(1, 1)?;
@@ -205,16 +212,34 @@ impl PartialOrd for Size {
     /// use img::primitive::size::Size;
     /// use std::cmp::Ordering;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// assert_eq!(Size::from_usize(10, 10)?.partial_cmp(&Size::from_usize(10, 10)?), Some(Ordering::Equal));
-    /// assert_eq!(Size::from_usize(10, 10)?.partial_cmp(&Size::from_usize(20, 20)?), Some(Ordering::Less));
-    /// assert_eq!(Size::from_usize(10, 10)?.partial_cmp(&Size::from_usize(10, 20)?), Some(Ordering::Less));
-    /// assert_eq!(Size::from_usize(10, 10)?.partial_cmp(&Size::from_usize(20, 10)?), Some(Ordering::Less));
-    /// assert_eq!(Size::from_usize(20, 20)?.partial_cmp(&Size::from_usize(10, 10)?),
-    /// Some(Ordering::Greater));
-    /// assert_eq!(Size::from_usize(20, 10)?.partial_cmp(&Size::from_usize(10, 10)?),
-    /// Some(Ordering::Greater));
-    /// assert_eq!(Size::from_usize(10, 20)?.partial_cmp(&Size::from_usize(10, 10)?),
-    /// Some(Ordering::Greater));
+    /// assert_eq!(
+    ///     Size::from_usize(10, 10)?.partial_cmp(&Size::from_usize(10, 10)?),
+    ///     Some(Ordering::Equal)
+    /// );
+    /// assert_eq!(
+    ///     Size::from_usize(10, 10)?.partial_cmp(&Size::from_usize(20, 20)?),
+    ///     Some(Ordering::Less)
+    /// );
+    /// assert_eq!(
+    ///     Size::from_usize(10, 10)?.partial_cmp(&Size::from_usize(10, 20)?),
+    ///     Some(Ordering::Less)
+    /// );
+    /// assert_eq!(
+    ///     Size::from_usize(10, 10)?.partial_cmp(&Size::from_usize(20, 10)?),
+    ///     Some(Ordering::Less)
+    /// );
+    /// assert_eq!(
+    ///     Size::from_usize(20, 20)?.partial_cmp(&Size::from_usize(10, 10)?),
+    ///     Some(Ordering::Greater)
+    /// );
+    /// assert_eq!(
+    ///     Size::from_usize(20, 10)?.partial_cmp(&Size::from_usize(10, 10)?),
+    ///     Some(Ordering::Greater)
+    /// );
+    /// assert_eq!(
+    ///     Size::from_usize(10, 20)?.partial_cmp(&Size::from_usize(10, 10)?),
+    ///     Some(Ordering::Greater)
+    /// );
     /// assert_eq!(Size::from_usize(20, 10)?.partial_cmp(&Size::from_usize(10, 20)?), None);
     /// assert_eq!(Size::from_usize(10, 20)?.partial_cmp(&Size::from_usize(20, 10)?), None);
     /// # Ok(())

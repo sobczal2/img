@@ -1,4 +1,8 @@
-use crate::primitive::{margin::Margin, point::Point, size::Size};
+use crate::primitive::{
+    margin::Margin,
+    point::Point,
+    size::Size,
+};
 
 pub struct Area {
     size: Size,

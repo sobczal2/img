@@ -1,7 +1,9 @@
 use std::str::FromStr;
 
-use anyhow::anyhow;
-use anyhow::bail;
+use anyhow::{
+    anyhow,
+    bail,
+};
 
 use super::size::Size;
 
@@ -20,12 +22,8 @@ impl FromStr for SizeOffset {
             bail!("size with offset must be in [width]x[height]+[offset_x]x[offset_y] format");
         }
 
-        let size = parts[0]
-            .parse::<Size>()
-            .map_err(|_| anyhow!("invalid size"))?;
-        let offset = parts[1]
-            .parse::<Size>()
-            .map_err(|_| anyhow!("invalid offset"))?;
+        let size = parts[0].parse::<Size>().map_err(|_| anyhow!("invalid size"))?;
+        let offset = parts[1].parse::<Size>().map_err(|_| anyhow!("invalid offset"))?;
 
         Ok(SizeOffset { size, offset })
     }

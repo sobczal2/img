@@ -1,43 +1,92 @@
 use thiserror::Error;
 
 use crate::{
-    component::kernel::gaussian::GaussianKernel,
+    component::kernel::{
+        self,
+        gaussian::GaussianKernel,
+    },
+    error::IndexResult,
     image::Image,
-    pipe::{FromPipe, Pipe},
-    primitive::size::Size,
+    pipe::{
+        self,
+        FromPipe,
+        Pipe,
+        kernel::KernelPipe,
+    },
+    pixel::{
+        Pixel,
+        PixelFlags,
+    },
+    primitive::{
+        point::Point,
+        size::Size,
+    },
 };
+
+#[cfg(feature = "parallel")]
+use crate::pipe::FromPipePar;
 
 /// Error returned by mean_blur function
 #[derive(Debug, Error)]
-pub enum Error {
-    #[error("radius too big for given image")]
-    RadiusTooBig,
-    #[error("invalid sigma - has to be positive")]
-    InvalidSigma,
+pub enum CreationError {
+    #[error("failed to create gaussian kernel: {0}")]
+    KernelCreation(#[from] kernel::gaussian::CreationError),
+    #[error("failed to create kernel pipe: {0}")]
+    KernelPipeCreation(#[from] pipe::kernel::CreationError),
 }
 
-pub type Result<T> = std::result::Result<T, Error>;
+pub type CreationResult<T> = std::result::Result<T, CreationError>;
 
-/// perform mean blur on an image not in place
-/// this reduces size of an image by radius * 2 times
-/// so to receive image of an original size you should pad it
-pub fn gaussian_blur(image: &Image, radius: usize, sigma: f32) -> Result<Image> {
-    validate(image, radius, sigma)?;
+type Inner<S> = KernelPipe<S, GaussianKernel, Pixel>;
 
-    let kernel = GaussianKernel::new(Size::from_radius(radius), sigma);
-    let pipe = image.pipe().kernel(kernel).unwrap();
+pub struct GaussianBlurPipe<S> {
+    inner: Inner<S>,
+}
 
+impl<S> GaussianBlurPipe<S>
+where
+    S: Pipe,
+    S::Item: AsRef<Pixel>,
+{
+    pub fn new(source: S, radius: usize, sigma: f32, flags: PixelFlags) -> CreationResult<Self> {
+        let kernel = GaussianKernel::new(Size::from_radius(radius), sigma, flags)?;
+        Ok(Self { inner: source.kernel(kernel)? })
+    }
+}
+
+impl<S> Pipe for GaussianBlurPipe<S>
+where
+    S: Pipe,
+    S::Item: AsRef<Pixel>,
+{
+    type Item = Pixel;
+
+    fn get(&self, point: Point) -> IndexResult<Self::Item> {
+        self.inner.get(point)
+    }
+
+    fn size(&self) -> Size {
+        self.inner.size()
+    }
+}
+
+pub fn gaussian_blur(
+    image: &Image,
+    radius: usize,
+    sigma: f32,
+    flags: PixelFlags,
+) -> CreationResult<Image> {
+    let pipe = GaussianBlurPipe::new(image.pipe(), radius, sigma, flags)?;
     Ok(Image::from_pipe(pipe))
 }
 
-fn validate(image: &Image, radius: usize, sigma: f32) -> Result<()> {
-    if image.size().width() < radius * 2 + 1 || image.size().height() < radius * 2 + 1 {
-        return Err(Error::RadiusTooBig);
-    }
-
-    if sigma <= 0f32 {
-        return Err(Error::InvalidSigma);
-    }
-
-    Ok(())
+#[cfg(feature = "parallel")]
+pub fn gaussian_blur_par(
+    image: &Image,
+    radius: usize,
+    sigma: f32,
+    flags: PixelFlags,
+) -> CreationResult<Image> {
+    let pipe = GaussianBlurPipe::new(image.pipe(), radius, sigma, flags)?;
+    Ok(Image::from_pipe_par(pipe))
 }

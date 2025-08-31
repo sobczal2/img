@@ -3,12 +3,18 @@ use crate::{
     error::IndexResult,
     pipe::{
         cloned::ClonedPipe,
-        iter::{Elements, Rows},
-        kernel::{KernelPipe, CreationError},
+        iter::{
+            Elements,
+            Rows,
+        },
+        kernel::KernelPipe,
         map::MapPipe,
         remap::RemapPipe,
     },
-    primitive::{point::Point, size::Size},
+    primitive::{
+        point::Point,
+        size::Size,
+    },
 };
 
 pub mod cloned;
@@ -40,9 +46,14 @@ pub trait Pipe {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{point::Point, size::Size};
-    /// use img::image::Image;
-    /// use img::pipe::Pipe;
+    /// use img::{
+    ///     image::Image,
+    ///     pipe::Pipe,
+    ///     primitive::{
+    ///         point::Point,
+    ///         size::Size,
+    ///     },
+    /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let image = Image::empty(Size::from_usize(10, 20)?);
@@ -66,12 +77,17 @@ pub trait Pipe {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{point::Point, size::Size};
-    /// use img::image::Image;
-    /// use img::pipe::Pipe;
+    /// use img::{
+    ///     image::Image,
+    ///     pipe::Pipe,
+    ///     primitive::{
+    ///         point::Point,
+    ///         size::Size,
+    ///     },
+    /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
-    /// let size = Size::from_usize(10,20)?;
+    /// let size = Size::from_usize(10, 20)?;
     /// let image = Image::empty(size);
     ///
     /// let pipe = image.pipe();
@@ -129,7 +145,7 @@ pub trait Pipe {
         ClonedPipe::new(self)
     }
 
-    fn kernel<K, T>(self, kernel: K) -> Result<KernelPipe<Self, K, T>, CreationError>
+    fn kernel<K, T>(self, kernel: K) -> Result<KernelPipe<Self, K, T>, kernel::CreationError>
     where
         Self: Sized,
         K: Kernel<Self::Item, T>,

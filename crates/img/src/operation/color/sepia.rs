@@ -1,6 +1,9 @@
 use crate::{
     image::Image,
-    pipe::{FromPipe, Pipe},
+    pipe::{
+        FromPipe,
+        Pipe,
+    },
     pixel::Pixel,
 };
 

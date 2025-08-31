@@ -1,11 +1,22 @@
 use std::path::PathBuf;
 
-use clap::{ArgMatches, Command};
+use clap::{
+    ArgMatches,
+    Command,
+};
 use img::operation::color::grayscale::grayscale;
 
-use crate::io::{read_image, write_image};
+use crate::io::{
+    read_image,
+    write_image,
+};
 
-use super::common::{INPUT_ARG_NAME, OUTPUT_ARG_NAME, input_arg, output_arg};
+use super::common::{
+    INPUT_ARG_NAME,
+    OUTPUT_ARG_NAME,
+    input_arg,
+    output_arg,
+};
 
 pub const CMD_NAME: &str = "grayscale";
 

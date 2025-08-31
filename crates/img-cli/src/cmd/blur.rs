@@ -1,11 +1,32 @@
 use std::path::PathBuf;
 
-use clap::{ArgMatches, Command, ValueEnum, arg, value_parser};
-use img::{image::Image, operation::blur::{gaussian::gaussian_blur, mean::mean_blur}};
+use clap::{
+    ArgMatches,
+    Command,
+    ValueEnum,
+    arg,
+    value_parser,
+};
+use img::{
+    image::Image,
+    operation::blur::{
+        gaussian::gaussian_blur,
+        mean::mean_blur,
+    },
+    pixel::PixelFlags,
+};
 
-use crate::io::{read_image, write_image};
+use crate::io::{
+    read_image,
+    write_image,
+};
 
-use super::common::{INPUT_ARG_NAME, OUTPUT_ARG_NAME, input_arg, output_arg};
+use super::common::{
+    INPUT_ARG_NAME,
+    OUTPUT_ARG_NAME,
+    input_arg,
+    output_arg,
+};
 
 pub const CMD_NAME: &str = "blur";
 
@@ -50,13 +71,13 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
 
 fn apply_mean(image: &Image, matches: &ArgMatches) -> anyhow::Result<Image> {
     let target_radius = matches.get_one::<usize>("radius").unwrap();
-    Ok(mean_blur(image, *target_radius)?)
+    Ok(mean_blur(image, *target_radius, PixelFlags::RGB)?)
 }
 
 fn apply_gaussian(image: &Image, matches: &ArgMatches) -> anyhow::Result<Image> {
     let target_radius = matches.get_one::<usize>("radius").unwrap();
     let sigma = matches.get_one::<f32>("sigma").unwrap();
-    Ok(gaussian_blur(image, *target_radius, *sigma)?)
+    Ok(gaussian_blur(image, *target_radius, *sigma, PixelFlags::RGB)?)
 }
 
 fn apply_median(_image: &Image, matches: &ArgMatches) -> anyhow::Result<Image> {

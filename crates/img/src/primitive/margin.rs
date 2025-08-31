@@ -10,12 +10,7 @@ pub struct Margin {
 
 impl Margin {
     pub fn new(top: usize, right: usize, bottom: usize, left: usize) -> Self {
-        Margin {
-            top,
-            right,
-            bottom,
-            left,
-        }
+        Margin { top, right, bottom, left }
     }
 
     pub fn from_size(size: Size) -> Self {

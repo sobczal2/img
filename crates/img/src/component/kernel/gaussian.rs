@@ -1,19 +1,48 @@
-use std::f32::consts::{E, PI};
+use std::f32::consts::{
+    E,
+    PI,
+};
+
+use thiserror::Error;
 
 use crate::{
-    component::kernel::{convolution::ConvolutionKernel, Kernel},
+    component::kernel::{
+        self,
+        Kernel,
+        convolution::ConvolutionKernel,
+    },
     error::IndexResult,
     pipe::Pipe,
-    pixel::Pixel,
-    primitive::{offset::Offset, point::Point, size::Size},
+    pixel::{
+        Pixel,
+        PixelFlags,
+    },
+    primitive::{
+        offset::Offset,
+        point::Point,
+        size::Size,
+    },
 };
+
+#[derive(Debug, Error)]
+pub enum CreationError {
+    #[error("invalid sigma")]
+    InvalidSigma,
+    #[error("invalid convolution kernel params: {0}")]
+    ConvolutionKernelError(#[from] kernel::convolution::CreationError),
+}
+
+pub type CreationResult = Result<GaussianKernel, CreationError>;
 
 pub struct GaussianKernel {
     inner: ConvolutionKernel,
 }
 
 impl GaussianKernel {
-    pub fn new(size: Size, sigma: f32) -> Self {
+    pub fn new(size: Size, sigma: f32, flags: PixelFlags) -> CreationResult {
+        if !sigma.is_finite() || sigma <= 0f32 {
+            return Err(CreationError::InvalidSigma);
+        }
         let mut values = vec![0f32; size.area()];
         let center = size.middle();
 
@@ -23,9 +52,11 @@ impl GaussianKernel {
             .map(|(index, value)| (Point::from_index(index, size).unwrap(), value))
             .for_each(|(point, value)| *value = gaussian_fn(point - center, sigma));
 
-        Self {
-            inner: ConvolutionKernel::new(size, values).unwrap()
-        }
+        let sum: f32 = values.iter().sum();
+        let correction = 1f32 / sum;
+        values.iter_mut().for_each(|value| *value *= correction);
+
+        Ok(Self { inner: ConvolutionKernel::new(size, values, flags)? })
     }
 }
 

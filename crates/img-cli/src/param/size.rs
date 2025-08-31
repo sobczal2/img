@@ -1,7 +1,9 @@
 use std::str::FromStr;
 
-use anyhow::anyhow;
-use anyhow::bail;
+use anyhow::{
+    anyhow,
+    bail,
+};
 use img::primitive::size::CreationError;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -19,12 +21,8 @@ impl FromStr for Size {
             bail!("size must be in [width]x[height] format");
         }
 
-        let width = parts[0]
-            .parse::<usize>()
-            .map_err(|_| anyhow!("invalid width"))?;
-        let height = parts[1]
-            .parse::<usize>()
-            .map_err(|_| anyhow!("invalid width"))?;
+        let width = parts[0].parse::<usize>().map_err(|_| anyhow!("invalid width"))?;
+        let height = parts[1].parse::<usize>().map_err(|_| anyhow!("invalid width"))?;
 
         Ok(Size { width, height })
     }

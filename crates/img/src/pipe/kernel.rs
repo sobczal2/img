@@ -6,7 +6,11 @@ use crate::{
     component::kernel::Kernel,
     error::IndexResult,
     pipe::Pipe,
-    primitive::{margin::Margin, point::Point, size::Size},
+    primitive::{
+        margin::Margin,
+        point::Point,
+        size::Size,
+    },
 };
 
 #[derive(Debug, Error)]
@@ -46,13 +50,7 @@ where
         // SAFETY: width, height are not zero after earlier checks
         let size = Size::from_usize(width, height).unwrap();
 
-        Ok(Self {
-            source,
-            kernel,
-            size,
-            margin,
-            _phantom_data: Default::default(),
-        })
+        Ok(Self { source, kernel, size, margin, _phantom_data: Default::default() })
     }
 }
 
@@ -63,10 +61,8 @@ where
     type Item = T;
 
     fn get(&self, point: Point) -> IndexResult<Self::Item> {
-        let source_point = Point::new(
-            point.x() + self.margin.left(),
-            point.y() + self.margin.top(),
-        );
+        let source_point =
+            Point::new(point.x() + self.margin.left(), point.y() + self.margin.top());
 
         self.kernel.apply(&self.source, source_point)
     }

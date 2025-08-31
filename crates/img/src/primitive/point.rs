@@ -1,13 +1,19 @@
 use std::{
     cmp::Ordering,
-    ops::{Sub},
+    ops::Sub,
 };
 
 use thiserror::Error;
 
 use crate::{
-    error::{IndexResult, OutOfBoundsError},
-    primitive::{offset::Offset, size::Size},
+    error::{
+        IndexResult,
+        OutOfBoundsError,
+    },
+    primitive::{
+        offset::Offset,
+        size::Size,
+    },
 };
 
 #[derive(Debug, Error)]
@@ -124,12 +130,9 @@ impl PartialOrd for Point {
     /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(20, 20)), Some(Ordering::Less));
     /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(10, 20)), Some(Ordering::Less));
     /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(20, 10)), Some(Ordering::Less));
-    /// assert_eq!(Point::new(20, 20).partial_cmp(&Point::new(10, 10)),
-    /// Some(Ordering::Greater));
-    /// assert_eq!(Point::new(20, 10).partial_cmp(&Point::new(10, 10)),
-    /// Some(Ordering::Greater));
-    /// assert_eq!(Point::new(10, 20).partial_cmp(&Point::new(10, 10)),
-    /// Some(Ordering::Greater));
+    /// assert_eq!(Point::new(20, 20).partial_cmp(&Point::new(10, 10)), Some(Ordering::Greater));
+    /// assert_eq!(Point::new(20, 10).partial_cmp(&Point::new(10, 10)), Some(Ordering::Greater));
+    /// assert_eq!(Point::new(10, 20).partial_cmp(&Point::new(10, 10)), Some(Ordering::Greater));
     /// assert_eq!(Point::new(20, 10).partial_cmp(&Point::new(10, 20)), None);
     /// assert_eq!(Point::new(10, 20).partial_cmp(&Point::new(20, 10)), None);
     /// # Ok(())
@@ -156,14 +159,8 @@ impl TryFrom<Offset> for Point {
     type Error = CreationError;
 
     fn try_from(value: Offset) -> CreationResult {
-        let x: usize = value
-            .x()
-            .try_into()
-            .map_err(|_| CreationError::InvalidX)?;
-        let y: usize = value
-            .y()
-            .try_into()
-            .map_err(|_| CreationError::InvalidY)?;
+        let x: usize = value.x().try_into().map_err(|_| CreationError::InvalidX)?;
+        let y: usize = value.y().try_into().map_err(|_| CreationError::InvalidY)?;
 
         Ok(Point::new(x, y))
     }
@@ -175,26 +172,11 @@ mod test {
 
     #[test]
     fn to_idx_basic() {
-        assert_eq!(
-            Point::new(0, 0).to_index(Size::from_usize(1, 1).unwrap()),
-            Ok(0)
-        );
-        assert_eq!(
-            Point::new(0, 0).to_index(Size::from_usize(100, 100).unwrap()),
-            Ok(0)
-        );
-        assert_eq!(
-            Point::new(10, 0).to_index(Size::from_usize(100, 100).unwrap()),
-            Ok(10)
-        );
-        assert_eq!(
-            Point::new(1, 0).to_index(Size::from_usize(10, 10).unwrap()),
-            Ok(1)
-        );
-        assert_eq!(
-            Point::new(0, 1).to_index(Size::from_usize(10, 10).unwrap()),
-            Ok(10)
-        );
+        assert_eq!(Point::new(0, 0).to_index(Size::from_usize(1, 1).unwrap()), Ok(0));
+        assert_eq!(Point::new(0, 0).to_index(Size::from_usize(100, 100).unwrap()), Ok(0));
+        assert_eq!(Point::new(10, 0).to_index(Size::from_usize(100, 100).unwrap()), Ok(10));
+        assert_eq!(Point::new(1, 0).to_index(Size::from_usize(10, 10).unwrap()), Ok(1));
+        assert_eq!(Point::new(0, 1).to_index(Size::from_usize(10, 10).unwrap()), Ok(10));
         assert_eq!(
             Point::new(2, 1).to_index(Size::from_usize(1, 1).unwrap()),
             Err(OutOfBoundsError)

@@ -1,14 +1,32 @@
-use std::{path::PathBuf, str::FromStr};
+use std::{
+    path::PathBuf,
+    str::FromStr,
+};
 
-use clap::{ArgMatches, Command, arg};
-use img::{operation::geometry::resize::resize, primitive::scale::Scale};
+use clap::{
+    ArgMatches,
+    Command,
+    arg,
+};
+use img::{
+    operation::geometry::resize::resize,
+    primitive::scale::Scale,
+};
 
 use crate::{
-    io::{read_image, write_image},
+    io::{
+        read_image,
+        write_image,
+    },
     param::size::Size,
 };
 
-use super::common::{INPUT_ARG_NAME, OUTPUT_ARG_NAME, input_arg, output_arg};
+use super::common::{
+    INPUT_ARG_NAME,
+    OUTPUT_ARG_NAME,
+    input_arg,
+    output_arg,
+};
 
 pub const CMD_NAME: &str = "resize";
 
@@ -16,11 +34,7 @@ pub fn subcommand() -> Command {
     Command::new(CMD_NAME)
         .arg(input_arg())
         .arg(output_arg())
-        .arg(
-            arg!(-s --size <size> "target size")
-                .required(true)
-                .value_parser(Size::from_str),
-        )
+        .arg(arg!(-s --size <size> "target size").required(true).value_parser(Size::from_str))
 }
 
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {

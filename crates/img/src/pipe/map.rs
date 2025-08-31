@@ -1,7 +1,10 @@
 use crate::{
     error::IndexResult,
     pipe::Pipe,
-    primitive::{point::Point, size::Size},
+    primitive::{
+        point::Point,
+        size::Size,
+    },
 };
 
 pub struct MapPipe<P, F> {

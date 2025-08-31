@@ -4,8 +4,14 @@ use thiserror::Error;
 
 use crate::{
     image::Image,
-    pipe::{FromPipe, Pipe},
-    primitive::{point::Point, size::Size},
+    pipe::{
+        FromPipe,
+        Pipe,
+    },
+    primitive::{
+        point::Point,
+        size::Size,
+    },
 };
 
 #[derive(Debug, Error)]
@@ -26,10 +32,7 @@ pub fn crop(image: &Image, size: Size, offset: (usize, usize)) -> Result<Image> 
     let pipe = image
         .pipe()
         .remap(
-            |pipe, point| {
-                pipe.get(Point::new(point.x() + offset.0, point.y() + offset.1))
-                    .unwrap()
-            },
+            |pipe, point| pipe.get(Point::new(point.x() + offset.0, point.y() + offset.1)).unwrap(),
             size,
         )
         .cloned();

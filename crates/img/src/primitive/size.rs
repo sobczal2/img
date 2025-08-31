@@ -13,7 +13,9 @@ pub enum SizeCreationError {
 }
 
 /// Represents a 2D size. Minimum size is 1x1.
+///
 /// # Examples
+///
 /// ```
 /// use img::primitive::size::Size;
 ///
@@ -38,6 +40,7 @@ impl Size {
     /// Returns `Size` with specified width and height.
     ///
     /// # Examples
+    ///
     /// ```
     /// use img::primitive::size::Size;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -47,7 +50,7 @@ impl Size {
     /// let large = Size::new(100_000.try_into()?, 2_000_000.try_into()?);
     ///
     /// # Ok(())
-    /// }
+    /// # }
     /// ```
     pub fn new(width: NonZeroUsize, height: NonZeroUsize) -> Self {
         Self(width, height)
@@ -66,6 +69,7 @@ impl Size {
     /// * `SizeCreationError::HeightZero` - if `height` is 0.
     ///
     /// # Examples
+    ///
     /// ```
     /// use img::primitive::size::Size;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -80,7 +84,7 @@ impl Size {
     /// assert!(Size::from_usize(0, 0).is_err());
     ///
     /// # Ok(())
-    /// }
+    /// # }
     /// ```
     pub fn from_usize(width: usize, height: usize) -> Result<Self, SizeCreationError> {
         let width: NonZeroUsize = width.try_into().map_err(|_| SizeCreationError::WidthZero)?;
@@ -99,6 +103,7 @@ impl Size {
     /// Returns `Size`, we always get a valid value since radius is non-negative.
     ///
     /// # Examples
+    /// 
     /// ```
     /// use img::primitive::size::Size;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -113,7 +118,7 @@ impl Size {
     /// assert_eq!((large.width(), large.height()), (20_001, 20_001));
     ///
     /// # Ok(())
-    /// }
+    /// # }
     /// ```
     pub fn from_radius(radius: usize) -> Self {
         let diameter = 2 * radius + 1;
@@ -122,75 +127,139 @@ impl Size {
         Self::from_usize(diameter, diameter).unwrap()
     }
 
+    /// Get width.
+    ///
+    /// # Returns
+    ///
+    /// Size's width as usize. Is guaranted to not be 0.
     pub fn width(&self) -> usize {
         self.0.into()
     }
 
+    /// Get height.
+    ///
+    /// # Returns
+    ///
+    /// Size's height as usize. Is guaranted to not be 0.
     pub fn height(&self) -> usize {
         self.1.into()
     }
 
+    /// Get area of the size (width*height).
+    ///
+    /// # Returns
+    ///
+    /// Size's area as usize. Is guaranted to not be 0.
     pub fn area(&self) -> usize {
         self.width() * self.height()
     }
 
-    pub fn center(&self) -> Point {
+    /// Get rounded up middle point.
+    ///
+    /// # Returns
+    ///
+    /// Size's middle point. Rounds point up in case dimension is even.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::primitive::{size::Size, point::Point};
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let smallest = Size::from_usize(1, 1)?;
+    /// assert_eq!(smallest.middle(), Point::new(0, 0));
+    ///
+    /// let even = Size::from_usize(10, 10)?;
+    /// assert_eq!(even.middle(), Point::new(5, 5));
+    ///
+    /// let odd = Size::from_usize(11, 11)?;
+    /// assert_eq!(odd.middle(), Point::new(5, 5));
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn middle(&self) -> Point {
         Point::new(self.width() / 2, self.height() / 2)
     }
 
+    /// Checks if point is within size bounds.
+    ///
+    /// # Returns
+    ///
+    /// * true - if point is within bounds
+    /// * false - if point is out of bounds
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::primitive::{size::Size, point::Point};
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let small = Size::from_usize(1, 1)?;
+    /// assert!(small.contains(Point::new(0, 0)));
+    /// assert!(!small.contains(Point::new(1, 0)));
+    /// assert!(!small.contains(Point::new(0, 1)));
+    ///
+    /// let medium = Size::from_usize(15, 30)?;
+    /// assert!(medium.contains(Point::new(0, 0)));
+    /// assert!(medium.contains(Point::new(14, 29)));
+    /// assert!(!medium.contains(Point::new(15, 0)));
+    /// assert!(!medium.contains(Point::new(0, 30)));
+    ///
+    /// let large = Size::from_usize(1000, 1000)?;
+    /// assert!(large.contains(Point::new(0, 0)));
+    /// assert!(large.contains(Point::new(999, 999)));
+    /// assert!(!large.contains(Point::new(1000, 0)));
+    /// assert!(!large.contains(Point::new(0, 1000)));
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn contains(&self, point: Point) -> bool {
         point.x() < self.width() && point.y() < self.height()
     }
 }
 
 impl PartialOrd for Size {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    /// Returns ordering of sizes or none if it is not possible to compare them.
+    ///
+    /// A size `a` is less than or equal to `b` if both `width` and `height` components
+    /// are less than or equal. If one component is greater and other is smaller
+    /// then it returns `None`.
+    ///
+    /// # Examples
+    /// ```
+    /// use img::primitive::size::Size;
+    /// use std::cmp::Ordering;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// assert_eq!(Size::from_usize(10, 10)?.partial_cmp(&Size::from_usize(10, 10)?), Some(Ordering::Equal));
+    /// assert_eq!(Size::from_usize(10, 10)?.partial_cmp(&Size::from_usize(20, 20)?), Some(Ordering::Less));
+    /// assert_eq!(Size::from_usize(10, 10)?.partial_cmp(&Size::from_usize(10, 20)?), Some(Ordering::Less));
+    /// assert_eq!(Size::from_usize(10, 10)?.partial_cmp(&Size::from_usize(20, 10)?), Some(Ordering::Less));
+    /// assert_eq!(Size::from_usize(20, 20)?.partial_cmp(&Size::from_usize(10, 10)?),
+    /// Some(Ordering::Greater));
+    /// assert_eq!(Size::from_usize(20, 10)?.partial_cmp(&Size::from_usize(10, 10)?),
+    /// Some(Ordering::Greater));
+    /// assert_eq!(Size::from_usize(10, 20)?.partial_cmp(&Size::from_usize(10, 10)?),
+    /// Some(Ordering::Greater));
+    /// assert_eq!(Size::from_usize(20, 10)?.partial_cmp(&Size::from_usize(10, 20)?), None);
+    /// assert_eq!(Size::from_usize(10, 20)?.partial_cmp(&Size::from_usize(20, 10)?), None);
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         if self.eq(other) {
             return Some(Ordering::Equal);
         }
 
-        if self.0 < other.0 && self.1 < other.1 {
+        if self.0 <= other.0 && self.1 <= other.1 {
             return Some(Ordering::Less);
         }
 
-        if self.0 > other.0 && self.1 > other.1 {
+        if self.0 >= other.0 && self.1 >= other.1 {
             return Some(Ordering::Greater);
         }
 
         None
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn contains_basic() {
-        assert!(Size::from_usize(1, 1).unwrap().contains(Point::new(0, 0)));
-        assert!(!Size::from_usize(1, 1).unwrap().contains(Point::new(1, 0)));
-        assert!(!Size::from_usize(1, 1).unwrap().contains(Point::new(0, 1)));
-        assert!(!Size::from_usize(1, 1).unwrap().contains(Point::new(1, 1)));
-
-        assert!(Size::from_usize(2, 2).unwrap().contains(Point::new(0, 0)));
-        assert!(Size::from_usize(2, 2).unwrap().contains(Point::new(1, 0)));
-        assert!(Size::from_usize(2, 2).unwrap().contains(Point::new(0, 1)));
-        assert!(Size::from_usize(2, 2).unwrap().contains(Point::new(1, 1)));
-
-        assert!(!Size::from_usize(2, 2).unwrap().contains(Point::new(2, 0)));
-        assert!(!Size::from_usize(2, 2).unwrap().contains(Point::new(0, 2)));
-        assert!(!Size::from_usize(2, 2).unwrap().contains(Point::new(2, 2)));
-        assert!(!Size::from_usize(2, 2).unwrap().contains(Point::new(2, 1)));
-        assert!(!Size::from_usize(2, 2).unwrap().contains(Point::new(1, 2)));
-
-        assert!(Size::from_usize(1, 2).unwrap().contains(Point::new(0, 0)));
-        assert!(!Size::from_usize(1, 2).unwrap().contains(Point::new(1, 0)));
-        assert!(Size::from_usize(1, 2).unwrap().contains(Point::new(0, 1)));
-        assert!(!Size::from_usize(1, 2).unwrap().contains(Point::new(1, 1)));
-
-        assert!(Size::from_usize(2, 1).unwrap().contains(Point::new(0, 0)));
-        assert!(Size::from_usize(2, 1).unwrap().contains(Point::new(1, 0)));
-        assert!(!Size::from_usize(2, 1).unwrap().contains(Point::new(0, 1)));
-        assert!(!Size::from_usize(2, 1).unwrap().contains(Point::new(1, 1)));
     }
 }

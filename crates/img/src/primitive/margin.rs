@@ -19,7 +19,7 @@ impl Margin {
     }
 
     pub fn from_size(size: Size) -> Self {
-        let center = size.center();
+        let center = size.middle();
         let left = center.x();
         let top = center.y();
         let right = size.width() - center.x();

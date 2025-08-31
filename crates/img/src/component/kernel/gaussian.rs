@@ -16,7 +16,7 @@ pub struct GaussianKernel {
 impl GaussianKernel {
     pub fn new(size: Size, sigma: f32) -> Self {
         let mut values = vec![0f32; size.area()];
-        let center = size.center();
+        let center = size.middle();
 
         values
             .iter_mut()
@@ -48,7 +48,7 @@ where
     where
         P: Pipe<Item = In>,
     {
-        let center = self.size.center();
+        let center = self.size.middle();
 
         let original = pipe.get(point).unwrap();
         let sum = self

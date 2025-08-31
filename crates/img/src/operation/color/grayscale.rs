@@ -1,19 +1,15 @@
 use crate::{
-    image::Image,
-    pipe::{
-        FromPipe,
-        Pipe,
-    },
-    pixel::{
+    image::Image, pipe::{
+        FromPipe, Pipe
+    }, pixel::{
         Pixel,
         PixelFlags,
-    },
+    }
 };
 
+
 pub fn grayscale_pipe<S>(source: S, flags: PixelFlags) -> impl Pipe<Item = Pixel>
-where
-    S: Pipe,
-    S::Item: AsRef<Pixel>,
+    where S: Pipe, S::Item: AsRef<Pixel>
 {
     source.map(move |px| map_px(px, flags))
 }

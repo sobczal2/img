@@ -21,6 +21,7 @@ pub enum CreationError {
     KernelTooBigY,
 }
 
+#[derive(Clone)]
 pub struct KernelPipe<P, K, T> {
     source: P,
     kernel: K,

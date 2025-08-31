@@ -10,12 +10,10 @@ bitflags! {
         const GREEN = 0b0100;
         const BLUE = 0b0010;
         const ALPHA = 0b0001;
-    }
-}
 
-impl PixelFlags {
-    pub const RGBA: PixelFlags = PixelFlags::all();
-    pub const RGB: PixelFlags = PixelFlags::from_bits_truncate(0b1110);
+        const RGB = Self::RED.bits() | Self::GREEN.bits() | Self::BLUE.bits();
+        const RGBA = Self::RGB.bits() | Self::ALPHA.bits();
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

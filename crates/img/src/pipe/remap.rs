@@ -7,6 +7,7 @@ use crate::{
     },
 };
 
+#[derive(Clone)]
 pub struct RemapPipe<P, F> {
     source: P,
     f: F,

@@ -31,6 +31,7 @@ pub enum CreationError {
 
 pub type CreationResult = Result<ConvolutionKernel, CreationError>;
 
+#[derive(Clone)]
 pub struct ConvolutionKernel {
     size: Size,
     buffer: Box<[f32]>,

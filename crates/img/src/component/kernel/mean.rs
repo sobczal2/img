@@ -26,6 +26,7 @@ pub enum CreationError {
 
 pub type CreationResult = Result<MeanKernel, CreationError>;
 
+#[derive(Clone)]
 pub struct MeanKernel {
     inner: ConvolutionKernel,
 }

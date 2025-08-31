@@ -7,6 +7,7 @@ use crate::{
     },
 };
 
+#[derive(Clone)]
 pub struct ClonedPipe<P> {
     source: P,
 }

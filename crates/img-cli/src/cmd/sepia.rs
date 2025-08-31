@@ -4,7 +4,7 @@ use clap::{
     ArgMatches,
     Command,
 };
-use img::operation::color::sepia::sepia;
+use img::{operation::color::sepia::sepia, pixel::PixelFlags};
 
 use crate::io::{
     read_image,
@@ -26,7 +26,7 @@ pub fn subcommand() -> Command {
 
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     let image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
-    let image = sepia(&image);
+    let image = sepia(&image, PixelFlags::RGB);
     write_image(&image, matches.get_one::<PathBuf>(OUTPUT_ARG_NAME).unwrap())?;
     Ok(())
 }

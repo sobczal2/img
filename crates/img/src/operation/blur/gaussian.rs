@@ -5,22 +5,19 @@ use crate::{
         self,
         gaussian::GaussianKernel,
     },
-    error::IndexResult,
     image::Image,
     pipe::{
         self,
         FromPipe,
         Pipe,
-        kernel::KernelPipe,
     },
     pixel::{
         Pixel,
         PixelFlags,
     },
-    primitive::{
-        point::Point,
-        size::Size,
-    },
+    primitive::
+        size::Size
+    ,
 };
 
 #[cfg(feature = "parallel")]
@@ -37,37 +34,20 @@ pub enum CreationError {
 
 pub type CreationResult<T> = std::result::Result<T, CreationError>;
 
-type Inner<S> = KernelPipe<S, GaussianKernel, Pixel>;
-
-pub struct GaussianBlurPipe<S> {
-    inner: Inner<S>,
-}
-
-impl<S> GaussianBlurPipe<S>
+pub fn gaussian_blur_pipe<S>(
+    source: S,
+    radius: usize,
+    sigma: f32,
+    flags: PixelFlags,
+) -> CreationResult<impl Pipe<Item = Pixel>>
 where
     S: Pipe,
     S::Item: AsRef<Pixel>,
 {
-    pub fn new(source: S, radius: usize, sigma: f32, flags: PixelFlags) -> CreationResult<Self> {
-        let kernel = GaussianKernel::new(Size::from_radius(radius), sigma, flags)?;
-        Ok(Self { inner: source.kernel(kernel)? })
-    }
-}
+    let kernel = GaussianKernel::new(Size::from_radius(radius), sigma, flags)?;
+    let pipe = source.kernel(kernel)?;
 
-impl<S> Pipe for GaussianBlurPipe<S>
-where
-    S: Pipe,
-    S::Item: AsRef<Pixel>,
-{
-    type Item = Pixel;
-
-    fn get(&self, point: Point) -> IndexResult<Self::Item> {
-        self.inner.get(point)
-    }
-
-    fn size(&self) -> Size {
-        self.inner.size()
-    }
+    Ok(pipe)
 }
 
 pub fn gaussian_blur(
@@ -76,7 +56,7 @@ pub fn gaussian_blur(
     sigma: f32,
     flags: PixelFlags,
 ) -> CreationResult<Image> {
-    let pipe = GaussianBlurPipe::new(image.pipe(), radius, sigma, flags)?;
+    let pipe = gaussian_blur_pipe(image.pipe(), radius, sigma, flags)?;
     Ok(Image::from_pipe(pipe))
 }
 
@@ -87,6 +67,6 @@ pub fn gaussian_blur_par(
     sigma: f32,
     flags: PixelFlags,
 ) -> CreationResult<Image> {
-    let pipe = GaussianBlurPipe::new(image.pipe(), radius, sigma, flags)?;
+    let pipe = gaussian_blur_pipe(image.pipe(), radius, sigma, flags)?;
     Ok(Image::from_pipe_par(pipe))
 }

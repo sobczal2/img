@@ -4,7 +4,10 @@ use clap::{
     ArgMatches,
     Command,
 };
-use img::operation::color::grayscale::grayscale;
+use img::{
+    operation::color::grayscale::grayscale,
+    pixel::PixelFlags,
+};
 
 use crate::io::{
     read_image,
@@ -26,7 +29,7 @@ pub fn subcommand() -> Command {
 
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     let image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
-    let image = grayscale(&image);
+    let image = grayscale(&image, PixelFlags::RGB);
     write_image(&image, matches.get_one::<PathBuf>(OUTPUT_ARG_NAME).unwrap())?;
     Ok(())
 }

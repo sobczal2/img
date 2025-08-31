@@ -4,12 +4,14 @@ use thiserror::Error;
 use crate::primitive::point::Point;
 
 #[derive(Debug, Error)]
-pub enum SizeCreationError {
+pub enum CreationError {
     #[error("width is zero")]
     WidthZero,
     #[error("height is zero")]
     HeightZero,
 }
+
+pub type CreationResult = Result<Size, CreationError>;
 
 /// Represents a 2D size. Minimum size is 1x1.
 ///
@@ -53,12 +55,12 @@ impl Size {
     /// Create a new `Size` with the specified width and height. Unlike `new` this takes in `usize`
     /// arguments and can fail in case width or height is 0.
     ///
-    /// Returns `Ok(Size)` if both parameters valid, otherwise returns a `SizeCreationError`.
+    /// Returns `Ok(Size)` if both parameters valid, otherwise returns a `CreationError`.
     ///
     /// # Errors
     ///
-    /// * `SizeCreationError::WidthZero` - if `width` is 0.
-    /// * `SizeCreationError::HeightZero` - if `height` is 0.
+    /// * `CreationError::WidthZero` - if `width` is 0.
+    /// * `CreationError::HeightZero` - if `height` is 0.
     ///
     /// # Examples
     ///
@@ -78,11 +80,11 @@ impl Size {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn from_usize(width: usize, height: usize) -> Result<Self, SizeCreationError> {
-        let width: NonZeroUsize = width.try_into().map_err(|_| SizeCreationError::WidthZero)?;
+    pub fn from_usize(width: usize, height: usize) -> CreationResult {
+        let width: NonZeroUsize = width.try_into().map_err(|_| CreationError::WidthZero)?;
         let height: NonZeroUsize = height
             .try_into()
-            .map_err(|_| SizeCreationError::HeightZero)?;
+            .map_err(|_| CreationError::HeightZero)?;
 
         Ok(Size(width, height))
     }

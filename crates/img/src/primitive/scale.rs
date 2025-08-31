@@ -4,16 +4,18 @@ use thiserror::Error;
 
 use crate::primitive::{
     point::Point,
-    size::{Size, SizeCreationError},
+    size::{self, Size},
 };
 
 #[derive(Error, Debug)]
-pub enum ScaleCreationError {
+pub enum CreationError {
     #[error("Scale x value {0} is outside valid range [{min_scale}, {max_scale}]", min_scale = Scale::MIN, max_scale = Scale::MAX)]
     ScaleXInvalid(f32),
     #[error("Scale y value {0} is outside valid range [{min_scale}, {max_scale}]", min_scale = Scale::MIN, max_scale = Scale::MAX)]
     ScaleYInvalid(f32),
 }
+
+pub type CreationResult = Result<Scale, CreationError>;
 
 /// Represents a 2D scale with separate x and y scaling factors.
 ///
@@ -73,14 +75,14 @@ impl Scale {
     /// # Ok(())
     /// }
     /// ```
-    pub fn new(x: f32, y: f32) -> Result<Self, ScaleCreationError> {
+    pub fn new(x: f32, y: f32) -> CreationResult {
         let valid_range = Self::MIN..=Self::MAX;
         if !valid_range.contains(&x) {
-            return Err(ScaleCreationError::ScaleXInvalid(x));
+            return Err(CreationError::ScaleXInvalid(x));
         }
 
         if !valid_range.contains(&y) {
-            return Err(ScaleCreationError::ScaleYInvalid(y));
+            return Err(CreationError::ScaleYInvalid(y));
         }
 
         Ok(Self(x, y))
@@ -123,7 +125,7 @@ impl Scale {
     /// Rounds results to the nearest integer or further from zero if value is in the
     /// middle.
     ///
-    /// Returns scaled `Ok(Size)` or `SizeCreationError` if resulting Size would not
+    /// Returns scaled `Ok(Size)` or `CreationError` if resulting Size would not
     /// be valid.
     ///
     /// # Examples
@@ -145,7 +147,7 @@ impl Scale {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn apply(&self, size: Size) -> Result<Size, SizeCreationError> {
+    pub fn apply(&self, size: Size) -> size::CreationResult {
         let new_width: f32 = size.width() as f32 * self.0;
         let new_height: f32 = size.height() as f32 * self.1;
 

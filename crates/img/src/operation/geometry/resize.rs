@@ -3,13 +3,13 @@ use thiserror::Error;
 use crate::{
     image::Image,
     pipe::{FromPipe, Pipe},
-    primitive::{scale::Scale, size::SizeCreationError},
+    primitive::{scale::Scale, size},
 };
 
 #[derive(Debug, Error)]
 pub enum Error {
     #[error("new size is invalid: {0}")]
-    NewSizeInvalid(#[from] SizeCreationError),
+    NewSizeInvalid(#[from] size::CreationError),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

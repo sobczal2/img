@@ -10,7 +10,7 @@ use crate::{
 };
 
 #[derive(Debug, Error)]
-pub enum KernelPipeCreationError {
+pub enum CreationError {
     #[error("kernel's width is too big")]
     KernelTooBigX,
     #[error("kernel's height is too big")]
@@ -29,13 +29,13 @@ impl<P: Pipe, K, T> KernelPipe<P, K, T>
 where
     K: Kernel<P::Item, T>,
 {
-    pub fn new(source: P, kernel: K) -> Result<Self, KernelPipeCreationError> {
+    pub fn new(source: P, kernel: K) -> Result<Self, CreationError> {
         if source.size().width() < kernel.size().width() {
-            return Err(KernelPipeCreationError::KernelTooBigX);
+            return Err(CreationError::KernelTooBigX);
         }
 
         if source.size().height() < kernel.size().height() {
-            return Err(KernelPipeCreationError::KernelTooBigY);
+            return Err(CreationError::KernelTooBigY);
         }
 
         let margin = Margin::from_size(kernel.size());

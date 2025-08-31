@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use clap::{ArgMatches, Command, ValueEnum, arg, value_parser};
-use img::{image::Image, operation::blur::gaussian::gaussian_blur};
+use img::{image::Image, operation::blur::{gaussian::gaussian_blur, mean::mean_blur}};
 
 use crate::io::{read_image, write_image};
 
@@ -48,10 +48,9 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn apply_mean(_image: &Image, matches: &ArgMatches) -> anyhow::Result<Image> {
-    let _target_radius = matches.get_one::<usize>("radius").unwrap();
-    // Ok(mean_blur(image, *target_radius)?)
-    todo!()
+fn apply_mean(image: &Image, matches: &ArgMatches) -> anyhow::Result<Image> {
+    let target_radius = matches.get_one::<usize>("radius").unwrap();
+    Ok(mean_blur(image, *target_radius)?)
 }
 
 fn apply_gaussian(image: &Image, matches: &ArgMatches) -> anyhow::Result<Image> {

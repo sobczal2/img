@@ -4,7 +4,7 @@ use crate::{
     pipe::{
         cloned::ClonedPipe,
         iter::{Elements, Rows},
-        kernel::{KernelPipe, KernelPipeCreationError},
+        kernel::{KernelPipe, CreationError},
         map::MapPipe,
         remap::RemapPipe,
     },
@@ -129,7 +129,7 @@ pub trait Pipe {
         ClonedPipe::new(self)
     }
 
-    fn kernel<K, T>(self, kernel: K) -> Result<KernelPipe<Self, K, T>, KernelPipeCreationError>
+    fn kernel<K, T>(self, kernel: K) -> Result<KernelPipe<Self, K, T>, CreationError>
     where
         Self: Sized,
         K: Kernel<Self::Item, T>,

@@ -1,6 +1,6 @@
 use std::{
     cmp::Ordering,
-    ops::{Sub, SubAssign},
+    ops::{Sub},
 };
 
 use thiserror::Error;
@@ -11,12 +11,14 @@ use crate::{
 };
 
 #[derive(Debug, Error)]
-pub enum PointCreationError {
+pub enum CreationError {
     #[error("invalid x value")]
     InvalidX,
     #[error("invalid y value")]
     InvalidY,
 }
+
+pub type CreationResult = Result<Point, CreationError>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Point(usize, usize);
@@ -74,12 +76,12 @@ impl Point {
         Point::new(index % size.width(), index / size.width())
     }
 
-    pub fn offset_by(&self, offset: Offset) -> Result<Point, PointCreationError> {
+    pub fn offset_by(&self, offset: Offset) -> CreationResult {
         let x = self.0 as isize + offset.x();
         let y = self.1 as isize + offset.y();
 
-        let x: usize = x.try_into().map_err(|_| PointCreationError::InvalidX)?;
-        let y: usize = y.try_into().map_err(|_| PointCreationError::InvalidY)?;
+        let x: usize = x.try_into().map_err(|_| CreationError::InvalidX)?;
+        let y: usize = y.try_into().map_err(|_| CreationError::InvalidY)?;
 
         Ok(Point(x, y))
     }
@@ -151,17 +153,17 @@ impl PartialOrd for Point {
 }
 
 impl TryFrom<Offset> for Point {
-    type Error = PointCreationError;
+    type Error = CreationError;
 
-    fn try_from(value: Offset) -> Result<Self, Self::Error> {
+    fn try_from(value: Offset) -> CreationResult {
         let x: usize = value
             .x()
             .try_into()
-            .map_err(|_| PointCreationError::InvalidX)?;
+            .map_err(|_| CreationError::InvalidX)?;
         let y: usize = value
             .y()
             .try_into()
-            .map_err(|_| PointCreationError::InvalidY)?;
+            .map_err(|_| CreationError::InvalidY)?;
 
         Ok(Point::new(x, y))
     }

@@ -1,5 +1,4 @@
 use std::{cmp::Ordering, num::NonZeroUsize};
-
 use thiserror::Error;
 
 use crate::primitive::point::Point;

@@ -1,4 +1,4 @@
-use std::ops::Sub;
+use std::{cmp::Ordering, ops::Sub};
 
 use thiserror::Error;
 
@@ -100,6 +100,61 @@ impl Sub for Point {
         let y = self.1 as isize - rhs.1 as isize;
 
         Offset::new(x, y)
+    }
+}
+
+impl PartialOrd for Point {
+    /// Returns ordering of Points or none if it is not possible to compare them.
+    ///
+    /// A size `a` is less than or equal to `b` if both `width` and `height` components
+    /// are less than or equal. If one component is greater and other is smaller
+    /// then it returns `None`.
+    ///
+    /// # Examples
+    /// ```
+    /// use img::primitive::point::Point;
+    /// use std::cmp::Ordering;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(10, 10)), Some(Ordering::Equal));
+    /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(20, 20)), Some(Ordering::Less));
+    /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(10, 20)), Some(Ordering::Less));
+    /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(20, 10)?), Some(Ordering::Less));
+    /// assert_eq!(Point::new(20, 20).partial_cmp(&Point::new(10, 10)),
+    /// Some(Ordering::Greater));
+    /// assert_eq!(Point::new(20, 10).partial_cmp(&Point::new(10, 10)),
+    /// Some(Ordering::Greater));
+    /// assert_eq!(Point::new(10, 20).partial_cmp(&Point::new(10, 10)),
+    /// Some(Ordering::Greater));
+    /// assert_eq!(Point::new(20, 10).partial_cmp(&Point::new(10, 20)), None);
+    /// assert_eq!(Point::new(10, 20).partial_cmp(&Point::new(20, 10)), None);
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        if self.eq(other) {
+            return Some(Ordering::Equal);
+        }
+
+        if self.0 <= other.0 && self.1 <= other.1 {
+            return Some(Ordering::Less);
+        }
+
+        if self.0 >= other.0 && self.1 >= other.1 {
+            return Some(Ordering::Greater);
+        }
+
+        None
+    }
+}
+
+impl TryFrom<Offset> for Point {
+    type Error = PointCreationError;
+
+    fn try_from(value: Offset) -> Result<Self, Self::Error> {
+        let x: usize = value.x().try_into().map_err(|_| PointCreationError::InvalidX)?;
+        let y: usize = value.y().try_into().map_err(|_| PointCreationError::InvalidY)?;
+
+        Ok(Point::new(x, y))
     }
 }
 

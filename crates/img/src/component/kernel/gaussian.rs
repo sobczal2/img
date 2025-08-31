@@ -2,10 +2,10 @@ use std::f32::consts::{E, PI};
 
 use crate::{
     component::kernel::Kernel,
-    error::IndexResult,
+    error::{IndexResult, OutOfBoundsError},
     pipe::Pipe,
     pixel::{Pixel, ReadPixelRgbaf32, WritePixelRgbaf32},
-    primitive::{offset::Offset, point::Point, size::Size},
+    primitive::{area::Area, margin::Margin, offset::Offset, point::Point, size::Size},
 };
 
 pub struct GaussianKernel {
@@ -43,11 +43,14 @@ impl<In> Kernel<In, Pixel> for GaussianKernel
 where
     In: AsRef<Pixel>,
 {
-    // TODO: Error handling, perhabs some abstraction
     fn apply<P>(&self, pipe: &P, point: Point) -> IndexResult<Pixel>
     where
         P: Pipe<Item = In>,
     {
+        let working_area = Area::from_cropped_size(pipe.size(), Margin::from_size(self.size));
+        if !working_area.contains(point) {
+            return Err(OutOfBoundsError);
+        }
         let center = self.size.middle();
 
         let original = pipe.get(point).unwrap();

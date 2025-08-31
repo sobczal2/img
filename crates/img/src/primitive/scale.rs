@@ -15,7 +15,7 @@ pub enum ScaleCreationError {
     ScaleYInvalid(f32),
 }
 
-/// Represents a 2D scale with seperate x and y scaling factors.
+/// Represents a 2D scale with separate x and y scaling factors.
 ///
 /// # Examples
 /// ```
@@ -38,18 +38,11 @@ impl Scale {
     pub const MIN: f32 = 1e-4;
 
     /// Maximum valid scaling factor.
-    pub const MAX: f32 = 1e4;
+    pub const MAX: f32 = 1f32 / Self::MIN;
 
     /// Create a new `Scale` with the specified x and y scaling factors.
     ///
     /// Both x and y must be within range `[Scale::MIN, Scale::MAX]` inclusive.
-    ///
-    /// # Arguments
-    ///
-    /// * `x` - The horizontal scaling factor
-    /// * `y` - The vertical scaling factor
-    ///
-    /// # Returns
     ///
     /// Returns `Ok(Scale)` if both parameters are valid, otherwise returns a
     /// `ScaleCreationError`.
@@ -57,9 +50,9 @@ impl Scale {
     /// # Errors
     ///
     /// * `ScaleCreationError::ScaleXInvalid` - if `x` is not within `[Scale::MIN, Scale::MAX]`,
-    ///   is NaN, or is infinite
+    ///   is `NAN`, or is `INFINITE`
     /// * `ScaleCreationError::ScaleYInvalid` - if `y` is not within `[Scale::MIN, Scale::MAX]`,
-    ///   is NaN, or is infinite
+    ///   is `NAN`, or is `INFINITE`
     ///
     /// # Examples
     ///
@@ -103,7 +96,7 @@ impl Scale {
         self.1
     }
 
-    /// Returns the inverse scale (1/x, 1/y)
+    /// Returns the inverse scale (1/x, 1/y).
     ///
     /// # Examples
     /// ```
@@ -129,8 +122,6 @@ impl Scale {
     /// Applies the scale transformation to a `Size`, returning a new scaled `Size`.
     /// Rounds results to the nearest integer or further from zero if value is in the
     /// middle.
-    ///
-    /// # Returns
     ///
     /// Returns scaled `Ok(Size)` or `SizeCreationError` if resulting Size would not
     /// be valid.
@@ -164,8 +155,6 @@ impl Scale {
     /// Transform the point to scaled coordinate space.
     /// Rounds results to the nearest integer or further from zero if value is in the
     /// middle.
-    ///
-    /// # Returns
     ///
     /// Returns scaled `Point`.
     ///
@@ -202,7 +191,7 @@ impl PartialEq for Scale {
     }
 }
 
-/// Eq can be safely implemented since we guarantee that `Scale` has floats within range
+/// `Eq` can be safely implemented since we guarantee that `Scale` has floats within range
 /// `[Scale::MIN, Scale::MAX]`.
 impl Eq for Scale {}
 

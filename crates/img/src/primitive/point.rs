@@ -1,4 +1,7 @@
-use std::{cmp::Ordering, ops::Sub};
+use std::{
+    cmp::Ordering,
+    ops::{Sub, SubAssign},
+};
 
 use thiserror::Error;
 
@@ -85,7 +88,7 @@ impl Point {
 impl Sub for Point {
     type Output = Offset;
 
-    ///
+    /// Subtract one `Point` from another
     /// # Examples
     /// ```
     /// use img::primitive::{point::Point, offset::Offset};
@@ -118,7 +121,7 @@ impl PartialOrd for Point {
     /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(10, 10)), Some(Ordering::Equal));
     /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(20, 20)), Some(Ordering::Less));
     /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(10, 20)), Some(Ordering::Less));
-    /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(20, 10)?), Some(Ordering::Less));
+    /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(20, 10)), Some(Ordering::Less));
     /// assert_eq!(Point::new(20, 20).partial_cmp(&Point::new(10, 10)),
     /// Some(Ordering::Greater));
     /// assert_eq!(Point::new(20, 10).partial_cmp(&Point::new(10, 10)),
@@ -151,8 +154,14 @@ impl TryFrom<Offset> for Point {
     type Error = PointCreationError;
 
     fn try_from(value: Offset) -> Result<Self, Self::Error> {
-        let x: usize = value.x().try_into().map_err(|_| PointCreationError::InvalidX)?;
-        let y: usize = value.y().try_into().map_err(|_| PointCreationError::InvalidY)?;
+        let x: usize = value
+            .x()
+            .try_into()
+            .map_err(|_| PointCreationError::InvalidX)?;
+        let y: usize = value
+            .y()
+            .try_into()
+            .map_err(|_| PointCreationError::InvalidY)?;
 
         Ok(Point::new(x, y))
     }

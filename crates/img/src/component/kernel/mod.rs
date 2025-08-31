@@ -4,7 +4,9 @@ use crate::{
     primitive::{point::Point, size::Size},
 };
 
+pub mod convolution;
 pub mod gaussian;
+pub mod mean;
 
 pub trait Kernel<In, Out> {
     fn apply<P>(&self, pipe: &P, point: Point) -> IndexResult<Out>

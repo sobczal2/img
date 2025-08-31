@@ -31,12 +31,7 @@ pub enum SizeCreationError {
 pub struct Size(NonZeroUsize, NonZeroUsize);
 
 impl Size {
-
-    /// Create a new `Size` with the specified width and height.
-    ///
-    /// # Returns
-    /// 
-    /// Returns `Size` with specified width and height.
+    /// Create a new `Size` with the specified `width` and `height`.
     ///
     /// # Examples
     ///
@@ -57,8 +52,6 @@ impl Size {
 
     /// Create a new `Size` with the specified width and height. Unlike `new` this takes in `usize`
     /// arguments and can fail in case width or height is 0.
-    ///
-    /// # Returns
     ///
     /// Returns `Ok(Size)` if both parameters valid, otherwise returns a `SizeCreationError`.
     ///
@@ -97,12 +90,8 @@ impl Size {
     /// Create a new `Size` from specified radius. Radius is defined as distance between central
     /// point and any border.
     ///
-    /// # Returns
-    ///
-    /// Returns `Size`, we always get a valid value since radius is non-negative.
-    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use img::primitive::size::Size;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -126,38 +115,26 @@ impl Size {
         Self::from_usize(diameter, diameter).unwrap()
     }
 
-    /// Get width.
-    ///
-    /// # Returns
-    ///
-    /// Size's width as usize. Is guaranted to not be 0.
+    /// Returns Size's width as `usize`. Is guaranteed to not be 0.
     pub fn width(&self) -> usize {
         self.0.into()
     }
 
-    /// Get height.
-    ///
-    /// # Returns
-    ///
-    /// Size's height as usize. Is guaranted to not be 0.
+    /// Returns Size's height as `usize`. Is guaranteed to not be 0.
     pub fn height(&self) -> usize {
         self.1.into()
     }
 
     /// Get area of the size (width*height).
     ///
-    /// # Returns
-    ///
-    /// Size's area as usize. Is guaranted to not be 0.
+    /// Returns Size's area as `usize`. Is guaranteed to not be 0.
     pub fn area(&self) -> usize {
         self.width() * self.height()
     }
 
     /// Get rounded up middle point.
     ///
-    /// # Returns
-    ///
-    /// Size's middle point. Rounds point up in case dimension is even.
+    /// Returns Size's middle point. Rounds point up in case dimension is even.
     ///
     /// # Examples
     ///
@@ -181,12 +158,7 @@ impl Size {
         Point::new(self.width() / 2, self.height() / 2)
     }
 
-    /// Checks if point is within size bounds.
-    ///
-    /// # Returns
-    ///
-    /// * true - if point is within bounds
-    /// * false - if point is out of bounds
+    /// Checks if point is within `Size` bounds.
     ///
     /// # Examples
     ///
@@ -220,9 +192,9 @@ impl Size {
 }
 
 impl PartialOrd for Size {
-    /// Returns ordering of sizes or none if it is not possible to compare them.
+    /// Returns `Some(Ordering)` of sizes or `None` if it is not possible to compare them.
     ///
-    /// A size `a` is less than or equal to `b` if both `width` and `height` components
+    /// A `Size` `a` is less than or equal to `b` if both `width` and `height` components
     /// are less than or equal. If one component is greater and other is smaller
     /// then it returns `None`.
     ///

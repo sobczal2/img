@@ -2,7 +2,7 @@ use crate::primitive::{margin::Margin, point::Point, size::Size};
 
 pub struct Area {
     size: Size,
-    top_left: Point
+    top_left: Point,
 }
 
 impl Area {

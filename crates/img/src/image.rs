@@ -19,7 +19,7 @@ pub struct Image {
 
 impl Image {
     /// create an image with the given size and buffer
-    /// fails if buf's length is not width * length * PIXEL_SIZE
+    /// fails if pixels' length is not width * length * PIXEL_SIZE
     pub fn new(size: Size, pixels: Box<[Pixel]>) -> Result<Self, SizePixelsMismatch> {
         if pixels.len() != size.area() {
             return Err(SizePixelsMismatch);
@@ -51,7 +51,7 @@ impl Image {
         Ok(&self.pixels[index])
     }
 
-    /// get immutable pixel at selected cordinates
+    /// get immutable pixel at selected coordinates
     /// without checking bounds
     ///
     /// # Safety
@@ -62,7 +62,7 @@ impl Image {
         &self.pixels[index]
     }
 
-    /// get mutable pixel at selected cordinates
+    /// get mutable pixel at selected coordinates
     pub fn pixel_mut(&mut self, point: Point) -> IndexResult<&mut Pixel> {
         let index = point.to_index(self.size())?;
 
@@ -70,7 +70,7 @@ impl Image {
         Ok(&mut self.pixels[index])
     }
 
-    /// get mutable pixel at selected cordinates
+    /// get mutable pixel at selected coordinates
     /// without checking bounds
     ///
     /// # Safety

@@ -2,7 +2,6 @@ use thiserror::Error;
 
 use crate::{
     component::kernel::{
-        gaussian::GaussianKernel,
         sobel::SobelKernel,
     },
     pipe::{
@@ -12,9 +11,7 @@ use crate::{
     },
     pixel::{
         Pixel,
-        PixelFlags,
     },
-    primitive::size::Size,
 };
 
 #[derive(Debug, Error)]

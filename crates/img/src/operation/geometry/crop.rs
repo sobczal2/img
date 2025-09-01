@@ -1,60 +1,40 @@
-use std::cmp::Ordering;
-
-use thiserror::Error;
-
 use crate::{
-    image::Image,
-    pipe::{
-        FromPipe,
-        Pipe,
-    },
-    primitive::{
-        point::Point,
-        size::Size,
-    },
+    image::Image, pipe::{
+        FromPipe, FromPipePar, Pipe
+    }, pixel::Pixel, primitive::{
+        margin::Margin, offset::Offset, size::{self}
+    }
 };
 
-#[derive(Debug, Error)]
-pub enum Error {
-    #[error("offset is bigger than image size")]
-    OffsetTooBig,
-    #[error("target size too big")]
-    SizeTooBig,
-    #[error("crop area is out of bounds")]
-    OutOfBounds,
+pub fn crop_pipe<S>(source: S, margin: Margin) -> Result<impl Pipe<Item = Pixel>, size::CreationError>
+where
+    S: Pipe,
+    S::Item: AsRef<Pixel>,
+{
+    let size = source.size();
+    let new_size = size.apply_margin(margin)?;
+
+    Ok(source.remap(move |pipe, point| {
+        let top_left = margin.top_left();
+        let original_point = point.offset_by(Offset::new(top_left.x() as isize, top_left.y() as isize)).unwrap();
+
+        *pipe.get(original_point).expect("bug in pipe implementation").as_ref()
+    },
+            new_size,
+    ))
 }
 
-pub type Result<T> = std::result::Result<T, Error>;
-
-pub fn crop(image: &Image, size: Size, offset: (usize, usize)) -> Result<Image> {
-    validate(image, size, offset)?;
-
-    let pipe = image
-        .pipe()
-        .remap(
-            |pipe, point| pipe.get(Point::new(point.x() + offset.0, point.y() + offset.1)).unwrap(),
-            size,
-        )
-        .cloned();
+pub fn crop(image: &Image, margin: Margin) -> Result<Image, size::CreationError> {
+    let pipe = crop_pipe(image.pipe(), margin)?;
     let image = Image::from_pipe(pipe);
 
     Ok(image)
 }
 
-fn validate(image: &Image, size: Size, offset: (usize, usize)) -> Result<()> {
-    if image.size().partial_cmp(&size) != Some(Ordering::Greater) {
-        return Err(Error::SizeTooBig);
-    }
+#[cfg(feature = "parallel")]
+pub fn crop_par(image: &Image, margin: Margin) -> Result<Image, size::CreationError> {
+    let pipe = crop_pipe(image.pipe(), margin)?;
+    let image = Image::from_pipe_par(pipe);
 
-    if image.size().width() < offset.0 || image.size().height() < offset.1 {
-        return Err(Error::OffsetTooBig);
-    }
-
-    if image.size().width() < offset.0 + size.width()
-        || image.size().height() < offset.1 + size.height()
-    {
-        return Err(Error::OutOfBounds);
-    }
-
-    Ok(())
+    Ok(image)
 }

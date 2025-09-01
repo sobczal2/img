@@ -9,6 +9,7 @@ thiserror.workspace = true
 rayon = { workspace = true, optional = true }
 itertools.workspace = true
 bitflags.workspace = true
+paste.workspace = true
 
 [features]
 default = ["parallel"]

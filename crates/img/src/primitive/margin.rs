@@ -1,4 +1,5 @@
-use crate::primitive::size::Size;
+use crate::primitive::{point::Point, size::Size};
+use paste::paste;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Margin {
@@ -6,6 +7,16 @@ pub struct Margin {
     right: usize,
     bottom: usize,
     left: usize,
+}
+
+macro_rules! define_swizzle {
+    ($vertical:ident, $horizontal:ident) => {
+        paste! {
+            pub fn [<$vertical _ $horizontal>](&self) -> Point {
+                Point::new(self.$horizontal, self.$vertical)
+            }
+        }
+    };
 }
 
 impl Margin {
@@ -37,4 +48,10 @@ impl Margin {
     pub fn left(&self) -> usize {
         self.left
     }
+
+    define_swizzle!(top, left);
+    define_swizzle!(bottom, left);
+    define_swizzle!(top, right);
+    define_swizzle!(bottom, right);
+
 }

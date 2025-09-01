@@ -1,10 +1,10 @@
 use std::{
     cmp::Ordering,
-    num::NonZeroUsize,
+    num::NonZeroUsize, ops::Sub,
 };
 use thiserror::Error;
 
-use crate::primitive::point::Point;
+use crate::primitive::{margin::Margin, point::Point};
 
 #[derive(Debug, Error)]
 pub enum CreationError {
@@ -197,6 +197,21 @@ impl Size {
     /// ```
     pub fn contains(&self, point: Point) -> bool {
         point.x() < self.width() && point.y() < self.height()
+    }
+
+    pub fn apply_margin(&self, margin: Margin) -> CreationResult {
+        if margin.left() + margin.right() >= self.width() {
+            return Err(CreationError::WidthZero);
+        }
+        
+        if margin.top() + margin.bottom() >= self.height() {
+            return Err(CreationError::HeightZero);
+        }
+
+        let width = self.width() - margin.left() - margin.right();
+        let height = self.height() - margin.top() - margin.bottom();
+
+        Ok(Size::from_usize(width, height).unwrap())
     }
 }
 

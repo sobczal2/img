@@ -8,7 +8,7 @@ use clap::{
     Command,
     arg,
 };
-use img::operation::geometry::crop::crop;
+use img::{operation::geometry::crop::crop, primitive::{margin::Margin, point::Point, size::Size}};
 
 use crate::{
     io::{
@@ -39,10 +39,13 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     let image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
     let target_size_offset = matches.get_one::<SizeOffset>("size").unwrap();
 
-    let size = target_size_offset.size.try_into()?;
-    let offset = target_size_offset.offset.into();
+    let old_size = image.size();
+    let new_size: Size = target_size_offset.size.try_into()?;
+    let offset = target_size_offset.offset;
+    
+    let margin = Margin::new(offset.height, old_size.width() - new_size.width() - offset.width, old_size.height() - new_size.height() - offset.height, offset.width);
 
-    let image = crop(&image, size, offset)?;
+    let image = crop(&image, margin)?;
     write_image(&image, matches.get_one::<PathBuf>(OUTPUT_ARG_NAME).unwrap())?;
     Ok(())
 }

@@ -1,6 +1,5 @@
 use crate::{
     image::Image,
-    operation::detection::edge::canny::canny_pipe,
     pipe::{
         FromPipe,
         Pipe,
@@ -16,8 +15,7 @@ where
     S: Pipe,
     S::Item: AsRef<Pixel>,
 {
-    // source.map(move |px| map_px(px, flags))
-    canny_pipe(source).unwrap()
+    source.map(move |px| map_px(px, flags))
 }
 
 fn map_px(px: impl AsRef<Pixel>, flags: PixelFlags) -> Pixel {

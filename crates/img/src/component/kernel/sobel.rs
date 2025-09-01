@@ -1,21 +1,34 @@
-use crate::{component::kernel::Kernel, error::{IndexResult, OutOfBoundsError}, pipe::Pipe, primitive::{offset::Offset, point::Point, size::Size}};
+use crate::{
+    component::kernel::Kernel,
+    error::{
+        IndexResult,
+        OutOfBoundsError,
+    },
+    pipe::Pipe,
+    primitive::{
+        offset::Offset,
+        point::Point,
+        size::Size,
+    },
+};
 
+const SOBEL_X: [[i16; 3]; 3] = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
 
-const SOBEL_X: [[i16; 3]; 3] = [
-[-1, 0, 1],
-[-2, 0, 2],
-[-1, 0, 1],
-];
-
-const SOBEL_Y: [[i16; 3]; 3] = [
-[-1, -2, -1],
-[0, 0, 0],
-[1, 2, 1],
-];
+const SOBEL_Y: [[i16; 3]; 3] = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]];
 
 pub struct Gradient {
     x: i16,
     y: i16,
+}
+
+impl Gradient {
+    pub fn magnitude(&self) -> f32 {
+        ((self.x.pow(2) + self.y.pow(2)) as f32).sqrt()
+    }
+
+    pub fn direction(&self) -> f32 {
+        (self.x as f32).atan2(self.y as f32)
+    }
 }
 
 #[derive(Default, Copy, Clone)]
@@ -27,10 +40,11 @@ impl SobelKernel {
     }
 }
 
-impl Kernel<f32, Gradient> for SobelKernel {
+impl Kernel<u8, Gradient> for SobelKernel {
     fn apply<P>(&self, pipe: &P, point: Point) -> IndexResult<Gradient>
     where
-        P: Pipe<Item = f32> {
+        P: Pipe<Item = u8>,
+    {
         if !in_bounds(pipe.size(), point) {
             return Err(OutOfBoundsError);
         }
@@ -39,18 +53,17 @@ impl Kernel<f32, Gradient> for SobelKernel {
             .iter()
             .zip(SOBEL_Y)
             .enumerate()
-            .flat_map(|(y, (row_x, row_y))|
-                row_x
-                    .iter()
-                    .zip(row_y)
-                    .enumerate()
-                    .map(move |(x, (x_value, y_value))| (Offset::new(x as isize - 1, y as isize - 1), x_value, y_value)))
-            .map(|(offset, x_value, y_value)|
-                {
-                    let pipe_value = pipe.get(point.offset_by(offset).unwrap()).expect("bug in pipe implementation") as i16;
-                    (x_value * pipe_value, y_value * pipe_value)
-                }
-            )
+            .flat_map(|(y, (row_x, row_y))| {
+                row_x.iter().zip(row_y).enumerate().map(move |(x, (x_value, y_value))| {
+                    (Offset::new(x as isize - 1, y as isize - 1), x_value, y_value)
+                })
+            })
+            .map(|(offset, x_value, y_value)| {
+                let pipe_value = pipe
+                    .get(point.offset_by(offset).unwrap())
+                    .expect("bug in pipe implementation") as i16;
+                (x_value * pipe_value, y_value * pipe_value)
+            })
             .reduce(|l, r| (l.0 + r.0, l.1 + r.1))
             .unwrap();
 

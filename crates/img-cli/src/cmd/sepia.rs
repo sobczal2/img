@@ -4,7 +4,10 @@ use clap::{
     ArgMatches,
     Command,
 };
-use img::{operation::color::sepia::sepia, pixel::PixelFlags};
+use img::{
+    operation::color::sepia::sepia,
+    pixel::PixelFlags,
+};
 
 use crate::io::{
     read_image,

@@ -1,17 +1,23 @@
 use crate::{
-    image::Image, pipe::{
-        FromPipe, Pipe
-    }, pixel::{
+    image::Image,
+    operation::detection::edge::canny::canny_pipe,
+    pipe::{
+        FromPipe,
+        Pipe,
+    },
+    pixel::{
         Pixel,
         PixelFlags,
-    }
+    },
 };
 
-
 pub fn grayscale_pipe<S>(source: S, flags: PixelFlags) -> impl Pipe<Item = Pixel>
-    where S: Pipe, S::Item: AsRef<Pixel>
+where
+    S: Pipe,
+    S::Item: AsRef<Pixel>,
 {
-    source.map(move |px| map_px(px, flags))
+    // source.map(move |px| map_px(px, flags))
+    canny_pipe(source).unwrap()
 }
 
 fn map_px(px: impl AsRef<Pixel>, flags: PixelFlags) -> Pixel {

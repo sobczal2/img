@@ -19,4 +19,3 @@ pub trait Kernel<In, Out> {
 
     fn size(&self) -> Size;
 }
-

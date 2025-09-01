@@ -99,14 +99,10 @@ impl<T: Into<Pixel>> FromPipe<T> for Image {
     where
         P: Pipe<Item = T>,
     {
-        let mut image = Image::empty(pipe.size());
+        let size = pipe.size();
+        let pixels = Box::from_iter(pipe.elements().map(Into::into));
 
-        image
-            .pixels
-            .iter_mut()
-            .zip(pipe.elements())
-            .for_each(|(target, source)| *target = source.into());
-        image
+        Self::new(size, pixels).unwrap()
     }
 }
 
@@ -118,18 +114,18 @@ impl<T: Into<Pixel> + Send> FromPipePar<T> for Image {
         P::Item: Send,
     {
         use rayon::iter::{
-            ParallelBridge,
-            ParallelIterator,
+            ParallelBridge, ParallelIterator,
         };
 
-        let mut image = Image::empty(pipe.size());
-        pipe.elements().par_bridge();
+        let size = pipe.size();
 
-        image.pixels.chunks_mut(image.size().width()).zip(pipe.rows()).par_bridge().for_each(
-            |(chunk, row)| {
-                chunk.iter_mut().zip(row).for_each(|(target, source)| *target = source.into());
-            },
-        );
-        image
+        let mut pixels = vec![Pixel::zero(); size.area()];
+
+        pixels.iter_mut().enumerate().par_bridge().for_each(|(index, pixel)| {
+            let point = Point::from_index(index, size).unwrap();
+            *pixel = pipe.get(point).unwrap().into();
+        });
+
+        Self::new(size, pixels.into_boxed_slice()).unwrap()
     }
 }

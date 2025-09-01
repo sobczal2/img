@@ -14,7 +14,7 @@ use crate::{
 pub const CMD_NAME: &str = "sepia";
 
 pub fn gamma_correction(image: &Image, gamma: f32) -> Image {
-    let pipe = image.pipe().map(|px| map_px(px, gamma));
+    let pipe = image.pipe().map(move |px| map_px(px, gamma));
     Image::from_pipe(pipe)
 }
 

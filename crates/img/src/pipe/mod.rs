@@ -2,10 +2,14 @@ use crate::{
     component::kernel::Kernel,
     error::IndexResult,
     pipe::{
-        cloned::ClonedPipe, colors::{ColorsPipe, OneshotPipe, PipeFactory}, iter::{
+        cloned::ClonedPipe,
+        iter::{
             Elements,
             Rows,
-        }, kernel::KernelPipe, map::MapPipe, remap::RemapPipe, swap::SwapPipe
+        },
+        kernel::KernelPipe,
+        map::MapPipe,
+        remap::RemapPipe,
     },
     primitive::{
         point::Point,
@@ -18,9 +22,8 @@ pub mod image;
 pub mod iter;
 pub mod kernel;
 pub mod map;
-pub mod colors;
+pub mod materialize;
 pub mod remap;
-pub mod swap;
 
 /// A trait for chaining operations for a 2D structures.
 ///
@@ -149,16 +152,6 @@ pub trait Pipe {
         K: Kernel<Self::Item, T>,
     {
         KernelPipe::new(self, kernel)
-    }
-
-    fn colors(self,
-        red_pipe_factory: PipeFactory,
-        green_pipe_factory: PipeFactory,
-        blue_pipe_factory: PipeFactory,
-        alpha_pipe_factory: PipeFactory
-    ) -> ColorsPipe<Self>
-    where Self: Sized {
-        ColorsPipe::new(self, red_pipe_factory, green_pipe_factory, blue_pipe_factory, alpha_pipe_factory)
     }
 }
 

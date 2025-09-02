@@ -33,7 +33,7 @@ pub trait Lens {
     /// `Pixel`, but this is not a requirement.
     type Item;
 
-    /// Read value at `point`.
+    /// Look at value for given `point`.
     ///
     /// Returns `Ok(Self::Item)` if point is within bounds, `OutOfBoundsError`
     /// otherwise. This should always return a value when `point` is contained
@@ -61,16 +61,16 @@ pub trait Lens {
     ///
     /// let lens = image.lens();
     ///
-    /// assert!(lens.get(Point::new(0, 0)).is_ok());
-    /// assert!(lens.get(Point::new(9, 0)).is_ok());
-    /// assert!(lens.get(Point::new(0, 19)).is_ok());
-    /// assert!(lens.get(Point::new(10, 0)).is_err());
-    /// assert!(lens.get(Point::new(0, 20)).is_err());
+    /// assert!(lens.look(Point::new(0, 0)).is_ok());
+    /// assert!(lens.look(Point::new(9, 0)).is_ok());
+    /// assert!(lens.look(Point::new(0, 19)).is_ok());
+    /// assert!(lens.look(Point::new(10, 0)).is_err());
+    /// assert!(lens.look(Point::new(0, 20)).is_err());
     ///
     /// # Ok(())
     /// # }
     /// ```
-    fn get(&self, point: Point) -> IndexResult<Self::Item>;
+    fn look(&self, point: Point) -> IndexResult<Self::Item>;
 
     /// Get size of lens's output. This should be aligned with the behaviour of
     /// `get()`.
@@ -98,9 +98,9 @@ pub trait Lens {
     /// let valid_point = Point::new(0, 0);
     /// let invalid_point = Point::new(10, 0);
     ///
-    /// assert!(lens.get(valid_point).is_ok());
+    /// assert!(lens.look(valid_point).is_ok());
     /// assert!(lens.size().contains(valid_point));
-    /// assert!(lens.get(invalid_point).is_err());
+    /// assert!(lens.look(invalid_point).is_err());
     /// assert!(!lens.size().contains(invalid_point));
     ///
     /// # Ok(())

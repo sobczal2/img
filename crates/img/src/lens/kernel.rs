@@ -61,7 +61,7 @@ where
 {
     type Item = T;
 
-    fn get(&self, point: Point) -> IndexResult<Self::Item> {
+    fn look(&self, point: Point) -> IndexResult<Self::Item> {
         let source_point =
             Point::new(point.x() + self.margin.left(), point.y() + self.margin.top());
 

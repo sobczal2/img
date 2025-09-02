@@ -32,8 +32,8 @@ macro_rules! color_lens {
         impl Lens for $name {
             type Item = u8;
 
-            fn get(&self, point: Point) -> IndexResult<Self::Item> {
-                Ok(self.source.get(point)?.$method())
+            fn look(&self, point: Point) -> IndexResult<Self::Item> {
+                Ok(self.source.look(point)?.$method())
             }
 
             fn size(&self) -> Size {
@@ -95,15 +95,15 @@ where
 {
     type Item = Pixel;
 
-    fn get(&self, point: Point) -> IndexResult<Self::Item> {
+    fn look(&self, point: Point) -> IndexResult<Self::Item> {
         if !self.size.contains(point) {
             return Err(OutOfBoundsError);
         }
 
-        let red = self.red.get(point).expect("bug in red lens implementation");
-        let green = self.green.get(point).expect("bug in green lens implementation");
-        let blue = self.blue.get(point).expect("bug in blue lens implementation");
-        let alpha = self.alpha.get(point).expect("bug in alpha lens implementation");
+        let red = self.red.look(point).expect("bug in red lens implementation");
+        let green = self.green.look(point).expect("bug in green lens implementation");
+        let blue = self.blue.look(point).expect("bug in blue lens implementation");
+        let alpha = self.alpha.look(point).expect("bug in alpha lens implementation");
 
         Ok(Pixel::new([red, green, blue, alpha]))
     }

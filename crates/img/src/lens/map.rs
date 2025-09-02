@@ -24,8 +24,8 @@ where
 {
     type Item = T;
 
-    fn get(&self, point: Point) -> IndexResult<Self::Item> {
-        Ok((self.f)(self.source.get(point)?))
+    fn look(&self, point: Point) -> IndexResult<Self::Item> {
+        Ok((self.f)(self.source.look(point)?))
     }
 
     fn size(&self) -> Size {

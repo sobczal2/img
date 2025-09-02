@@ -124,7 +124,7 @@ impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
 
         pixels.iter_mut().enumerate().par_bridge().for_each(|(index, pixel)| {
             let point = Point::from_index(index, size).unwrap();
-            *pixel = lens.get(point).unwrap().into();
+            *pixel = lens.look(point).unwrap().into();
         });
 
         Self::new(size, pixels.into_boxed_slice()).unwrap()

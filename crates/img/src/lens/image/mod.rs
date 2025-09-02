@@ -32,7 +32,7 @@ impl<'a> ImageLens<'a> {
 impl<'a> Lens for ImageLens<'a> {
     type Item = &'a Pixel;
 
-    fn get(&self, point: Point) -> IndexResult<&'a Pixel> {
+    fn look(&self, point: Point) -> IndexResult<&'a Pixel> {
         self.0.pixel(point)
     }
 

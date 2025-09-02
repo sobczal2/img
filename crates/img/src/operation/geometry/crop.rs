@@ -32,7 +32,7 @@ where
             let original_point =
                 point.offset_by(Offset::new(top_left.x() as isize, top_left.y() as isize)).unwrap();
 
-            *lens.get(original_point).expect("bug in lens implementation").as_ref()
+            *lens.look(original_point).expect("bug in lens implementation").as_ref()
         },
         new_size,
     ))

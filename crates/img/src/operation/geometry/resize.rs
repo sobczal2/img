@@ -28,7 +28,7 @@ pub fn resize(image: &Image, scale: Scale) -> Result<Image> {
         .lens()
         .remap(
             |lens, point| {
-                lens.get(inverse_scale.translate(point)).expect("out of bounds in resize")
+                lens.look(inverse_scale.translate(point)).expect("out of bounds in resize")
             },
             size,
         )

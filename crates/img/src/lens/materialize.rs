@@ -42,7 +42,7 @@ where
 {
     type Item = T;
 
-    fn get(&self, point: Point) -> IndexResult<Self::Item> {
+    fn look(&self, point: Point) -> IndexResult<Self::Item> {
         let index = point.to_index(self.size)?;
         Ok(self.values[index].clone())
     }

@@ -55,7 +55,7 @@ where
             return None;
         }
 
-        let value = self.lens.get(self.current).expect("bug in lens implementation");
+        let value = self.lens.look(self.current).expect("bug in lens implementation");
         self.current = Point::new(self.current.x() + 1, self.current.y());
 
         Some(value)
@@ -85,7 +85,7 @@ where
             Ok(point) => point,
             Err(_) => return None,
         };
-        let value = self.lens.get(point).expect("bug in lens implementation");
+        let value = self.lens.look(point).expect("bug in lens implementation");
         self.current += 1;
 
         Some(value)

@@ -25,8 +25,8 @@ where
 {
     type Item = S;
 
-    fn get(&self, point: Point) -> IndexResult<Self::Item> {
-        self.source.get(point).cloned()
+    fn look(&self, point: Point) -> IndexResult<Self::Item> {
+        self.source.look(point).cloned()
     }
 
     fn size(&self) -> Size {

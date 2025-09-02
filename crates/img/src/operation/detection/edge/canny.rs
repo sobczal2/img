@@ -105,17 +105,17 @@ where
     source.map(|g| (g.magnitude(), g.direction())).remap(
         |s, p| {
             let p = p.offset_by(Offset::new(1, 1)).unwrap();
-            let gradient_a = s.get(p).unwrap();
+            let gradient_a = s.look(p).unwrap();
             let direction = GradientDirection::from_angle(gradient_a.1);
 
             let gradient_b = match direction {
-                GradientDirection::Horizontal => s.get(Point::new(p.x() + 1, p.y())).unwrap(),
-                GradientDirection::Vertical => s.get(Point::new(p.x(), p.y() + 1)).unwrap(),
+                GradientDirection::Horizontal => s.look(Point::new(p.x() + 1, p.y())).unwrap(),
+                GradientDirection::Vertical => s.look(Point::new(p.x(), p.y() + 1)).unwrap(),
             };
 
             let gradient_c = match direction {
-                GradientDirection::Horizontal => s.get(Point::new(p.x() - 1, p.y())).unwrap(),
-                GradientDirection::Vertical => s.get(Point::new(p.x(), p.y() - 1)).unwrap(),
+                GradientDirection::Horizontal => s.look(Point::new(p.x() - 1, p.y())).unwrap(),
+                GradientDirection::Vertical => s.look(Point::new(p.x(), p.y() - 1)).unwrap(),
             };
 
             if gradient_a.0 > gradient_b.0 && gradient_a.0 > gradient_c.0 {
@@ -138,7 +138,7 @@ impl Kernel<f32, u8> for HysteresisThresholdingKernel {
     where
         P: Lens<Item = f32>,
     {
-        let v = lens.get(point)?;
+        let v = lens.look(point)?;
 
         if v > self.max {
             return Ok(255u8);
@@ -152,7 +152,7 @@ impl Kernel<f32, u8> for HysteresisThresholdingKernel {
             .cartesian_product(-1..=1)
             .map(|(x, y)| Offset::new(x, y))
             .map(|offset| point.offset_by(offset).unwrap())
-            .map(|point| lens.get(point).unwrap())
+            .map(|point| lens.look(point).unwrap())
             .any(|value| value > self.max);
 
         if neighbor_exists { Ok(255u8) } else { Ok(0u8) }

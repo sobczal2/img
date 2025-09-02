@@ -79,7 +79,7 @@ where
 
         let center = self.size.middle();
 
-        let original = lens.get(point).unwrap();
+        let original = lens.look(point).unwrap();
         let sum = self
             .buffer
             .iter()
@@ -87,7 +87,7 @@ where
             .map(|(index, value)| (Point::from_index(index, self.size).unwrap(), value))
             .map(|(kernel_point, value)| {
                 let offset = center - kernel_point;
-                let current = lens.get(point.offset_by(offset).unwrap()).unwrap();
+                let current = lens.look(point.offset_by(offset).unwrap()).unwrap();
                 let pixel = current.as_ref();
 
                 IntermediatePixel(

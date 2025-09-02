@@ -6,10 +6,10 @@ use crate::{
         gaussian::GaussianKernel,
     },
     image::Image,
-    pipe::{
+    lens::{
         self,
-        FromPipe,
-        Pipe,
+        FromLens,
+        Lens,
     },
     pixel::{
         Pixel,
@@ -23,26 +23,26 @@ use crate::{
 pub enum CreationError {
     #[error("failed to create gaussian kernel: {0}")]
     KernelCreation(#[from] kernel::gaussian::CreationError),
-    #[error("failed to create kernel pipe: {0}")]
-    KernelPipeCreation(#[from] pipe::kernel::CreationError),
+    #[error("failed to create kernel lens: {0}")]
+    KernelLensCreation(#[from] lens::kernel::CreationError),
 }
 
 pub type CreationResult<T> = std::result::Result<T, CreationError>;
 
-pub fn gaussian_blur_pipe<S>(
+pub fn gaussian_blur_lens<S>(
     source: S,
     radius: usize,
     sigma: f32,
     flags: PixelFlags,
-) -> CreationResult<impl Pipe<Item = Pixel>>
+) -> CreationResult<impl Lens<Item = Pixel>>
 where
-    S: Pipe,
+    S: Lens,
     S::Item: AsRef<Pixel>,
 {
     let kernel = GaussianKernel::new(Size::from_radius(radius), sigma, flags)?;
-    let pipe = source.kernel(kernel)?;
+    let lens = source.kernel(kernel)?;
 
-    Ok(pipe)
+    Ok(lens)
 }
 
 pub fn gaussian_blur(
@@ -51,8 +51,8 @@ pub fn gaussian_blur(
     sigma: f32,
     flags: PixelFlags,
 ) -> CreationResult<Image> {
-    let pipe = gaussian_blur_pipe(image.pipe(), radius, sigma, flags)?;
-    Ok(Image::from_pipe(pipe))
+    let lens = gaussian_blur_lens(image.lens(), radius, sigma, flags)?;
+    Ok(Image::from_lens(lens))
 }
 
 #[cfg(feature = "parallel")]
@@ -62,8 +62,8 @@ pub fn gaussian_blur_par(
     sigma: f32,
     flags: PixelFlags,
 ) -> CreationResult<Image> {
-    use crate::pipe::FromPipePar;
+    use crate::lens::FromLensPar;
 
-    let pipe = gaussian_blur_pipe(image.pipe(), radius, sigma, flags)?;
-    Ok(Image::from_pipe_par(pipe))
+    let lens = gaussian_blur_lens(image.lens(), radius, sigma, flags)?;
+    Ok(Image::from_lens_par(lens))
 }

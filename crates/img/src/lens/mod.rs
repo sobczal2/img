@@ -1,15 +1,15 @@
 use crate::{
     component::kernel::Kernel,
     error::IndexResult,
-    pipe::{
-        cloned::ClonedPipe,
+    lens::{
+        cloned::ClonedLens,
         iter::{
             Elements,
             Rows,
         },
-        kernel::KernelPipe,
-        map::MapPipe,
-        remap::RemapPipe,
+        kernel::KernelLens,
+        map::MapLens,
+        remap::RemapLens,
     },
     primitive::{
         point::Point,
@@ -28,7 +28,7 @@ pub mod remap;
 /// A trait for chaining operations for a 2D structures.
 ///
 /// This is main way for applying transformations and change `Image`.
-pub trait Pipe {
+pub trait Lens {
     /// Type of individual items within underlying 2d structure. This can be
     /// `Pixel`, but this is not a requirement.
     type Item;
@@ -49,7 +49,7 @@ pub trait Pipe {
     /// ```
     /// use img::{
     ///     image::Image,
-    ///     pipe::Pipe,
+    ///     lens::Lens,
     ///     primitive::{
     ///         point::Point,
     ///         size::Size,
@@ -59,20 +59,20 @@ pub trait Pipe {
     ///
     /// let image = Image::empty(Size::from_usize(10, 20)?);
     ///
-    /// let pipe = image.pipe();
+    /// let lens = image.lens();
     ///
-    /// assert!(pipe.get(Point::new(0, 0)).is_ok());
-    /// assert!(pipe.get(Point::new(9, 0)).is_ok());
-    /// assert!(pipe.get(Point::new(0, 19)).is_ok());
-    /// assert!(pipe.get(Point::new(10, 0)).is_err());
-    /// assert!(pipe.get(Point::new(0, 20)).is_err());
+    /// assert!(lens.get(Point::new(0, 0)).is_ok());
+    /// assert!(lens.get(Point::new(9, 0)).is_ok());
+    /// assert!(lens.get(Point::new(0, 19)).is_ok());
+    /// assert!(lens.get(Point::new(10, 0)).is_err());
+    /// assert!(lens.get(Point::new(0, 20)).is_err());
     ///
     /// # Ok(())
     /// # }
     /// ```
     fn get(&self, point: Point) -> IndexResult<Self::Item>;
 
-    /// Get size of pipe's output. This should be aligned with the behaviour of
+    /// Get size of lens's output. This should be aligned with the behaviour of
     /// `get()`.
     ///
     /// # Examples
@@ -80,7 +80,7 @@ pub trait Pipe {
     /// ```
     /// use img::{
     ///     image::Image,
-    ///     pipe::Pipe,
+    ///     lens::Lens,
     ///     primitive::{
     ///         point::Point,
     ///         size::Size,
@@ -91,17 +91,17 @@ pub trait Pipe {
     /// let size = Size::from_usize(10, 20)?;
     /// let image = Image::empty(size);
     ///
-    /// let pipe = image.pipe();
+    /// let lens = image.lens();
     ///
-    /// assert_eq!(pipe.size(), size);
+    /// assert_eq!(lens.size(), size);
     ///
     /// let valid_point = Point::new(0, 0);
     /// let invalid_point = Point::new(10, 0);
     ///
-    /// assert!(pipe.get(valid_point).is_ok());
-    /// assert!(pipe.size().contains(valid_point));
-    /// assert!(pipe.get(invalid_point).is_err());
-    /// assert!(!pipe.size().contains(invalid_point));
+    /// assert!(lens.get(valid_point).is_ok());
+    /// assert!(lens.size().contains(valid_point));
+    /// assert!(lens.get(invalid_point).is_err());
+    /// assert!(!lens.size().contains(invalid_point));
     ///
     /// # Ok(())
     /// # }
@@ -122,49 +122,49 @@ pub trait Pipe {
         Elements::new(self)
     }
 
-    fn map<T, F>(self, f: F) -> MapPipe<Self, F>
+    fn map<T, F>(self, f: F) -> MapLens<Self, F>
     where
         Self: Sized,
         F: Fn(Self::Item) -> T,
     {
-        MapPipe::new(self, f)
+        MapLens::new(self, f)
     }
 
-    fn remap<T, F>(self, f: F, size: Size) -> RemapPipe<Self, F>
+    fn remap<T, F>(self, f: F, size: Size) -> RemapLens<Self, F>
     where
         Self: Sized,
         F: Fn(&Self, Point) -> T,
     {
-        RemapPipe::new(self, f, size)
+        RemapLens::new(self, f, size)
     }
 
-    fn cloned<'a>(self) -> ClonedPipe<Self>
+    fn cloned<'a>(self) -> ClonedLens<Self>
     where
         Self: Sized,
         Self::Item: Clone + 'a,
     {
-        ClonedPipe::new(self)
+        ClonedLens::new(self)
     }
 
-    fn kernel<K, T>(self, kernel: K) -> Result<KernelPipe<Self, K, T>, kernel::CreationError>
+    fn kernel<K, T>(self, kernel: K) -> Result<KernelLens<Self, K, T>, kernel::CreationError>
     where
         Self: Sized,
         K: Kernel<Self::Item, T>,
     {
-        KernelPipe::new(self, kernel)
+        KernelLens::new(self, kernel)
     }
 }
 
-pub trait FromPipe<T>: Sized {
-    fn from_pipe<P>(pipe: P) -> Self
+pub trait FromLens<T>: Sized {
+    fn from_lens<P>(lens: P) -> Self
     where
-        P: Pipe<Item = T>;
+        P: Lens<Item = T>;
 }
 
 #[cfg(feature = "parallel")]
-pub trait FromPipePar<T>: Sized {
-    fn from_pipe_par<P>(pipe: P) -> Self
+pub trait FromLensPar<T>: Sized {
+    fn from_lens_par<P>(lens: P) -> Self
     where
-        P: Pipe<Item = T> + Send + Sync,
+        P: Lens<Item = T> + Send + Sync,
         P::Item: Send;
 }

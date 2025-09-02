@@ -1,6 +1,6 @@
 use crate::{
     error::IndexResult,
-    pipe::Pipe,
+    lens::Lens,
     primitive::{
         point::Point,
         size::Size,
@@ -8,19 +8,19 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub struct ClonedPipe<P> {
+pub struct ClonedLens<P> {
     source: P,
 }
 
-impl<P> ClonedPipe<P> {
+impl<P> ClonedLens<P> {
     pub fn new(source: P) -> Self {
         Self { source }
     }
 }
 
-impl<'a, S, P> Pipe for ClonedPipe<P>
+impl<'a, S, P> Lens for ClonedLens<P>
 where
-    P: Pipe<Item = &'a S>,
+    P: Lens<Item = &'a S>,
     S: Clone + 'a,
 {
     type Item = S;

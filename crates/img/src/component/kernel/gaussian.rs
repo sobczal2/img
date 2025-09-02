@@ -12,7 +12,7 @@ use crate::{
         convolution::ConvolutionKernel,
     },
     error::IndexResult,
-    pipe::Pipe,
+    lens::Lens,
     pixel::{
         Pixel,
         PixelFlags,
@@ -72,11 +72,11 @@ impl<In> Kernel<In, Pixel> for GaussianKernel
 where
     In: AsRef<Pixel>,
 {
-    fn apply<P>(&self, pipe: &P, point: Point) -> IndexResult<Pixel>
+    fn apply<P>(&self, lens: &P, point: Point) -> IndexResult<Pixel>
     where
-        P: Pipe<Item = In>,
+        P: Lens<Item = In>,
     {
-        self.inner.apply(pipe, point)
+        self.inner.apply(lens, point)
     }
 
     fn size(&self) -> Size {

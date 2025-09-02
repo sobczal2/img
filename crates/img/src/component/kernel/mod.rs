@@ -1,6 +1,6 @@
 use crate::{
     error::IndexResult,
-    pipe::Pipe,
+    lens::Lens,
     primitive::{
         point::Point,
         size::Size,
@@ -13,9 +13,9 @@ pub mod mean;
 pub mod sobel;
 
 pub trait Kernel<In, Out> {
-    fn apply<P>(&self, pipe: &P, point: Point) -> IndexResult<Out>
+    fn apply<P>(&self, lens: &P, point: Point) -> IndexResult<Out>
     where
-        P: Pipe<Item = In>;
+        P: Lens<Item = In>;
 
     fn size(&self) -> Size;
 }

@@ -2,11 +2,11 @@ use thiserror::Error;
 
 use crate::{
     error::IndexResult,
-    pipe::{
-        FromPipe,
-        FromPipePar,
-        Pipe,
-        image::ImagePipe,
+    lens::{
+        FromLens,
+        FromLensPar,
+        Lens,
+        image::ImageLens,
     },
     pixel::Pixel,
     primitive::{
@@ -89,28 +89,28 @@ impl Image {
         self.pixels.iter().flat_map(|px| px.buffer()).cloned().collect()
     }
 
-    pub fn pipe(&self) -> ImagePipe<'_> {
-        ImagePipe::new(self)
+    pub fn lens(&self) -> ImageLens<'_> {
+        ImageLens::new(self)
     }
 }
 
-impl<T: Into<Pixel>> FromPipe<T> for Image {
-    fn from_pipe<P>(pipe: P) -> Self
+impl<T: Into<Pixel>> FromLens<T> for Image {
+    fn from_lens<P>(lens: P) -> Self
     where
-        P: Pipe<Item = T>,
+        P: Lens<Item = T>,
     {
-        let size = pipe.size();
-        let pixels = Box::from_iter(pipe.elements().map(Into::into));
+        let size = lens.size();
+        let pixels = Box::from_iter(lens.elements().map(Into::into));
 
         Self::new(size, pixels).unwrap()
     }
 }
 
 #[cfg(feature = "parallel")]
-impl<T: Into<Pixel> + Send> FromPipePar<T> for Image {
-    fn from_pipe_par<P>(pipe: P) -> Self
+impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
+    fn from_lens_par<P>(lens: P) -> Self
     where
-        P: Pipe<Item = T> + Send + Sync,
+        P: Lens<Item = T> + Send + Sync,
         P::Item: Send,
     {
         use rayon::iter::{
@@ -118,13 +118,13 @@ impl<T: Into<Pixel> + Send> FromPipePar<T> for Image {
             ParallelIterator,
         };
 
-        let size = pipe.size();
+        let size = lens.size();
 
         let mut pixels = vec![Pixel::zero(); size.area()];
 
         pixels.iter_mut().enumerate().par_bridge().for_each(|(index, pixel)| {
             let point = Point::from_index(index, size).unwrap();
-            *pixel = pipe.get(point).unwrap().into();
+            *pixel = lens.get(point).unwrap().into();
         });
 
         Self::new(size, pixels.into_boxed_slice()).unwrap()

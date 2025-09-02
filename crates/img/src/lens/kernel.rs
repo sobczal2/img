@@ -5,7 +5,7 @@ use thiserror::Error;
 use crate::{
     component::kernel::Kernel,
     error::IndexResult,
-    pipe::Pipe,
+    lens::Lens,
     primitive::{
         margin::Margin,
         point::Point,
@@ -22,7 +22,7 @@ pub enum CreationError {
 }
 
 #[derive(Clone)]
-pub struct KernelPipe<P, K, T> {
+pub struct KernelLens<P, K, T> {
     source: P,
     kernel: K,
     size: Size,
@@ -30,7 +30,7 @@ pub struct KernelPipe<P, K, T> {
     _phantom_data: PhantomData<T>,
 }
 
-impl<P: Pipe, K, T> KernelPipe<P, K, T>
+impl<P: Lens, K, T> KernelLens<P, K, T>
 where
     K: Kernel<P::Item, T>,
 {
@@ -55,7 +55,7 @@ where
     }
 }
 
-impl<P: Pipe, K, T> Pipe for KernelPipe<P, K, T>
+impl<P: Lens, K, T> Lens for KernelLens<P, K, T>
 where
     K: Kernel<P::Item, T>,
 {

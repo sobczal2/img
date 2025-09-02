@@ -1,8 +1,8 @@
 use crate::{
     image::Image,
-    pipe::{
-        FromPipe,
-        Pipe,
+    lens::{
+        FromLens,
+        Lens,
     },
     pixel::{
         Pixel,
@@ -14,8 +14,8 @@ use crate::{
 pub const CMD_NAME: &str = "sepia";
 
 pub fn gamma_correction(image: &Image, gamma: f32) -> Image {
-    let pipe = image.pipe().map(move |px| map_px(px, gamma));
-    Image::from_pipe(pipe)
+    let lens = image.lens().map(move |px| map_px(px, gamma));
+    Image::from_lens(lens)
 }
 
 fn map_px(px: &Pixel, gamma: f32) -> Pixel {

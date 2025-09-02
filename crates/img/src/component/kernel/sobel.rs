@@ -4,7 +4,7 @@ use crate::{
         IndexResult,
         OutOfBoundsError,
     },
-    pipe::Pipe,
+    lens::Lens,
     primitive::{
         offset::Offset,
         point::Point,
@@ -41,11 +41,11 @@ impl SobelKernel {
 }
 
 impl Kernel<u8, Gradient> for SobelKernel {
-    fn apply<P>(&self, pipe: &P, point: Point) -> IndexResult<Gradient>
+    fn apply<P>(&self, lens: &P, point: Point) -> IndexResult<Gradient>
     where
-        P: Pipe<Item = u8>,
+        P: Lens<Item = u8>,
     {
-        if !in_bounds(pipe.size(), point) {
+        if !in_bounds(lens.size(), point) {
             return Err(OutOfBoundsError);
         }
 
@@ -59,10 +59,10 @@ impl Kernel<u8, Gradient> for SobelKernel {
                 })
             })
             .map(|(offset, x_value, y_value)| {
-                let pipe_value = pipe
+                let lens_value = lens
                     .get(point.offset_by(offset).unwrap())
-                    .expect("bug in pipe implementation") as i16;
-                (x_value * pipe_value, y_value * pipe_value)
+                    .expect("bug in lens implementation") as i16;
+                (x_value * lens_value, y_value * lens_value)
             })
             .reduce(|l, r| (l.0 + r.0, l.1 + r.1))
             .unwrap();

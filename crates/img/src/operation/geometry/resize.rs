@@ -2,9 +2,9 @@ use thiserror::Error;
 
 use crate::{
     image::Image,
-    pipe::{
-        FromPipe,
-        Pipe,
+    lens::{
+        FromLens,
+        Lens,
     },
     primitive::{
         scale::Scale,
@@ -24,17 +24,17 @@ pub fn resize(image: &Image, scale: Scale) -> Result<Image> {
     let size = scale.apply(image.size())?;
     let inverse_scale = scale.inverse();
 
-    let pipe = image
-        .pipe()
+    let lens = image
+        .lens()
         .remap(
-            |pipe, point| {
-                pipe.get(inverse_scale.translate(point)).expect("out of bounds in resize")
+            |lens, point| {
+                lens.get(inverse_scale.translate(point)).expect("out of bounds in resize")
             },
             size,
         )
         .cloned();
 
-    let image = Image::from_pipe(pipe);
+    let image = Image::from_lens(lens);
 
     Ok(image)
 }

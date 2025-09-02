@@ -14,10 +14,10 @@ use crate::{
     },
     error::IndexResult,
     image::Image,
-    pipe::{
-        FromPipe,
-        Pipe,
-        image::PixelPipe,
+    lens::{
+        FromLens,
+        Lens,
+        image::PixelLens,
         kernel,
     },
     pixel::{
@@ -40,45 +40,45 @@ pub enum CreationError {
 
 pub type CreationResult<T> = std::result::Result<T, CreationError>;
 
-pub fn canny_pipe<S>(source: S) -> Result<impl Pipe<Item = Pixel>, CreationError>
+pub fn canny_lens<S>(source: S) -> Result<impl Lens<Item = Pixel>, CreationError>
 where
-    S: Pipe,
+    S: Lens,
     S::Item: AsRef<Pixel>,
 {
-    let pipe = source
+    let lens = source
         .kernel(GaussianKernel::new(Size::from_radius(2), 2f32, PixelFlags::RGB).unwrap())?
         .colors(
-            single_channel_pipe,
-            single_channel_pipe,
-            single_channel_pipe,
+            single_channel_lens,
+            single_channel_lens,
+            single_channel_lens,
             CreationResult::Ok,
         )?;
 
-    Ok(pipe)
+    Ok(lens)
 }
 
 pub fn canny(image: &Image) -> Image {
-    let pipe = canny_pipe(image.pipe()).unwrap();
-    Image::from_pipe(pipe)
+    let lens = canny_lens(image.lens()).unwrap();
+    Image::from_lens(lens)
 }
 
 #[cfg(feature = "parallel")]
 pub fn canny_par(image: &Image) -> Image {
-    use crate::pipe::FromPipePar;
+    use crate::lens::FromLensPar;
 
-    let pipe = canny_pipe(image.pipe()).unwrap();
-    Image::from_pipe_par(pipe)
+    let lens = canny_lens(image.lens()).unwrap();
+    Image::from_lens_par(lens)
 }
 
-fn single_channel_pipe<S>(source: S) -> Result<impl Pipe<Item = u8>, CreationError>
+fn single_channel_lens<S>(source: S) -> Result<impl Lens<Item = u8>, CreationError>
 where
-    S: Pipe<Item = u8>,
+    S: Lens<Item = u8>,
 {
-    let pipe = source.kernel(SobelKernel::new())?;
-    let pipe = non_maximum_suppression_pipe(pipe);
-    let pipe = hysteresis_thresholding_pipe(pipe);
+    let lens = source.kernel(SobelKernel::new())?;
+    let lens = non_maximum_suppression_lens(lens);
+    let lens = hysteresis_thresholding_lens(lens);
 
-    Ok(pipe)
+    Ok(lens)
 }
 
 enum GradientDirection {
@@ -97,9 +97,9 @@ impl GradientDirection {
     }
 }
 
-fn non_maximum_suppression_pipe<S>(source: S) -> impl Pipe<Item = f32>
+fn non_maximum_suppression_lens<S>(source: S) -> impl Lens<Item = f32>
 where
-    S: Pipe<Item = Gradient>,
+    S: Lens<Item = Gradient>,
 {
     let size = source.size().apply_margin(Margin::unified(1)).unwrap();
     source.map(|g| (g.magnitude(), g.direction())).remap(
@@ -134,11 +134,11 @@ struct HysteresisThresholdingKernel {
 }
 
 impl Kernel<f32, u8> for HysteresisThresholdingKernel {
-    fn apply<P>(&self, pipe: &P, point: Point) -> IndexResult<u8>
+    fn apply<P>(&self, lens: &P, point: Point) -> IndexResult<u8>
     where
-        P: Pipe<Item = f32>,
+        P: Lens<Item = f32>,
     {
-        let v = pipe.get(point)?;
+        let v = lens.get(point)?;
 
         if v > self.max {
             return Ok(255u8);
@@ -152,7 +152,7 @@ impl Kernel<f32, u8> for HysteresisThresholdingKernel {
             .cartesian_product(-1..=1)
             .map(|(x, y)| Offset::new(x, y))
             .map(|offset| point.offset_by(offset).unwrap())
-            .map(|point| pipe.get(point).unwrap())
+            .map(|point| lens.get(point).unwrap())
             .any(|value| value > self.max);
 
         if neighbor_exists { Ok(255u8) } else { Ok(0u8) }
@@ -163,9 +163,9 @@ impl Kernel<f32, u8> for HysteresisThresholdingKernel {
     }
 }
 
-fn hysteresis_thresholding_pipe<S>(source: S) -> impl Pipe<Item = u8>
+fn hysteresis_thresholding_lens<S>(source: S) -> impl Lens<Item = u8>
 where
-    S: Pipe<Item = f32>,
+    S: Lens<Item = f32>,
 {
     let min = 10f32;
     let max = 20f32;

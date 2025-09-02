@@ -1,8 +1,8 @@
 use crate::{
     image::Image,
-    pipe::{
-        FromPipe,
-        Pipe,
+    lens::{
+        FromLens,
+        Lens,
     },
     pixel::{
         Pixel,
@@ -10,9 +10,9 @@ use crate::{
     },
 };
 
-pub fn grayscale_pipe<S>(source: S, flags: PixelFlags) -> impl Pipe<Item = Pixel>
+pub fn grayscale_lens<S>(source: S, flags: PixelFlags) -> impl Lens<Item = Pixel>
 where
-    S: Pipe,
+    S: Lens,
     S::Item: AsRef<Pixel>,
 {
     source.map(move |px| map_px(px, flags))
@@ -30,14 +30,14 @@ fn map_px(px: impl AsRef<Pixel>, flags: PixelFlags) -> Pixel {
 }
 
 pub fn grayscale(image: &Image, flags: PixelFlags) -> Image {
-    let pipe = grayscale_pipe(image.pipe(), flags);
-    Image::from_pipe(pipe)
+    let lens = grayscale_lens(image.lens(), flags);
+    Image::from_lens(lens)
 }
 
 #[cfg(feature = "parallel")]
 pub fn grayscale_par(image: &Image, flags: PixelFlags) -> Image {
-    use crate::pipe::FromPipePar;
+    use crate::lens::FromLensPar;
 
-    let pipe = grayscale_pipe(image.pipe(), flags);
-    Image::from_pipe_par(pipe)
+    let lens = grayscale_lens(image.lens(), flags);
+    Image::from_lens_par(lens)
 }

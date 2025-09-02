@@ -6,7 +6,10 @@ use clap::{
     arg,
     value_parser,
 };
-use img::operation::color::gamma_correction::gamma_correction;
+use img::{
+    operation::color::gamma_correction::gamma_correction,
+    pixel::PixelFlags,
+};
 
 use crate::io::{
     read_image,
@@ -20,7 +23,7 @@ use super::common::{
     output_arg,
 };
 
-pub const CMD_NAME: &str = "gamma";
+pub const CMD_NAME: &str = "gamma-correction";
 
 pub fn subcommand() -> Command {
     Command::new(CMD_NAME).arg(input_arg()).arg(output_arg()).arg(
@@ -33,7 +36,7 @@ pub fn subcommand() -> Command {
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     let image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
     let gamma = matches.get_one::<f32>("gamma").unwrap();
-    let image = gamma_correction(&image, *gamma);
+    let image = gamma_correction(&image, *gamma, PixelFlags::RGB);
     write_image(&image, matches.get_one::<PathBuf>(OUTPUT_ARG_NAME).unwrap())?;
     Ok(())
 }

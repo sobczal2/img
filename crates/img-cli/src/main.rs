@@ -11,7 +11,7 @@ use clap::{
 };
 use cmd::{
     crop,
-    gamma,
+    gamma_correction,
     grayscale,
     resize,
     sepia,
@@ -31,7 +31,7 @@ fn main() {
         .subcommand(resize::subcommand())
         .subcommand(crop::subcommand())
         .subcommand(blur::subcommand())
-        .subcommand(gamma::subcommand())
+        .subcommand(gamma_correction::subcommand())
         .subcommand(canny::subcommand());
 
     if let Err(e) = execute_command(command) {
@@ -48,7 +48,7 @@ fn execute_command(command: Command) -> anyhow::Result<()> {
         Some((resize::CMD_NAME, m)) => resize::action(m),
         Some((crop::CMD_NAME, m)) => crop::action(m),
         Some((blur::CMD_NAME, m)) => blur::action(m),
-        Some((gamma::CMD_NAME, m)) => gamma::action(m),
+        Some((gamma_correction::CMD_NAME, m)) => gamma_correction::action(m),
         Some((canny::CMD_NAME, m)) => canny::action(m),
         _ => unreachable!(),
     }

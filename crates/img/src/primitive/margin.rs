@@ -1,4 +1,7 @@
-use crate::primitive::{point::Point, size::Size};
+use crate::primitive::{
+    point::Point,
+    size::Size,
+};
 use paste::paste;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -22,6 +25,10 @@ macro_rules! define_swizzle {
 impl Margin {
     pub fn new(top: usize, right: usize, bottom: usize, left: usize) -> Self {
         Margin { top, right, bottom, left }
+    }
+
+    pub fn unified(value: usize) -> Self {
+        Margin { top: value, right: value, bottom: value, left: value }
     }
 
     pub fn from_size(size: Size) -> Self {
@@ -53,5 +60,4 @@ impl Margin {
     define_swizzle!(bottom, left);
     define_swizzle!(top, right);
     define_swizzle!(bottom, right);
-
 }

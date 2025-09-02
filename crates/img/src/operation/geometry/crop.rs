@@ -1,12 +1,24 @@
 use crate::{
-    image::Image, pipe::{
-        FromPipe, FromPipePar, Pipe
-    }, pixel::Pixel, primitive::{
-        margin::Margin, offset::Offset, size::{self}
-    }
+    image::Image,
+    pipe::{
+        FromPipe,
+        FromPipePar,
+        Pipe,
+    },
+    pixel::Pixel,
+    primitive::{
+        margin::Margin,
+        offset::Offset,
+        size::{
+            self,
+        },
+    },
 };
 
-pub fn crop_pipe<S>(source: S, margin: Margin) -> Result<impl Pipe<Item = Pixel>, size::CreationError>
+pub fn crop_pipe<S>(
+    source: S,
+    margin: Margin,
+) -> Result<impl Pipe<Item = Pixel>, size::CreationError>
 where
     S: Pipe,
     S::Item: AsRef<Pixel>,
@@ -14,13 +26,15 @@ where
     let size = source.size();
     let new_size = size.apply_margin(margin)?;
 
-    Ok(source.remap(move |pipe, point| {
-        let top_left = margin.top_left();
-        let original_point = point.offset_by(Offset::new(top_left.x() as isize, top_left.y() as isize)).unwrap();
+    Ok(source.remap(
+        move |pipe, point| {
+            let top_left = margin.top_left();
+            let original_point =
+                point.offset_by(Offset::new(top_left.x() as isize, top_left.y() as isize)).unwrap();
 
-        *pipe.get(original_point).expect("bug in pipe implementation").as_ref()
-    },
-            new_size,
+            *pipe.get(original_point).expect("bug in pipe implementation").as_ref()
+        },
+        new_size,
     ))
 }
 

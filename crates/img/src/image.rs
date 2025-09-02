@@ -114,7 +114,8 @@ impl<T: Into<Pixel> + Send> FromPipePar<T> for Image {
         P::Item: Send,
     {
         use rayon::iter::{
-            ParallelBridge, ParallelIterator,
+            ParallelBridge,
+            ParallelIterator,
         };
 
         let size = pipe.size();

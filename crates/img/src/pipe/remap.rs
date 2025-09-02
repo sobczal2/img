@@ -20,6 +20,7 @@ impl<P, F> RemapPipe<P, F> {
     }
 }
 
+// TODO: consider remapping point here instead of callee
 impl<T, P: Pipe, F> Pipe for RemapPipe<P, F>
 where
     F: Fn(&P, Point) -> T,

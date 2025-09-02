@@ -1,4 +1,5 @@
 pub mod blur;
+pub mod canny;
 pub mod common;
 pub mod crop;
 pub mod gamma;

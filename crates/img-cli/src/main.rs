@@ -18,7 +18,10 @@ use cmd::{
 };
 use printing::print_error;
 
-use crate::cmd::blur;
+use crate::cmd::{
+    blur,
+    canny,
+};
 
 fn main() {
     let command = command!()
@@ -28,7 +31,8 @@ fn main() {
         .subcommand(resize::subcommand())
         .subcommand(crop::subcommand())
         .subcommand(blur::subcommand())
-        .subcommand(gamma::subcommand());
+        .subcommand(gamma::subcommand())
+        .subcommand(canny::subcommand());
 
     if let Err(e) = execute_command(command) {
         print_error(e.to_string());
@@ -45,6 +49,7 @@ fn execute_command(command: Command) -> anyhow::Result<()> {
         Some((crop::CMD_NAME, m)) => crop::action(m),
         Some((blur::CMD_NAME, m)) => blur::action(m),
         Some((gamma::CMD_NAME, m)) => gamma::action(m),
+        Some((canny::CMD_NAME, m)) => canny::action(m),
         _ => unreachable!(),
     }
 }

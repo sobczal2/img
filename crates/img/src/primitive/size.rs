@@ -1,10 +1,13 @@
 use std::{
     cmp::Ordering,
-    num::NonZeroUsize, ops::Sub,
+    num::NonZeroUsize,
 };
 use thiserror::Error;
 
-use crate::primitive::{margin::Margin, point::Point};
+use crate::primitive::{
+    margin::Margin,
+    point::Point,
+};
 
 #[derive(Debug, Error)]
 pub enum CreationError {
@@ -203,7 +206,7 @@ impl Size {
         if margin.left() + margin.right() >= self.width() {
             return Err(CreationError::WidthZero);
         }
-        
+
         if margin.top() + margin.bottom() >= self.height() {
             return Err(CreationError::HeightZero);
         }

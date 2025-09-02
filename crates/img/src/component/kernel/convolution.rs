@@ -8,7 +8,7 @@ use crate::{
         IndexResult,
         OutOfBoundsError,
     },
-    pipe::Pipe,
+    lens::Lens,
     pixel::{
         Pixel,
         PixelFlags,
@@ -68,18 +68,18 @@ impl<In> Kernel<In, Pixel> for ConvolutionKernel
 where
     In: AsRef<Pixel>,
 {
-    fn apply<P>(&self, pipe: &P, point: Point) -> IndexResult<Pixel>
+    fn apply<P>(&self, lens: &P, point: Point) -> IndexResult<Pixel>
     where
-        P: Pipe<Item = In>,
+        P: Lens<Item = In>,
     {
-        let working_area = Area::from_cropped_size(pipe.size(), Margin::from_size(self.size));
+        let working_area = Area::from_cropped_size(lens.size(), Margin::from_size(self.size));
         if !working_area.contains(point) {
             return Err(OutOfBoundsError);
         }
 
         let center = self.size.middle();
 
-        let original = pipe.get(point).unwrap();
+        let original = lens.look(point).unwrap();
         let sum = self
             .buffer
             .iter()
@@ -87,7 +87,7 @@ where
             .map(|(index, value)| (Point::from_index(index, self.size).unwrap(), value))
             .map(|(kernel_point, value)| {
                 let offset = center - kernel_point;
-                let current = pipe.get(point.offset_by(offset).unwrap()).unwrap();
+                let current = lens.look(point.offset_by(offset).unwrap()).unwrap();
                 let pixel = current.as_ref();
 
                 IntermediatePixel(

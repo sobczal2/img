@@ -1,8 +1,8 @@
 use crate::{
     image::Image,
-    pipe::{
-        FromPipe,
-        Pipe,
+    lens::{
+        FromLens,
+        Lens,
     },
     pixel::{
         Pixel,
@@ -10,25 +10,25 @@ use crate::{
     },
 };
 
-pub fn sepia_pipe<S>(source: S, flags: PixelFlags) -> impl Pipe<Item = Pixel>
+pub fn sepia_lens<S>(source: S, flags: PixelFlags) -> impl Lens<Item = Pixel>
 where
-    S: Pipe,
+    S: Lens,
     S::Item: AsRef<Pixel>,
 {
     source.map(move |px| map_px(px, flags))
 }
 
 pub fn sepia(image: &Image, flags: PixelFlags) -> Image {
-    let pipe = sepia_pipe(image.pipe(), flags);
-    Image::from_pipe(pipe)
+    let lens = sepia_lens(image.lens(), flags);
+    Image::from_lens(lens)
 }
 
 #[cfg(feature = "parallel")]
 pub fn sepia_par(image: &Image, flags: PixelFlags) -> Image {
-    use crate::pipe::FromPipePar;
+    use crate::lens::FromLensPar;
 
-    let pipe = sepia_pipe(image.pipe(), flags);
-    Image::from_pipe_par(pipe)
+    let lens = sepia_lens(image.lens(), flags);
+    Image::from_lens_par(lens)
 }
 
 fn map_px(px: impl AsRef<Pixel>, flags: PixelFlags) -> Pixel {

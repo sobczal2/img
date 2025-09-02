@@ -1,31 +1,31 @@
 use crate::{
     error::IndexResult,
-    pipe::Pipe,
+    lens::Lens,
     primitive::{
         point::Point,
         size::Size,
     },
 };
 
-pub struct MapPipe<P, F> {
+pub struct MapLens<P, F> {
     source: P,
     f: F,
 }
 
-impl<P, F> MapPipe<P, F> {
+impl<P, F> MapLens<P, F> {
     pub fn new(source: P, f: F) -> Self {
         Self { source, f }
     }
 }
 
-impl<T, P: Pipe, F> Pipe for MapPipe<P, F>
+impl<T, P: Lens, F> Lens for MapLens<P, F>
 where
     F: Fn(P::Item) -> T,
 {
     type Item = T;
 
-    fn get(&self, point: Point) -> IndexResult<Self::Item> {
-        Ok((self.f)(self.source.get(point)?))
+    fn look(&self, point: Point) -> IndexResult<Self::Item> {
+        Ok((self.f)(self.source.look(point)?))
     }
 
     fn size(&self) -> Size {

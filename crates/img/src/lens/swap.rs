@@ -1,19 +1,19 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{error::IndexResult, pipe::Pipe, primitive::{point::Point, size::Size}};
+use crate::{error::IndexResult, lens::Lens, primitive::{point::Point, size::Size}};
 
-pub struct SwapPipe<S> {
+pub struct SwapLens<S> {
     source: Rc<RefCell<S>>,
 }
 
-impl<S> Clone for SwapPipe<S> {
+impl<S> Clone for SwapLens<S> {
     fn clone(&self) -> Self {
         Self { source: self.source.clone() }
     }
 }
 
-impl<S> SwapPipe<S>
-    where S: Pipe
+impl<S> SwapLens<S>
+    where S: Lens
 {
     pub fn new(source: S) -> Self
     {
@@ -25,8 +25,8 @@ impl<S> SwapPipe<S>
     }
 }
 
-impl<S> Pipe for SwapPipe<S>
-    where S: Pipe
+impl<S> Lens for SwapLens<S>
+    where S: Lens
 {
     type Item = S::Item;
 

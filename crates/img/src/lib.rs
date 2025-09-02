@@ -3,7 +3,7 @@ pub mod error;
 pub mod image;
 pub mod io;
 pub mod operation;
-pub mod pipe;
+pub mod lens;
 pub mod pixel;
 pub mod prelude;
 pub mod primitive;

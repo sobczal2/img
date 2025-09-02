@@ -2,22 +2,22 @@ use std::sync::Arc;
 
 use crate::{
     error::IndexResult,
-    pipe::Pipe,
+    lens::Lens,
     primitive::{
         point::Point,
         size::Size,
     },
 };
 
-pub struct MaterializePipe<T> {
+pub struct MaterializeLens<T> {
     values: Arc<[T]>,
     size: Size,
 }
 
-impl<T> MaterializePipe<T> {
+impl<T> MaterializeLens<T> {
     pub fn new<S>(source: S) -> Self
     where
-        S: Pipe<Item = T>,
+        S: Lens<Item = T>,
     {
         let size = source.size();
         let values = Arc::from_iter(source.elements());
@@ -30,19 +30,19 @@ impl<T> MaterializePipe<T> {
     }
 }
 
-impl<T> Clone for MaterializePipe<T> {
+impl<T> Clone for MaterializeLens<T> {
     fn clone(&self) -> Self {
         Self { values: self.values.clone(), size: self.size }
     }
 }
 
-impl<T> Pipe for MaterializePipe<T>
+impl<T> Lens for MaterializeLens<T>
 where
     T: Clone,
 {
     type Item = T;
 
-    fn get(&self, point: Point) -> IndexResult<Self::Item> {
+    fn look(&self, point: Point) -> IndexResult<Self::Item> {
         let index = point.to_index(self.size)?;
         Ok(self.values[index].clone())
     }

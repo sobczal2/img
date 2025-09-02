@@ -6,10 +6,10 @@ use crate::{
         mean::MeanKernel,
     },
     image::Image,
-    pipe::{
+    lens::{
         self,
-        FromPipe,
-        Pipe,
+        FromLens,
+        Lens,
     },
     pixel::{
         Pixel,
@@ -22,35 +22,35 @@ use crate::{
 pub enum CreationError {
     #[error("failed to create mean kernel: {0}")]
     KernelCreation(#[from] kernel::mean::CreationError),
-    #[error("failed to create kernel pipe: {0}")]
-    KernelPipeCreation(#[from] pipe::kernel::CreationError),
+    #[error("failed to create kernel lens: {0}")]
+    KernelLensCreation(#[from] lens::kernel::CreationError),
 }
 
 pub type CreationResult<T> = std::result::Result<T, CreationError>;
 
-pub fn mean_blur_pipe<S>(
+pub fn mean_blur_lens<S>(
     source: S,
     radius: usize,
     flags: PixelFlags,
-) -> CreationResult<impl Pipe<Item = Pixel>>
+) -> CreationResult<impl Lens<Item = Pixel>>
 where
-    S: Pipe,
+    S: Lens,
     S::Item: AsRef<Pixel>,
 {
     let kernel = MeanKernel::new(Size::from_radius(radius), flags)?;
-    let pipe = source.kernel(kernel)?;
-    Ok(pipe)
+    let lens = source.kernel(kernel)?;
+    Ok(lens)
 }
 
 pub fn mean_blur(image: &Image, radius: usize, flags: PixelFlags) -> CreationResult<Image> {
-    let pipe = mean_blur_pipe(image.pipe(), radius, flags)?;
-    Ok(Image::from_pipe(pipe))
+    let lens = mean_blur_lens(image.lens(), radius, flags)?;
+    Ok(Image::from_lens(lens))
 }
 
 #[cfg(feature = "parallel")]
 pub fn mean_blur_par(image: &Image, radius: usize, flags: PixelFlags) -> CreationResult<Image> {
-    use crate::pipe::FromPipePar;
+    use crate::lens::FromLensPar;
 
-    let pipe = mean_blur_pipe(image.pipe(), radius, flags)?;
-    Ok(Image::from_pipe_par(pipe))
+    let lens = mean_blur_lens(image.lens(), radius, flags)?;
+    Ok(Image::from_lens_par(lens))
 }

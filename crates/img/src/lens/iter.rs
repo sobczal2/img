@@ -1,61 +1,61 @@
 use crate::{
-    pipe::Pipe,
+    lens::Lens,
     primitive::point::Point,
 };
 
 #[derive(Clone)]
 pub struct Rows<'a, P> {
-    pipe: &'a P,
+    lens: &'a P,
     current: usize,
 }
 
 impl<'a, P> Rows<'a, P> {
-    pub fn new(pipe: &'a P) -> Self {
-        Self { pipe, current: 0 }
+    pub fn new(lens: &'a P) -> Self {
+        Self { lens, current: 0 }
     }
 }
 
 impl<'a, P> Iterator for Rows<'a, P>
 where
-    P: Pipe,
+    P: Lens,
 {
     type Item = RowElements<'a, P>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.current == self.pipe.size().height() {
+        if self.current == self.lens.size().height() {
             return None;
         }
 
         self.current += 1;
 
-        Some(RowElements::new(self.pipe, self.current - 1))
+        Some(RowElements::new(self.lens, self.current - 1))
     }
 }
 
 #[derive(Clone)]
 pub struct RowElements<'a, P> {
-    pipe: &'a P,
+    lens: &'a P,
     current: Point,
 }
 
 impl<'a, P> RowElements<'a, P> {
-    fn new(pipe: &'a P, row: usize) -> Self {
-        Self { pipe, current: Point::new(0, row) }
+    fn new(lens: &'a P, row: usize) -> Self {
+        Self { lens, current: Point::new(0, row) }
     }
 }
 
-impl<'a, P: Pipe> Iterator for RowElements<'a, P>
+impl<'a, P: Lens> Iterator for RowElements<'a, P>
 where
-    P: Pipe,
+    P: Lens,
 {
     type Item = P::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.current.x() == self.pipe.size().width() {
+        if self.current.x() == self.lens.size().width() {
             return None;
         }
 
-        let value = self.pipe.get(self.current).expect("bug in pipe implementation");
+        let value = self.lens.look(self.current).expect("bug in lens implementation");
         self.current = Point::new(self.current.x() + 1, self.current.y());
 
         Some(value)
@@ -64,28 +64,28 @@ where
 
 #[derive(Clone)]
 pub struct Elements<'a, P> {
-    pipe: &'a P,
+    lens: &'a P,
     current: usize,
 }
 
 impl<'a, P> Elements<'a, P> {
-    pub fn new(pipe: &'a P) -> Self {
-        Self { pipe, current: 0 }
+    pub fn new(lens: &'a P) -> Self {
+        Self { lens, current: 0 }
     }
 }
 
-impl<'a, P: Pipe> Iterator for Elements<'a, P>
+impl<'a, P: Lens> Iterator for Elements<'a, P>
 where
-    P: Pipe,
+    P: Lens,
 {
     type Item = P::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let point = match Point::from_index(self.current, self.pipe.size()) {
+        let point = match Point::from_index(self.current, self.lens.size()) {
             Ok(point) => point,
             Err(_) => return None,
         };
-        let value = self.pipe.get(point).expect("bug in pipe implementation");
+        let value = self.lens.look(point).expect("bug in lens implementation");
         self.current += 1;
 
         Some(value)

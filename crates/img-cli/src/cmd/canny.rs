@@ -4,9 +4,7 @@ use clap::{
     ArgMatches,
     Command,
 };
-use img::{
-    operation::detection::edge::canny::canny,
-};
+use img::operation::detection::edge::canny::canny;
 
 use crate::io::{
     read_image,

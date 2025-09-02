@@ -6,6 +6,7 @@ use crate::{
         FromLens,
         Lens,
     },
+    pixel::Pixel,
     primitive::{
         scale::Scale,
         size,
@@ -13,28 +14,38 @@ use crate::{
 };
 
 #[derive(Debug, Error)]
-pub enum Error {
+pub enum CreationError {
     #[error("new size is invalid: {0}")]
     NewSizeInvalid(#[from] size::CreationError),
 }
 
-pub type Result<T> = std::result::Result<T, Error>;
-
-pub fn resize(image: &Image, scale: Scale) -> Result<Image> {
-    let size = scale.apply(image.size())?;
+pub fn resize_lens<S>(source: S, scale: Scale) -> Result<impl Lens<Item = Pixel>, CreationError>
+where
+    S: Lens,
+    S::Item: AsRef<Pixel>,
+{
+    let size = scale.apply(source.size())?;
     let inverse_scale = scale.inverse();
 
-    let lens = image
-        .lens()
-        .remap(
-            |lens, point| {
-                lens.look(inverse_scale.translate(point)).expect("out of bounds in resize")
-            },
-            size,
-        )
-        .cloned();
+    let lens = source.remap(
+        move |lens, point| {
+            *lens.look(inverse_scale.translate(point)).expect("out of bounds in resize").as_ref()
+        },
+        size,
+    );
 
-    let image = Image::from_lens(lens);
+    Ok(lens)
+}
 
-    Ok(image)
+pub fn resize(image: &Image, scale: Scale) -> Result<Image, CreationError> {
+    let lens = resize_lens(image.lens(), scale)?;
+    Ok(Image::from_lens(lens))
+}
+
+#[cfg(feature = "parallel")]
+pub fn resize_par(image: &Image, scale: Scale) -> Result<Image, CreationError> {
+    use crate::lens::FromLensPar;
+
+    let lens = resize_lens(image.lens(), scale)?;
+    Ok(Image::from_lens_par(lens))
 }

@@ -5,7 +5,7 @@ use clap::{
     Command,
 };
 use img::{
-    operation::color::grayscale::{grayscale, grayscale_par},
+    operation::color::grayscale::{grayscale},
     pixel::PixelFlags,
 };
 
@@ -29,7 +29,7 @@ pub fn subcommand() -> Command {
 
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     let image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
-    let image = grayscale_par(&image, PixelFlags::RGB);
+    let image = grayscale(&image, PixelFlags::RGB);
     write_image(&image, matches.get_one::<PathBuf>(OUTPUT_ARG_NAME).unwrap())?;
     Ok(())
 }

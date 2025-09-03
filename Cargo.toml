@@ -13,3 +13,4 @@ rayon = { version = "1.10.0" }
 itertools = { version = "0.14.0" }
 bitflags = { version = "2.9.3" }
 paste = { version = "1.0.15" }
+criterion = { version = "0.5", features = ["html_reports"] }

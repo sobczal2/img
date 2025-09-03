@@ -2,7 +2,7 @@
 
 img is a simple image manipulation tool.
 It aims to provide a cli tool allowing for quick image manipulation
-as well as a rust library for applying simpla image filters.
+as well as a rust library for applying image filters.
 
 # Features
 
@@ -11,6 +11,8 @@ img is a very young tool so support for different types of filters is limited to
 - blur (available algorithms: mean blur, gaussian blur)
 - grayscale filter
 - sepia filter
+- gamma correction filter
+- canny edge detection
 
 it also allows for simple image manipulation:
 
@@ -66,6 +68,18 @@ img blur -i input.png -o output.png -r <radius> -a <algorithm> -s <sigma>
 img grayscale -i input.png -o output.png
 ```
 
+## Sepia
+
+```bash
+img sepia -i input.png -o output.png
+```
+
+## Gamma Correction
+
+```bash
+img gamma-correction -i input.png -o output.png -g <gamma>
+```
+
 ## Crop
 
 ```bash
@@ -94,14 +108,24 @@ img resize -i input.png -o output.png -s [width]x[height]
 - width - width of the target image in pixels
 - height - height of the target image in pixels
 
+## Canny
+
+```bash
+img canny -i input.png -o output.png
+```
+
 # Library usage
 
 Image struct is the main struct holding image data. It holds RGBA images where each pixel value ranges from 0 to 255.
+
+All filters use lens api (see [Lens trait](https://github.com/sobczal2/img/blob/main/crates/img/src/lens/mod.rs#L31).
+This is a main way of interacting with image, each `Lens` transforms each point of an `Image` (or a different 2d
+representation). This api is lazy, inspired by `Iterator` so it does not perform any expensive calculations
+unless [`Lens::look`](https://github.com/sobczal2/img/blob/main/crates/img/src/lens/mod.rs#L73) method is called.
 
 From there, you can follow code documentation.
 
 # Parallelism
 
-This project can be compiled with "parallel" feature flag which adds corresponding functions utilizing rayon parallelism.
-It is disabled by default since rayon's overhead usually makes filters run slower compared to non parallel version, but can be
-enabled when necessary.
+This project can be compiled with "parallel" feature flag which adds corresponding functions utilizing parallelism, all
+based on [`FromLensPar::from_lens_par` method](https://github.com/sobczal2/img/blob/main/crates/img/src/lens/mod.rs#L165).

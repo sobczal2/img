@@ -54,6 +54,7 @@ use img::{
     },
 };
 use paste::paste;
+use std::time::Duration;
 
 macro_rules! add_bench_for_size {
     ($operation_name:ident, $size:expr, $criterion:ident, $($args:expr),* ) => {
@@ -61,7 +62,7 @@ macro_rules! add_bench_for_size {
             {
                 let [<image $size>] = black_box(Image::empty(Size::from_usize($size, $size).unwrap()));
                 let mut group = $criterion.benchmark_group(stringify!([<$operation_name _ $size x $size>]));
-                group.sample_size(50);
+                group.sample_size(50).measurement_time(Duration::from_secs(600));
                 group.bench_function(
                     "sequential",
                     |b| b.iter(|| $operation_name(&[<image $size>], $($args),*))

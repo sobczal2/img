@@ -113,20 +113,29 @@ impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
         P: Lens<Item = T> + Send + Sync,
         P::Item: Send,
     {
-        use rayon::iter::{
-            ParallelBridge,
-            ParallelIterator,
-        };
+        use std::thread;
 
         let size = lens.size();
+        let cpus = num_cpus::get();
+        let chunk_size = (size.area() as f32 / cpus as f32).ceil() as usize;
 
-        let mut pixels = vec![Pixel::zero(); size.area()];
+        let mut image = Image::empty(size);
 
-        pixels.iter_mut().enumerate().par_bridge().for_each(|(index, pixel)| {
-            let point = Point::from_index(index, size).unwrap();
-            *pixel = lens.look(point).unwrap().into();
+        let image_chunks = image.pixels.chunks_mut(chunk_size);
+
+        thread::scope(|scope| {
+            image_chunks.enumerate().for_each(|(index, chunk)| {
+                let lens = &lens;
+                scope.spawn(move || {
+                    let starting_index = index * chunk_size;
+                    chunk.iter_mut().enumerate().for_each(|(index, pixel)| {
+                        let point = Point::from_index(starting_index + index, size).unwrap();
+                        *pixel = lens.look(point).unwrap().into();
+                    });
+                });
+            });
         });
 
-        Self::new(size, pixels.into_boxed_slice()).unwrap()
+        image
     }
 }

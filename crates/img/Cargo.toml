@@ -14,3 +14,10 @@ paste.workspace = true
 [features]
 default = ["parallel"]
 parallel = ["dep:rayon"]
+
+[dev-dependencies]
+criterion.workspace = true
+
+[[bench]]
+name = "operations"
+harness = false

@@ -4,6 +4,20 @@ use crate::primitive::{
     size::Size,
 };
 
+/// Represents a 2D area defined by size and top left point.
+///
+/// # Examples
+///
+/// ```
+/// use img::primitive::{area::Area, size::Size, point::Point};
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+///
+/// // Create a 1x1 area in without any offset
+/// let small_top_left = Area::new(Size::from_usize(1, 1)?, Point::new(0, 0));
+///
+/// # Ok(())
+/// # }
+/// ```
 pub struct Area {
     size: Size,
     top_left: Point,

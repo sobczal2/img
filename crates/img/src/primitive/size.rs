@@ -25,6 +25,7 @@ pub type CreationResult = Result<Size, CreationError>;
 ///
 /// ```
 /// use img::primitive::size::Size;
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 ///
 /// // Create a smallest possible size
 /// let size = Size::from_usize(1, 1).unwrap();
@@ -34,6 +35,9 @@ pub type CreationResult = Result<Size, CreationError>;
 ///
 /// // Tries to create a size, but width value is 0
 /// let invalid_size = Size::from_usize(0, 10).unwrap_err();
+///
+/// # Ok(())
+/// # }
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Size(NonZeroUsize, NonZeroUsize);

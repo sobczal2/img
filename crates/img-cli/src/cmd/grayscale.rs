@@ -5,7 +5,7 @@ use clap::{
     Command,
 };
 use img::{
-    operation::color::grayscale::{grayscale},
+    operation::color::grayscale::grayscale,
     pixel::PixelFlags,
 };
 

@@ -60,7 +60,7 @@ impl Kernel<u8, Gradient> for SobelKernel {
             })
             .map(|(offset, x_value, y_value)| {
                 let lens_value = lens
-                    .look(point.offset_by(offset).unwrap())
+                    .look(point.translate(offset).unwrap())
                     .expect("bug in lens implementation") as i16;
                 (x_value * lens_value, y_value * lens_value)
             })

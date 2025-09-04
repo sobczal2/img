@@ -16,7 +16,7 @@ use crate::{
     },
 };
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum CreationError {
     #[error("invalid x value")]
     InvalidX,
@@ -26,70 +26,189 @@ pub enum CreationError {
 
 pub type CreationResult = Result<Point, CreationError>;
 
+/// Represents point on a 2D structure. Both dimensions are represented as positive integers.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Point(usize, usize);
+pub struct Point {
+    x: usize,
+    y: usize,
+}
 
 impl Point {
-    pub fn new(x: usize, y: usize) -> Self {
-        Self(x, y)
-    }
-
-    pub fn zero() -> Self {
-        Self(0, 0)
-    }
-
-    pub fn x(&self) -> usize {
-        self.0
-    }
-
-    pub fn y(&self) -> usize {
-        self.1
-    }
-
-    pub fn to_index(&self, size: Size) -> IndexResult<usize> {
-        if !size.contains(*self) {
-            return Err(OutOfBoundsError);
-        }
-        Ok(unsafe { self.to_index_unchecked(size) })
-    }
-
-    /// .
+    /// Create a new `Point` with the specified `x` and `y`.
     ///
-    /// # Safety
-    /// The caller has to guarantee that point is within size to get
-    /// a valid index
-    /// .
-    pub unsafe fn to_index_unchecked(&self, size: Size) -> usize {
-        self.y() * size.width() + self.x()
+    /// # Examples
+    ///
+    /// ```
+    /// use img::primitive::point::Point;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let point = Point::new(100, 200);
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn new(x: usize, y: usize) -> Self {
+        Self { x, y }
     }
 
+    /// Create a new `Point` with both dimensions equal to 0.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::primitive::point::Point;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let zero1 = Point::new(0, 0);
+    /// let zero2 = Point::zero();
+    ///
+    /// assert_eq!(zero1, zero2);
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn zero() -> Self {
+        Self { x: 0, y: 0 }
+    }
+
+    /// Creates `Point` given 1D index based on `Size` of 2D structure represented by 1D array.
+    /// Performs bounds check.
+    ///
+    /// Returns `Point` if successful, `OutOfBoundsError` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::primitive::{
+    ///     point::Point,
+    ///     size::Size,
+    /// };
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let size = Size::from_usize(2, 2)?;
+    ///
+    /// assert_eq!(Point::from_index(0, size)?, Point::new(0, 0));
+    /// assert_eq!(Point::from_index(1, size)?, Point::new(1, 0));
+    /// assert_eq!(Point::from_index(2, size)?, Point::new(0, 1));
+    /// assert_eq!(Point::from_index(3, size)?, Point::new(1, 1));
+    ///
+    /// assert!(Point::from_index(4, Size::from_usize(2, 2)?).is_err());
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn from_index(index: usize, size: Size) -> IndexResult<Self> {
         let point = Point::new(index % size.width(), index / size.width());
-        if !size.contains(point) {
+        if !size.contains(&point) {
             return Err(OutOfBoundsError);
         }
 
-        Ok(point)
+        Ok(Point::new(index % size.width(), index / size.width()))
     }
 
-    /// .
+    /// Returns `Point`'s x.
+    pub fn x(&self) -> usize {
+        self.x
+    }
+
+    /// Returns `Point`'s y.
+    pub fn y(&self) -> usize {
+        self.y
+    }
+
+    /// Create 1D index for `Point` based on `Size` of 2D structure represented by 1D array.
+    /// Performs bounds check.
     ///
-    /// # Safety
-    /// The caller has to guarantee that point is within size to get
-    /// a valid index
-    /// .
-    pub unsafe fn from_index_unchecked(index: usize, size: Size) -> Self {
-        Point::new(index % size.width(), index / size.width())
+    /// Returns `usize` if successful, `OutOfBoundsError` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::primitive::{
+    ///     point::Point,
+    ///     size::Size,
+    /// };
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let point_top_left = Point::new(0, 0);
+    /// let point_top_right = Point::new(1, 0);
+    /// let point_bottom_left = Point::new(0, 1);
+    /// let point_bottom_right = Point::new(1, 1);
+    ///
+    /// let array = vec![0, 1, 2, 3];
+    /// let size = Size::from_usize(2, 2)?;
+    ///
+    /// assert_eq!(array[point_top_left.index(size)?], 0);
+    /// assert_eq!(array[point_top_right.index(size)?], 1);
+    /// assert_eq!(array[point_bottom_left.index(size)?], 2);
+    /// assert_eq!(array[point_bottom_right.index(size)?], 3);
+    ///
+    /// assert!(Point::new(2, 2).index(Size::from_usize(2, 2)?).is_err());
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn index(&self, size: Size) -> IndexResult<usize> {
+        if !size.contains(self) {
+            return Err(OutOfBoundsError);
+        }
+        Ok(self.y * size.width() + self.x)
     }
 
-    pub fn offset_by(&self, offset: Offset) -> CreationResult {
-        let x = self.0 as isize + offset.x();
-        let y = self.1 as isize + offset.y();
+    /// Translate `Point` by given `Offset`.
+    ///
+    /// Returns `Point` if point components are non-negative, `CreationError` otherwise.
+    ///
+    /// # Errors
+    ///
+    /// * `CreationError::InvalidX` - if x is negative after applying offset.
+    /// * `CreationError::InvalidY` - if y is negative after applying offset.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::primitive::{
+    ///     offset::Offset,
+    ///     point::{
+    ///         CreationError,
+    ///         CreationResult,
+    ///         Point,
+    ///     },
+    /// };
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let point = Point::new(100, 200);
+    ///
+    /// assert_eq!(point.translate(Offset::new(10, 20))?, Point::new(110, 220));
+    /// assert_eq!(point.translate(Offset::new(-10, 20))?, Point::new(90, 220));
+    /// assert_eq!(point.translate(Offset::new(10, -20))?, Point::new(110, 180));
+    /// assert_eq!(point.translate(Offset::new(-10, -20))?, Point::new(90, 180));
+    ///
+    /// assert!(Point::new(10, 10).translate(Offset::new(-10, -10)).is_ok());
+    /// assert_eq!(
+    ///     Point::new(10, 10).translate(Offset::new(-11, -10)),
+    ///     CreationResult::Err(CreationError::InvalidX)
+    /// );
+    /// assert_eq!(
+    ///     Point::new(10, 10).translate(Offset::new(-10, -11)),
+    ///     CreationResult::Err(CreationError::InvalidY)
+    /// );
+    /// assert_eq!(
+    ///     Point::new(10, 10).translate(Offset::new(-11, -11)),
+    ///     CreationResult::Err(CreationError::InvalidX)
+    /// );
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn translate(mut self, offset: Offset) -> CreationResult {
+        let x = self.x as isize + offset.x();
+        let y = self.y as isize + offset.y();
 
-        let x: usize = x.try_into().map_err(|_| CreationError::InvalidX)?;
-        let y: usize = y.try_into().map_err(|_| CreationError::InvalidY)?;
+        self.x = x.try_into().map_err(|_| CreationError::InvalidX)?;
+        self.y = y.try_into().map_err(|_| CreationError::InvalidY)?;
 
-        Ok(Point(x, y))
+        Ok(self)
     }
 }
 
@@ -97,7 +216,9 @@ impl Sub for Point {
     type Output = Offset;
 
     /// Subtract one `Point` from another
+    ///
     /// # Examples
+    ///
     /// ```
     /// use img::primitive::{point::Point, offset::Offset};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -107,8 +228,8 @@ impl Sub for Point {
     /// # Ok(())
     /// # }
     fn sub(self, rhs: Self) -> Self::Output {
-        let x = self.0 as isize - rhs.0 as isize;
-        let y = self.1 as isize - rhs.1 as isize;
+        let x = self.x as isize - rhs.x as isize;
+        let y = self.y as isize - rhs.y as isize;
 
         Offset::new(x, y)
     }
@@ -122,6 +243,7 @@ impl PartialOrd for Point {
     /// then it returns `None`.
     ///
     /// # Examples
+    ///
     /// ```
     /// use img::primitive::point::Point;
     /// use std::cmp::Ordering;
@@ -143,11 +265,11 @@ impl PartialOrd for Point {
             return Some(Ordering::Equal);
         }
 
-        if self.0 <= other.0 && self.1 <= other.1 {
+        if self.x <= other.x && self.y <= other.y {
             return Some(Ordering::Less);
         }
 
-        if self.0 >= other.0 && self.1 >= other.1 {
+        if self.x >= other.x && self.y >= other.y {
             return Some(Ordering::Greater);
         }
 
@@ -158,28 +280,40 @@ impl PartialOrd for Point {
 impl TryFrom<Offset> for Point {
     type Error = CreationError;
 
+    /// Create `Point` from `Offset`.
+    ///
+    /// Returns `Point` if point components are non-negative, `CreationError` otherwise.
+    ///
+    /// # Errors
+    /// * `CreationError::InvalidX` - if x is negative after applying offset.
+    /// * `CreationError::InvalidY` - if y is negative after applying offset.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::primitive::{
+    ///     offset::Offset,
+    ///     point::{
+    ///         CreationError,
+    ///         CreationResult,
+    ///         Point,
+    ///     },
+    /// };
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// assert_eq!(Point::try_from(Offset::new(1, 1))?, Point::new(1, 1));
+    ///
+    /// assert_eq!(Point::try_from(Offset::new(-1, -1)), CreationResult::Err(CreationError::InvalidX));
+    /// assert_eq!(Point::try_from(Offset::new(1, -1)), CreationResult::Err(CreationError::InvalidY));
+    /// assert_eq!(Point::try_from(Offset::new(-1, 1)), CreationResult::Err(CreationError::InvalidX));
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
     fn try_from(value: Offset) -> CreationResult {
         let x: usize = value.x().try_into().map_err(|_| CreationError::InvalidX)?;
         let y: usize = value.y().try_into().map_err(|_| CreationError::InvalidY)?;
 
         Ok(Point::new(x, y))
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn to_idx_basic() {
-        assert_eq!(Point::new(0, 0).to_index(Size::from_usize(1, 1).unwrap()), Ok(0));
-        assert_eq!(Point::new(0, 0).to_index(Size::from_usize(100, 100).unwrap()), Ok(0));
-        assert_eq!(Point::new(10, 0).to_index(Size::from_usize(100, 100).unwrap()), Ok(10));
-        assert_eq!(Point::new(1, 0).to_index(Size::from_usize(10, 10).unwrap()), Ok(1));
-        assert_eq!(Point::new(0, 1).to_index(Size::from_usize(10, 10).unwrap()), Ok(10));
-        assert_eq!(
-            Point::new(2, 1).to_index(Size::from_usize(1, 1).unwrap()),
-            Err(OutOfBoundsError)
-        );
     }
 }

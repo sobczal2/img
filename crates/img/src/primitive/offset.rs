@@ -1,16 +1,35 @@
+/// Represents a 2D offset between 2 `Point`s.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct Offset(isize, isize);
+pub struct Offset {
+    x: isize,
+    y: isize,
+}
 
 impl Offset {
+    /// Create a new `Offset` with specified `x` and `y`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::primitive::offset::Offset;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let offset = Offset::new(100, 200);
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn new(x: isize, y: isize) -> Self {
-        Self(x, y)
+        Self { x, y }
     }
 
+    /// Returns `Offset`'s x.
     pub fn x(&self) -> isize {
-        self.0
+        self.x
     }
 
+    /// Returns `Offset`'s y.
     pub fn y(&self) -> isize {
-        self.1
+        self.y
     }
 }

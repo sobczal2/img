@@ -96,7 +96,7 @@ where
     type Item = Pixel;
 
     fn look(&self, point: Point) -> IndexResult<Self::Item> {
-        if !self.size.contains(point) {
+        if !self.size.contains(&point) {
             return Err(OutOfBoundsError);
         }
 

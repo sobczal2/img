@@ -20,30 +20,14 @@ pub enum CreationError {
 pub type CreationResult = Result<Size, CreationError>;
 
 /// Represents a 2D size. Minimum size is 1x1.
-///
-/// # Examples
-///
-/// ```
-/// use img::primitive::size::Size;
-/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-///
-/// // Create a smallest possible size
-/// let size = Size::from_usize(1, 1).unwrap();
-///
-/// // Create a 100x100 size
-/// let size100 = Size::from_usize(100, 100).unwrap();
-///
-/// // Tries to create a size, but width value is 0
-/// let invalid_size = Size::from_usize(0, 10).unwrap_err();
-///
-/// # Ok(())
-/// # }
-/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Size(NonZeroUsize, NonZeroUsize);
+pub struct Size {
+    width: NonZeroUsize,
+    height: NonZeroUsize,
+}
 
 impl Size {
-    /// Create a new `Size` with the specified `width` and `height`.
+    /// Create a new `Size` with specified `width` and `height`.
     ///
     /// # Examples
     ///
@@ -51,21 +35,19 @@ impl Size {
     /// use img::primitive::size::Size;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
-    /// let small = Size::new(1.try_into()?, 2.try_into()?);
-    /// let medium = Size::new(100.try_into()?, 200.try_into()?);
-    /// let large = Size::new(100_000.try_into()?, 2_000_000.try_into()?);
+    /// let size = Size::new(100.try_into()?, 200.try_into()?);
     ///
     /// # Ok(())
     /// # }
     /// ```
     pub fn new(width: NonZeroUsize, height: NonZeroUsize) -> Self {
-        Self(width, height)
+        Self { width, height }
     }
 
     /// Create a new `Size` with the specified width and height. Unlike `new` this takes in `usize`
     /// arguments and can fail in case width or height is 0.
     ///
-    /// Returns `Ok(Size)` if both parameters valid, otherwise returns a `CreationError`.
+    /// Returns `Size` if both parameters valid, otherwise returns a `CreationError`.
     ///
     /// # Errors
     ///
@@ -94,7 +76,7 @@ impl Size {
         let width: NonZeroUsize = width.try_into().map_err(|_| CreationError::WidthZero)?;
         let height: NonZeroUsize = height.try_into().map_err(|_| CreationError::HeightZero)?;
 
-        Ok(Size(width, height))
+        Ok(Size { width, height })
     }
 
     /// Create a new `Size` from specified radius. Radius is defined as distance between central
@@ -125,17 +107,17 @@ impl Size {
         Self::from_usize(diameter, diameter).unwrap()
     }
 
-    /// Returns Size's width as `usize`. Is guaranteed to not be 0.
+    /// Returns `Size`'s width as `usize`. Is guaranteed to not be 0.
     pub fn width(&self) -> usize {
-        self.0.into()
+        self.width.into()
     }
 
-    /// Returns Size's height as `usize`. Is guaranteed to not be 0.
+    /// Returns `Size`'s height as `usize`. Is guaranteed to not be 0.
     pub fn height(&self) -> usize {
-        self.1.into()
+        self.height.into()
     }
 
-    /// Get area of the size (width*height).
+    /// Calculate `Size`'s area (width*height).
     ///
     /// Returns Size's area as `usize`. Is guaranteed to not be 0.
     pub fn area(&self) -> usize {
@@ -183,26 +165,26 @@ impl Size {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let small = Size::from_usize(1, 1)?;
-    /// assert!(small.contains(Point::new(0, 0)));
-    /// assert!(!small.contains(Point::new(1, 0)));
-    /// assert!(!small.contains(Point::new(0, 1)));
+    /// assert!(small.contains(&Point::new(0, 0)));
+    /// assert!(!small.contains(&Point::new(1, 0)));
+    /// assert!(!small.contains(&Point::new(0, 1)));
     ///
     /// let medium = Size::from_usize(15, 30)?;
-    /// assert!(medium.contains(Point::new(0, 0)));
-    /// assert!(medium.contains(Point::new(14, 29)));
-    /// assert!(!medium.contains(Point::new(15, 0)));
-    /// assert!(!medium.contains(Point::new(0, 30)));
+    /// assert!(medium.contains(&Point::new(0, 0)));
+    /// assert!(medium.contains(&Point::new(14, 29)));
+    /// assert!(!medium.contains(&Point::new(15, 0)));
+    /// assert!(!medium.contains(&Point::new(0, 30)));
     ///
     /// let large = Size::from_usize(1000, 1000)?;
-    /// assert!(large.contains(Point::new(0, 0)));
-    /// assert!(large.contains(Point::new(999, 999)));
-    /// assert!(!large.contains(Point::new(1000, 0)));
-    /// assert!(!large.contains(Point::new(0, 1000)));
+    /// assert!(large.contains(&Point::new(0, 0)));
+    /// assert!(large.contains(&Point::new(999, 999)));
+    /// assert!(!large.contains(&Point::new(1000, 0)));
+    /// assert!(!large.contains(&Point::new(0, 1000)));
     ///
     /// # Ok(())
     /// # }
     /// ```
-    pub fn contains(&self, point: Point) -> bool {
+    pub fn contains(&self, point: &Point) -> bool {
         point.x() < self.width() && point.y() < self.height()
     }
 
@@ -272,11 +254,11 @@ impl PartialOrd for Size {
             return Some(Ordering::Equal);
         }
 
-        if self.0 <= other.0 && self.1 <= other.1 {
+        if self.width <= other.width && self.height <= other.height {
             return Some(Ordering::Less);
         }
 
-        if self.0 >= other.0 && self.1 >= other.1 {
+        if self.width >= other.width && self.height >= other.height {
             return Some(Ordering::Greater);
         }
 

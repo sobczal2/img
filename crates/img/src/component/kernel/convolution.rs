@@ -72,8 +72,11 @@ where
     where
         P: Lens<Item = In>,
     {
-        let working_area = Area::from_cropped_size(lens.size(), Margin::from_size(self.size));
-        if !working_area.contains(point) {
+        // TODO: This isn't a out of bounds error, but currently we have no way to return something
+        // else here
+        let working_area = Area::from_cropped_size(lens.size(), Margin::from_size(self.size))
+            .map_err(|_| OutOfBoundsError)?;
+        if !working_area.contains(&point) {
             return Err(OutOfBoundsError);
         }
 
@@ -87,7 +90,7 @@ where
             .map(|(index, value)| (Point::from_index(index, self.size).unwrap(), value))
             .map(|(kernel_point, value)| {
                 let offset = center - kernel_point;
-                let current = lens.look(point.offset_by(offset).unwrap()).unwrap();
+                let current = lens.look(point.translate(offset).unwrap()).unwrap();
                 let pixel = current.as_ref();
 
                 IntermediatePixel(

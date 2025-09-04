@@ -99,9 +99,9 @@ pub trait Lens {
     /// let invalid_point = Point::new(10, 0);
     ///
     /// assert!(lens.look(valid_point).is_ok());
-    /// assert!(lens.size().contains(valid_point));
+    /// assert!(lens.size().contains(&valid_point));
     /// assert!(lens.look(invalid_point).is_err());
-    /// assert!(!lens.size().contains(invalid_point));
+    /// assert!(!lens.size().contains(&invalid_point));
     ///
     /// # Ok(())
     /// # }

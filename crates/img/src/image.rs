@@ -50,39 +50,18 @@ impl Image {
 
     /// get immutable pixel at selected point
     pub fn pixel(&self, point: Point) -> IndexResult<&Pixel> {
-        let index = point.to_index(self.size())?;
+        let index = point.index(self.size())?;
 
         // SAFETY: index from point.to_idx is always valid
         Ok(&self.pixels[index])
     }
 
-    /// get immutable pixel at selected coordinates
-    /// without checking bounds
-    ///
-    /// # Safety
-    ///
-    /// this should be called only using valid point
-    pub unsafe fn pixel_unchecked(&self, point: Point) -> &Pixel {
-        let index = unsafe { point.to_index_unchecked(self.size()) };
-        &self.pixels[index]
-    }
-
     /// get mutable pixel at selected coordinates
     pub fn pixel_mut(&mut self, point: Point) -> IndexResult<&mut Pixel> {
-        let index = point.to_index(self.size())?;
+        let index = point.index(self.size())?;
 
         // SAFETY: index from point.to_idx is always valid
         Ok(&mut self.pixels[index])
-    }
-
-    /// get mutable pixel at selected coordinates
-    /// without checking bounds
-    ///
-    /// # Safety
-    /// - point must be within image bounds
-    pub unsafe fn pixel_mut_unchecked(&mut self, point: Point) -> &mut Pixel {
-        let index = unsafe { point.to_index_unchecked(self.size()) };
-        &mut self.pixels[index]
     }
 
     pub fn buffer(&self) -> Box<[u8]> {

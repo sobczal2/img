@@ -30,7 +30,7 @@ where
         move |lens, point| {
             let top_left = margin.top_left();
             let original_point =
-                point.offset_by(Offset::new(top_left.x() as isize, top_left.y() as isize)).unwrap();
+                point.translate(Offset::new(top_left.x() as isize, top_left.y() as isize)).unwrap();
 
             *lens.look(original_point).expect("bug in lens implementation").as_ref()
         },

@@ -104,7 +104,7 @@ where
     let size = source.size().apply_margin(Margin::unified(1)).unwrap();
     source.map(|g| (g.magnitude(), g.direction())).remap(
         |s, p| {
-            let p = p.offset_by(Offset::new(1, 1)).unwrap();
+            let p = p.translate(Offset::new(1, 1)).unwrap();
             let gradient_a = s.look(p).unwrap();
             let direction = GradientDirection::from_angle(gradient_a.1);
 
@@ -151,7 +151,7 @@ impl Kernel<f32, u8> for HysteresisThresholdingKernel {
         let neighbor_exists = (-1..=1)
             .cartesian_product(-1..=1)
             .map(|(x, y)| Offset::new(x, y))
-            .map(|offset| point.offset_by(offset).unwrap())
+            .map(|offset| point.translate(offset).unwrap())
             .map(|point| lens.look(point).unwrap())
             .any(|value| value > self.max);
 

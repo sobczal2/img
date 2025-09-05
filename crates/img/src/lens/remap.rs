@@ -8,22 +8,22 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub struct RemapLens<P, F> {
-    source: P,
+pub struct RemapLens<S, F> {
+    source: S,
     f: F,
     size: Size,
 }
 
-impl<P, F> RemapLens<P, F> {
-    pub fn new(source: P, f: F, size: Size) -> Self {
+impl<S, F> RemapLens<S, F> {
+    pub fn new(source: S, f: F, size: Size) -> Self {
         Self { source, f, size }
     }
 }
 
-// TODO: consider remapping point here instead of callee
-impl<T, P: Lens, F> Lens for RemapLens<P, F>
+impl<T, S, F> Lens for RemapLens<S, F>
 where
-    F: Fn(&P, Point) -> T,
+    S: Lens,
+    F: Fn(&S, Point) -> T,
 {
     type Item = T;
 

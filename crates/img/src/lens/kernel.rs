@@ -22,19 +22,20 @@ pub enum CreationError {
 }
 
 #[derive(Clone)]
-pub struct KernelLens<P, K, T> {
-    source: P,
+pub struct KernelLens<S, K, T> {
+    source: S,
     kernel: K,
     size: Size,
     margin: Margin,
     _phantom_data: PhantomData<T>,
 }
 
-impl<P: Lens, K, T> KernelLens<P, K, T>
+impl<S, K, T> KernelLens<S, K, T>
 where
-    K: Kernel<P::Item, T>,
+    S: Lens,
+    K: Kernel<S::Item, T>,
 {
-    pub fn new(source: P, kernel: K) -> Result<Self, CreationError> {
+    pub fn new(source: S, kernel: K) -> Result<Self, CreationError> {
         if source.size().width() < kernel.size().width() {
             return Err(CreationError::KernelTooBigX);
         }
@@ -51,9 +52,10 @@ where
     }
 }
 
-impl<P: Lens, K, T> Lens for KernelLens<P, K, T>
+impl<S, K, T> Lens for KernelLens<S, K, T>
 where
-    K: Kernel<P::Item, T>,
+    S: Lens,
+    K: Kernel<S::Item, T>,
 {
     type Item = T;
 

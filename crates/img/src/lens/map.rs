@@ -7,20 +7,21 @@ use crate::{
     },
 };
 
-pub struct MapLens<P, F> {
-    source: P,
+pub struct MapLens<S, F> {
+    source: S,
     f: F,
 }
 
-impl<P, F> MapLens<P, F> {
-    pub fn new(source: P, f: F) -> Self {
+impl<S, F> MapLens<S, F> {
+    pub fn new(source: S, f: F) -> Self {
         Self { source, f }
     }
 }
 
-impl<T, P: Lens, F> Lens for MapLens<P, F>
+impl<T, S, F> Lens for MapLens<S, F>
 where
-    F: Fn(P::Item) -> T,
+    S: Lens,
+    F: Fn(S::Item) -> T,
 {
     type Item = T;
 

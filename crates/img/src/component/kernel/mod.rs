@@ -13,9 +13,9 @@ pub mod mean;
 pub mod sobel;
 
 pub trait Kernel<In, Out> {
-    fn apply<P>(&self, lens: &P, point: Point) -> IndexResult<Out>
+    fn apply<S>(&self, source: &S, point: Point) -> IndexResult<Out>
     where
-        P: Lens<Item = In>;
+        S: Lens<Item = In>;
 
     fn size(&self) -> Size;
 }

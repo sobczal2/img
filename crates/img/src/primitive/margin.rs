@@ -4,6 +4,7 @@ use crate::primitive::{
 };
 use paste::paste;
 
+/// Represents a 2D margin
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Margin {
     top: usize,

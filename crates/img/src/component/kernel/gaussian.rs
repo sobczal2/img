@@ -72,9 +72,9 @@ impl<In> Kernel<In, Pixel> for GaussianKernel
 where
     In: AsRef<Pixel>,
 {
-    fn apply<P>(&self, lens: &P, point: Point) -> IndexResult<Pixel>
+    fn apply<S>(&self, lens: &S, point: Point) -> IndexResult<Pixel>
     where
-        P: Lens<Item = In>,
+        S: Lens<Item = In>,
     {
         self.inner.apply(lens, point)
     }

@@ -68,11 +68,11 @@ impl<In> Kernel<In, Pixel> for ConvolutionKernel
 where
     In: AsRef<Pixel>,
 {
-    fn apply<P>(&self, lens: &P, point: Point) -> IndexResult<Pixel>
+    fn apply<S>(&self, lens: &S, point: Point) -> IndexResult<Pixel>
     where
-        P: Lens<Item = In>,
+        S: Lens<Item = In>,
     {
-        // TODO: This isn't a out of bounds error, but currently we have no way to return something
+        // TODO: This isn't out of bounds error, but currently we have no way to return something
         // else here
         let working_area = Area::from_cropped_size(lens.size(), Margin::from_size(self.size))
             .map_err(|_| OutOfBoundsError)?;

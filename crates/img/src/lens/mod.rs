@@ -169,15 +169,15 @@ pub trait Lens {
 }
 
 pub trait FromLens<T>: Sized {
-    fn from_lens<P>(lens: P) -> Self
+    fn from_lens<S>(source: S) -> Self
     where
-        P: Lens<Item = T>;
+        S: Lens<Item = T>;
 }
 
 #[cfg(feature = "parallel")]
 pub trait FromLensPar<T>: Sized {
-    fn from_lens_par<P>(lens: P) -> Self
+    fn from_lens_par<S>(source: S) -> Self
     where
-        P: Lens<Item = T> + Send + Sync,
-        P::Item: Send;
+        S: Lens<Item = T> + Send + Sync,
+        S::Item: Send;
 }

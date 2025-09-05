@@ -118,14 +118,14 @@ img canny -i input.png -o output.png
 
 Image struct is the main struct holding image data. It holds RGBA images where each pixel value ranges from 0 to 255.
 
-All filters use lens api (see [Lens trait](https://github.com/sobczal2/img/blob/main/crates/img/src/lens/mod.rs#L31).
+All filters use lens api (see [Lens trait](https://github.com/sobczal2/img/blob/ef0af266f4bd8e0adc1c3839cb2a0fb92e61881e/crates/img/src/lens/mod.rs#L37).
 This is a main way of interacting with image, each `Lens` transforms each point of an `Image` (or a different 2d
 representation). This api is lazy, inspired by `Iterator` so it does not perform any expensive calculations
-unless [`Lens::look`](https://github.com/sobczal2/img/blob/main/crates/img/src/lens/mod.rs#L73) method is called.
+unless [`Lens::look`](https://github.com/sobczal2/img/blob/ef0af266f4bd8e0adc1c3839cb2a0fb92e61881e/crates/img/src/lens/mod.rs#L79) method is called.
 
 From there, you can follow code documentation.
 
 # Parallelism
 
 This project can be compiled with "parallel" feature flag which adds corresponding functions utilizing parallelism, all
-based on [`FromLensPar::from_lens_par` method](https://github.com/sobczal2/img/blob/main/crates/img/src/lens/mod.rs#L165).
+based on [`FromLensPar::from_lens_par` method](https://github.com/sobczal2/img/blob/ef0af266f4bd8e0adc1c3839cb2a0fb92e61881e/crates/img/src/lens/mod.rs#L179).

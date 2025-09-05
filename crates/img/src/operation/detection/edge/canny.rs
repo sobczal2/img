@@ -17,6 +17,7 @@ use crate::{
     lens::{
         FromLens,
         Lens,
+        border::BorderFill,
         image::PixelLens,
         kernel,
     },
@@ -46,6 +47,7 @@ where
     S::Item: AsRef<Pixel>,
 {
     let lens = source
+        .border(Margin::unified(2), BorderFill::PickZero)
         .kernel(GaussianKernel::new(Size::from_radius(2), 2f32, PixelFlags::RGB).unwrap())?
         .colors(
             single_channel_lens,
@@ -74,8 +76,11 @@ fn single_channel_lens<S>(source: S) -> Result<impl Lens<Item = u8>, CreationErr
 where
     S: Lens<Item = u8>,
 {
-    let lens = source.kernel(SobelKernel::new())?;
+    let lens = source.border(Margin::unified(1), BorderFill::PickZero);
+    let lens = lens.kernel(SobelKernel::new())?;
+    let lens = lens.border(Margin::unified(1), BorderFill::PickZero);
     let lens = non_maximum_suppression_lens(lens);
+    let lens = lens.border(Margin::unified(1), BorderFill::PickZero);
     let lens = hysteresis_thresholding_lens(lens);
 
     Ok(lens)

@@ -20,11 +20,11 @@ bitflags! {
 pub struct Pixel([u8; PIXEL_SIZE]);
 
 impl Pixel {
-    pub fn new(value: [u8; PIXEL_SIZE]) -> Self {
+    pub const fn new(value: [u8; PIXEL_SIZE]) -> Self {
         Self(value)
     }
 
-    pub fn zero() -> Self {
+    pub const fn zero() -> Self {
         Self([0; PIXEL_SIZE])
     }
 

@@ -35,8 +35,8 @@ impl Margin {
         let center = size.middle();
         let left = center.x();
         let top = center.y();
-        let right = size.width() - center.x();
-        let bottom = size.height() - center.y();
+        let right = size.width() - center.x() - 1;
+        let bottom = size.height() - center.y() - 1;
         Self::new(top, right, bottom, left)
     }
 

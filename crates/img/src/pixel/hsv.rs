@@ -1,7 +1,9 @@
 use thiserror::Error;
 
-use crate::pixel::{Pixel, PixelRgbaf32};
-
+use crate::pixel::{
+    Pixel,
+    PixelRgbaf32,
+};
 
 #[derive(Debug, Error)]
 pub enum CreationError {
@@ -25,12 +27,7 @@ pub struct HsvPixel {
 impl Eq for HsvPixel {}
 
 impl HsvPixel {
-    pub fn new(
-        hue: f32,
-        saturation: f32,
-        value: f32,
-        alpha: u8
-    ) -> CreationResult {
+    pub fn new(hue: f32, saturation: f32, value: f32, alpha: u8) -> CreationResult {
         if !(0f32..=360f32).contains(&hue) {
             return Err(CreationError::HueInvalid);
         }
@@ -86,13 +83,15 @@ impl HsvPixel {
 }
 
 impl From<Pixel> for HsvPixel {
-
     /// Convert `Pixel` to `HsvPixel`. This effectively converts RGB color space to HSV.
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
-    /// use img::pixel::{Pixel, hsv::HsvPixel};
+    /// use img::pixel::{
+    ///     Pixel,
+    ///     hsv::HsvPixel,
+    /// };
     ///
     /// macro_rules! assert_hsv_pixel_eq {
     ///     ($left:expr, $right:expr) => {
@@ -212,7 +211,9 @@ impl From<Pixel> for HsvPixel {
         } else {
             60f32 * (((r - g) / delta) + 4f32)
         };
-        if hue < 0f32 { hue += 360f32 };
+        if hue < 0f32 {
+            hue += 360f32
+        };
 
         let saturation = if cmax != 0f32 { delta / cmax } else { 0f32 };
 

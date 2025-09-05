@@ -165,20 +165,19 @@ impl AsRef<Pixel> for Pixel {
 }
 
 impl From<HsvPixel> for Pixel {
-
     /// Convert `HsvPixel` to `Pixel`. This effectively converts HSV color space to RGB.
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
-    /// use img::pixel::{Pixel, hsv::HsvPixel};
+    /// use img::pixel::{
+    ///     Pixel,
+    ///     hsv::HsvPixel,
+    /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// // Black
-    /// assert_eq!(
-    ///     Pixel::from(HsvPixel::new(0.0, 0.0, 0.0, 255).unwrap()),
-    ///     Pixel::new([0, 0, 0, 255])
-    /// );
+    /// assert_eq!(Pixel::from(HsvPixel::new(0.0, 0.0, 0.0, 255).unwrap()), Pixel::new([0, 0, 0, 255]));
     ///
     /// // White
     /// assert_eq!(

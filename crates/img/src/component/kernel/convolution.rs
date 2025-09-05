@@ -72,13 +72,11 @@ where
     where
         S: Lens<Item = In>,
     {
-        // TODO: This isn't out of bounds error, but currently we have no way to return something
-        // else here
         let working_area = Area::from_cropped_size(
             lens.size(),
             <ConvolutionKernel as Kernel<In, Pixel>>::margin(self),
-        )
-        .map_err(|_| OutOfBoundsError)?;
+        ).expect("failed to create working area, this is either lens or kernel bug");
+
         if !working_area.contains(&point) {
             return Err(OutOfBoundsError);
         }

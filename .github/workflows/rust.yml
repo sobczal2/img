@@ -19,7 +19,7 @@ jobs:
         with:
           components: rustfmt
       - name: Lint
-        run: cargo +nightly fmt --check
+        run: cargo +nightly fmt -- --check
       - name: Build
         run: cargo build --verbose
       - name: Run tests

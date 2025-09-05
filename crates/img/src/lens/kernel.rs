@@ -36,17 +36,17 @@ where
     K: Kernel<S::Item, T>,
 {
     pub fn new(source: S, kernel: K) -> Result<Self, CreationError> {
-        if source.size().width() < kernel.size().width() {
+        let margin = kernel.margin();
+
+        if source.size().width() < margin.left() + margin.right() + 1 {
             return Err(CreationError::KernelTooBigX);
         }
 
-        if source.size().height() < kernel.size().height() {
+        if source.size().height() < margin.top() + margin.bottom() + 1 {
             return Err(CreationError::KernelTooBigY);
         }
 
-        let margin = Margin::from_size(kernel.size());
-
-        let size = source.size().apply_margin(margin).unwrap();
+        let size = source.size().apply_margin(kernel.margin()).unwrap();
 
         Ok(Self { source, kernel, size, margin, _phantom_data: Default::default() })
     }

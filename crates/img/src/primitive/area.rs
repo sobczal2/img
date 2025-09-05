@@ -2,6 +2,7 @@ use thiserror::Error;
 
 use crate::primitive::{
     margin::Margin,
+    offset::Offset,
     point::Point,
     size::{
         self,
@@ -101,6 +102,23 @@ impl Area {
     /// Returns `Area`'s top left point
     pub fn top_left(&self) -> Point {
         self.top_left
+    }
+
+    /// Returns `Area`'s top left point
+    pub fn top_right(&self) -> Point {
+        self.top_left.translate(Offset::new(self.size.width() as isize, 0)).unwrap()
+    }
+
+    /// Returns `Area`'s top left point
+    pub fn bottom_left(&self) -> Point {
+        self.top_left.translate(Offset::new(0, self.size.height() as isize)).unwrap()
+    }
+
+    /// Returns `Area`'s top left point
+    pub fn bottom_right(&self) -> Point {
+        self.top_left
+            .translate(Offset::new(self.size.width() as isize, self.size.height() as isize))
+            .unwrap()
     }
 
     /// Checks if `Point` is contained within `Area`.

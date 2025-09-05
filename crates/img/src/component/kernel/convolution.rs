@@ -74,8 +74,11 @@ where
     {
         // TODO: This isn't out of bounds error, but currently we have no way to return something
         // else here
-        let working_area = Area::from_cropped_size(lens.size(), Margin::from_size(self.size))
-            .map_err(|_| OutOfBoundsError)?;
+        let working_area = Area::from_cropped_size(
+            lens.size(),
+            <ConvolutionKernel as Kernel<In, Pixel>>::margin(self),
+        )
+        .map_err(|_| OutOfBoundsError)?;
         if !working_area.contains(&point) {
             return Err(OutOfBoundsError);
         }
@@ -109,7 +112,19 @@ where
         Ok(px)
     }
 
-    fn size(&self) -> Size {
-        self.size
+    fn margin(&self) -> Margin {
+        let (left, right) = if self.size.width() % 2 == 0 {
+            (self.size.width() / 2, self.size.width() / 2 - 1)
+        } else {
+            (self.size.width() / 2, self.size.width() / 2)
+        };
+
+        let (top, bottom) = if self.size.height() % 2 == 0 {
+            (self.size.height() / 2, self.size.height() / 2 - 1)
+        } else {
+            (self.size.height() / 2, self.size.height() / 2)
+        };
+
+        Margin::new(top, right, bottom, left)
     }
 }

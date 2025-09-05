@@ -2,8 +2,8 @@ use crate::{
     error::IndexResult,
     lens::Lens,
     primitive::{
+        margin::Margin,
         point::Point,
-        size::Size,
     },
 };
 
@@ -17,5 +17,5 @@ pub trait Kernel<In, Out> {
     where
         S: Lens<Item = In>;
 
-    fn size(&self) -> Size;
+    fn margin(&self) -> Margin;
 }

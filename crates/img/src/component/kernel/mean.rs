@@ -13,6 +13,7 @@ use crate::{
         PixelFlags,
     },
     primitive::{
+        margin::Margin,
         point::Point,
         size::Size,
     },
@@ -54,7 +55,7 @@ where
         self.inner.apply(lens, point)
     }
 
-    fn size(&self) -> Size {
-        <ConvolutionKernel as Kernel<In, Pixel>>::size(&self.inner)
+    fn margin(&self) -> Margin {
+        <ConvolutionKernel as Kernel<In, Pixel>>::margin(&self.inner)
     }
 }

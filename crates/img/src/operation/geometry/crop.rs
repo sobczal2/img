@@ -28,9 +28,9 @@ where
 
     Ok(source.remap(
         move |lens, point| {
-            let top_left = margin.top_left();
-            let original_point =
-                point.translate(Offset::new(top_left.x() as isize, top_left.y() as isize)).unwrap();
+            let original_point = point
+                .translate(Offset::new(margin.left() as isize, margin.right() as isize))
+                .unwrap();
 
             *lens.look(original_point).expect("bug in lens implementation").as_ref()
         },

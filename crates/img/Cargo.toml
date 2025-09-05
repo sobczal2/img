@@ -19,5 +19,36 @@ parallel = ["dep:num_cpus"]
 criterion.workspace = true
 
 [[bench]]
-name = "operations"
+name = "grayscale"
+path = "benches/operation/grayscale.rs"
+harness = false
+
+[[bench]]
+name = "sepia"
+path = "benches/operation/sepia.rs"
+harness = false
+
+[[bench]]
+name = "gamma_correction"
+path = "benches/operation/gamma_correction.rs"
+harness = false
+
+[[bench]]
+name = "mean_blur"
+path = "benches/operation/mean_blur.rs"
+harness = false
+
+[[bench]]
+name = "gaussian_blur"
+path = "benches/operation/gaussian_blur.rs"
+harness = false
+
+[[bench]]
+name = "crop"
+path = "benches/operation/crop.rs"
+harness = false
+
+[[bench]]
+name = "resize"
+path = "benches/operation/resize.rs"
 harness = false

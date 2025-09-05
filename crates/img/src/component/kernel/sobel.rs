@@ -6,6 +6,7 @@ use crate::{
     },
     lens::Lens,
     primitive::{
+        margin::Margin,
         offset::Offset,
         point::Point,
         size::Size,
@@ -70,8 +71,8 @@ impl Kernel<u8, Gradient> for SobelKernel {
         Ok(Gradient { x: g_x, y: g_y })
     }
 
-    fn size(&self) -> Size {
-        Size::from_radius(1)
+    fn margin(&self) -> crate::primitive::margin::Margin {
+        Margin::unified(1)
     }
 }
 

@@ -8,22 +8,22 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub struct ClonedLens<P> {
-    source: P,
+pub struct ClonedLens<S> {
+    source: S,
 }
 
-impl<P> ClonedLens<P> {
-    pub fn new(source: P) -> Self {
+impl<S> ClonedLens<S> {
+    pub fn new(source: S) -> Self {
         Self { source }
     }
 }
 
-impl<'a, S, P> Lens for ClonedLens<P>
+impl<'a, S, T> Lens for ClonedLens<S>
 where
-    P: Lens<Item = &'a S>,
-    S: Clone + 'a,
+    S: Lens<Item = &'a T>,
+    T: Clone + 'a,
 {
-    type Item = S;
+    type Item = T;
 
     fn look(&self, point: Point) -> IndexResult<Self::Item> {
         self.source.look(point).cloned()

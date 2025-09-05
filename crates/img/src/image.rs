@@ -74,9 +74,9 @@ impl Image {
 }
 
 impl<T: Into<Pixel>> FromLens<T> for Image {
-    fn from_lens<P>(lens: P) -> Self
+    fn from_lens<S>(lens: S) -> Self
     where
-        P: Lens<Item = T>,
+        S: Lens<Item = T>,
     {
         let size = lens.size();
         let pixels = Box::from_iter(lens.elements().map(Into::into));
@@ -87,10 +87,10 @@ impl<T: Into<Pixel>> FromLens<T> for Image {
 
 #[cfg(feature = "parallel")]
 impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
-    fn from_lens_par<P>(lens: P) -> Self
+    fn from_lens_par<S>(lens: S) -> Self
     where
-        P: Lens<Item = T> + Send + Sync,
-        P::Item: Send,
+        S: Lens<Item = T> + Send + Sync,
+        S::Item: Send,
     {
         use std::thread;
 

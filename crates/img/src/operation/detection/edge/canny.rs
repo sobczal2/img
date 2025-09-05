@@ -163,8 +163,8 @@ impl Kernel<f32, u8> for HysteresisThresholdingKernel {
         if neighbor_exists { Ok(255u8) } else { Ok(0u8) }
     }
 
-    fn size(&self) -> Size {
-        Size::from_radius(1)
+    fn margin(&self) -> Margin {
+        Margin::unified(1)
     }
 }
 

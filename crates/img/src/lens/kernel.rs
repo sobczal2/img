@@ -22,38 +22,40 @@ pub enum CreationError {
 }
 
 #[derive(Clone)]
-pub struct KernelLens<P, K, T> {
-    source: P,
+pub struct KernelLens<S, K, T> {
+    source: S,
     kernel: K,
     size: Size,
     margin: Margin,
     _phantom_data: PhantomData<T>,
 }
 
-impl<P: Lens, K, T> KernelLens<P, K, T>
+impl<S, K, T> KernelLens<S, K, T>
 where
-    K: Kernel<P::Item, T>,
+    S: Lens,
+    K: Kernel<S::Item, T>,
 {
-    pub fn new(source: P, kernel: K) -> Result<Self, CreationError> {
-        if source.size().width() < kernel.size().width() {
+    pub fn new(source: S, kernel: K) -> Result<Self, CreationError> {
+        let margin = kernel.margin();
+
+        if source.size().width() < margin.left() + margin.right() + 1 {
             return Err(CreationError::KernelTooBigX);
         }
 
-        if source.size().height() < kernel.size().height() {
+        if source.size().height() < margin.top() + margin.bottom() + 1 {
             return Err(CreationError::KernelTooBigY);
         }
 
-        let margin = Margin::from_size(kernel.size());
-
-        let size = source.size().apply_margin(margin).unwrap();
+        let size = source.size().apply_margin(kernel.margin()).unwrap();
 
         Ok(Self { source, kernel, size, margin, _phantom_data: Default::default() })
     }
 }
 
-impl<P: Lens, K, T> Lens for KernelLens<P, K, T>
+impl<S, K, T> Lens for KernelLens<S, K, T>
 where
-    K: Kernel<P::Item, T>,
+    S: Lens,
+    K: Kernel<S::Item, T>,
 {
     type Item = T;
 

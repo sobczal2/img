@@ -4,58 +4,58 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub struct Rows<'a, P> {
-    lens: &'a P,
+pub struct Rows<'a, S> {
+    source: &'a S,
     current: usize,
 }
 
-impl<'a, P> Rows<'a, P> {
-    pub fn new(lens: &'a P) -> Self {
-        Self { lens, current: 0 }
+impl<'a, S> Rows<'a, S> {
+    pub fn new(source: &'a S) -> Self {
+        Self { source, current: 0 }
     }
 }
 
-impl<'a, P> Iterator for Rows<'a, P>
+impl<'a, S> Iterator for Rows<'a, S>
 where
-    P: Lens,
+    S: Lens,
 {
-    type Item = RowElements<'a, P>;
+    type Item = RowElements<'a, S>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.current == self.lens.size().height() {
+        if self.current == self.source.size().height() {
             return None;
         }
 
         self.current += 1;
 
-        Some(RowElements::new(self.lens, self.current - 1))
+        Some(RowElements::new(self.source, self.current - 1))
     }
 }
 
 #[derive(Clone)]
-pub struct RowElements<'a, P> {
-    lens: &'a P,
+pub struct RowElements<'a, S> {
+    source: &'a S,
     current: Point,
 }
 
-impl<'a, P> RowElements<'a, P> {
-    fn new(lens: &'a P, row: usize) -> Self {
-        Self { lens, current: Point::new(0, row) }
+impl<'a, S> RowElements<'a, S> {
+    fn new(source: &'a S, row: usize) -> Self {
+        Self { source, current: Point::new(0, row) }
     }
 }
 
-impl<'a, P: Lens> Iterator for RowElements<'a, P>
+impl<'a, S> Iterator for RowElements<'a, S>
 where
-    P: Lens,
+    S: Lens,
 {
-    type Item = P::Item;
+    type Item = S::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.current.x() == self.lens.size().width() {
+        if self.current.x() == self.source.size().width() {
             return None;
         }
 
-        let value = self.lens.look(self.current).expect("bug in lens implementation");
+        let value = self.source.look(self.current).expect("bug in lens implementation");
         self.current = Point::new(self.current.x() + 1, self.current.y());
 
         Some(value)
@@ -63,22 +63,22 @@ where
 }
 
 #[derive(Clone)]
-pub struct Elements<'a, P> {
-    lens: &'a P,
+pub struct Elements<'a, S> {
+    lens: &'a S,
     current: usize,
 }
 
-impl<'a, P> Elements<'a, P> {
-    pub fn new(lens: &'a P) -> Self {
+impl<'a, S> Elements<'a, S> {
+    pub fn new(lens: &'a S) -> Self {
         Self { lens, current: 0 }
     }
 }
 
-impl<'a, P: Lens> Iterator for Elements<'a, P>
+impl<'a, S> Iterator for Elements<'a, S>
 where
-    P: Lens,
+    S: Lens,
 {
-    type Item = P::Item;
+    type Item = S::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
         let point = match Point::from_index(self.current, self.lens.size()) {

@@ -2,6 +2,10 @@ use crate::{
     component::kernel::Kernel,
     error::IndexResult,
     lens::{
+        border::{
+            BorderFill,
+            BorderLens,
+        },
         cloned::ClonedLens,
         iter::{
             Elements,
@@ -12,11 +16,13 @@ use crate::{
         remap::RemapLens,
     },
     primitive::{
+        margin::Margin,
         point::Point,
         size::Size,
     },
 };
 
+pub mod border;
 pub mod cloned;
 pub mod image;
 pub mod iter;
@@ -152,6 +158,13 @@ pub trait Lens {
         K: Kernel<Self::Item, T>,
     {
         KernelLens::new(self, kernel)
+    }
+
+    fn border(self, margin: Margin, fill: BorderFill) -> BorderLens<Self>
+    where
+        Self: Sized,
+    {
+        BorderLens::new(self, margin, fill)
     }
 }
 

@@ -1,3 +1,7 @@
+use std::ops::Neg;
+
+use crate::primitive::point::Point;
+
 /// Represents a 2D offset between 2 `Point`s.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Offset {
@@ -31,5 +35,21 @@ impl Offset {
     /// Returns `Offset`'s y.
     pub fn y(&self) -> isize {
         self.y
+    }
+}
+
+impl From<Point> for Offset {
+    fn from(value: Point) -> Self {
+        Self::new(value.x() as isize, value.y() as isize)
+    }
+}
+
+impl Neg for Offset {
+    type Output = Offset;
+
+    fn neg(mut self) -> Self::Output {
+        self.x = -self.x;
+        self.y = -self.y;
+        self
     }
 }

@@ -1,6 +1,7 @@
 use std::{
     cmp::Ordering,
     num::NonZeroUsize,
+    ops::Add,
 };
 use thiserror::Error;
 
@@ -263,5 +264,17 @@ impl PartialOrd for Size {
         }
 
         None
+    }
+}
+
+impl Add<Margin> for Size {
+    type Output = Size;
+
+    fn add(self, rhs: Margin) -> Self::Output {
+        Size::from_usize(
+            self.width() + rhs.left() + rhs.right(),
+            self.height() + rhs.top() + rhs.bottom(),
+        )
+        .unwrap()
     }
 }

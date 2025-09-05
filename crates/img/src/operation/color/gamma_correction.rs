@@ -7,8 +7,7 @@ use crate::{
     pixel::{
         Pixel,
         PixelFlags,
-        ReadPixelRgbaf32,
-        WritePixelRgbaf32,
+        PixelRgbaf32,
     },
 };
 

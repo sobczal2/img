@@ -12,8 +12,7 @@ use crate::{
     pixel::{
         Pixel,
         PixelFlags,
-        ReadPixelRgbaf32,
-        WritePixelRgbaf32,
+        PixelRgbaf32,
     },
     primitive::{
         area::Area,
@@ -44,12 +43,12 @@ impl ConvolutionKernel {
         buffer: impl IntoIterator<Item = f32>,
         flags: PixelFlags,
     ) -> CreationResult {
-        let buffer: Vec<_> = buffer.into_iter().collect();
+        let buffer: Box<[_]> = buffer.into_iter().collect();
         if buffer.len() != size.area() {
             return Err(CreationError::BufferLenMissmatch);
         }
 
-        Ok(Self { size, buffer: buffer.into_boxed_slice(), flags })
+        Ok(Self { size, buffer, flags })
     }
 }
 
@@ -75,7 +74,8 @@ where
         let working_area = Area::from_cropped_size(
             lens.size(),
             <ConvolutionKernel as Kernel<In, Pixel>>::margin(self),
-        ).expect("failed to create working area, this is either lens or kernel bug");
+        )
+        .expect("failed to create working area, this is either lens or kernel bug");
 
         if !working_area.contains(&point) {
             return Err(OutOfBoundsError);

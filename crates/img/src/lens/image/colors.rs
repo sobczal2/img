@@ -49,7 +49,7 @@ color_lens!(BlueColorLens, b);
 color_lens!(AlphaColorLens, a);
 
 impl<R, G, B, A> ColorsLens<R, G, B, A> {
-    pub fn new<S, RF, GF, BF, AF, T, E>(
+    pub fn new<S, RF, GF, BF, AF, E>(
         source: S,
         red: RF,
         green: GF,
@@ -57,8 +57,7 @@ impl<R, G, B, A> ColorsLens<R, G, B, A> {
         alpha: AF,
     ) -> Result<Self, E>
     where
-        S: PixelLens<T>,
-        T: AsRef<Pixel>,
+        S: PixelLens,
         RF: FnOnce(RedColorLens) -> Result<R, E>,
         GF: FnOnce(GreenColorLens) -> Result<G, E>,
         BF: FnOnce(BlueColorLens) -> Result<B, E>,
@@ -68,7 +67,43 @@ impl<R, G, B, A> ColorsLens<R, G, B, A> {
         B: Lens<Item = u8>,
         A: Lens<Item = u8>,
     {
-        let materialize = MaterializeLens::new(source.map(|p| *p.as_ref()));
+        let materialize = MaterializeLens::new(source);
+
+        let red = (red)(RedColorLens { source: materialize.clone() })?;
+        let green = (green)(GreenColorLens { source: materialize.clone() })?;
+        let blue = (blue)(BlueColorLens { source: materialize.clone() })?;
+        let alpha = (alpha)(AlphaColorLens { source: materialize.clone() })?;
+
+        let sizes = [red.size(), green.size(), blue.size(), alpha.size()];
+
+        let min_width = sizes.iter().map(|s| s.width()).min().unwrap();
+        let min_height = sizes.iter().map(|s| s.height()).min().unwrap();
+
+        let size = Size::from_usize(min_width, min_height).unwrap();
+
+        Ok(Self { red, green, blue, alpha, size })
+    }
+
+    #[cfg(feature = "parallel")]
+    pub fn new_par<S, RF, GF, BF, AF, E>(
+        source: S,
+        red: RF,
+        green: GF,
+        blue: BF,
+        alpha: AF,
+    ) -> Result<Self, E>
+    where
+        S: PixelLens + Send + Sync,
+        RF: FnOnce(RedColorLens) -> Result<R, E>,
+        GF: FnOnce(GreenColorLens) -> Result<G, E>,
+        BF: FnOnce(BlueColorLens) -> Result<B, E>,
+        AF: FnOnce(AlphaColorLens) -> Result<A, E>,
+        R: Lens<Item = u8>,
+        G: Lens<Item = u8>,
+        B: Lens<Item = u8>,
+        A: Lens<Item = u8>,
+    {
+        let materialize = MaterializeLens::new_par(source);
 
         let red = (red)(RedColorLens { source: materialize.clone() })?;
         let green = (green)(GreenColorLens { source: materialize.clone() })?;

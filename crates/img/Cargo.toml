@@ -52,3 +52,8 @@ harness = false
 name = "resize"
 path = "benches/operation/resize.rs"
 harness = false
+
+[[bench]]
+name = "canny"
+path = "benches/operation/canny.rs"
+harness = false

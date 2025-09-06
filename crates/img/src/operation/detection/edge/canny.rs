@@ -59,6 +59,25 @@ where
     Ok(lens)
 }
 
+#[cfg(feature = "parallel")]
+pub fn canny_lens_par<S>(source: S) -> Result<impl Lens<Item = Pixel>, CreationError>
+where
+    S: Lens + Send + Sync,
+    S::Item: AsRef<Pixel>,
+{
+    let lens = source
+        .border(Margin::unified(2), BorderFill::PickZero)
+        .kernel(GaussianKernel::new(Size::from_radius(2), 2f32, PixelFlags::RGB).unwrap())?
+        .colors_par(
+            single_channel_lens,
+            single_channel_lens,
+            single_channel_lens,
+            CreationResult::Ok,
+        )?;
+
+    Ok(lens)
+}
+
 pub fn canny(image: &Image) -> Image {
     let lens = canny_lens(image.lens()).unwrap();
     Image::from_lens(lens)
@@ -68,7 +87,7 @@ pub fn canny(image: &Image) -> Image {
 pub fn canny_par(image: &Image) -> Image {
     use crate::lens::FromLensPar;
 
-    let lens = canny_lens(image.lens()).unwrap();
+    let lens = canny_lens_par(image.lens()).unwrap();
     Image::from_lens_par(lens)
 }
 

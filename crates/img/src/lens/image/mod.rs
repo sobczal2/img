@@ -41,10 +41,7 @@ impl<'a> Lens for ImageLens<'a> {
     }
 }
 
-pub trait PixelLens<T>: Lens<Item = T>
-where
-    T: AsRef<Pixel>,
-{
+pub trait PixelLens: Lens<Item = Pixel> {
     fn colors<R, G, B, A, RF, GF, BF, AF, E>(
         self,
         red: RF,
@@ -65,11 +62,28 @@ where
     {
         ColorsLens::new(self, red, green, blue, alpha)
     }
+
+    #[cfg(feature = "parallel")]
+    fn colors_par<R, G, B, A, RF, GF, BF, AF, E>(
+        self,
+        red: RF,
+        green: GF,
+        blue: BF,
+        alpha: AF,
+    ) -> Result<ColorsLens<R, G, B, A>, E>
+    where
+        Self: Sized + Send + Sync,
+        RF: FnOnce(RedColorLens) -> Result<R, E>,
+        GF: FnOnce(GreenColorLens) -> Result<G, E>,
+        BF: FnOnce(BlueColorLens) -> Result<B, E>,
+        AF: FnOnce(AlphaColorLens) -> Result<A, E>,
+        R: Lens<Item = u8>,
+        G: Lens<Item = u8>,
+        B: Lens<Item = u8>,
+        A: Lens<Item = u8>,
+    {
+        ColorsLens::new_par(self, red, green, blue, alpha)
+    }
 }
 
-impl<P, T> PixelLens<T> for P
-where
-    P: Lens<Item = T>,
-    T: AsRef<Pixel>,
-{
-}
+impl<P> PixelLens for P where P: Lens<Item = Pixel> {}

@@ -1,4 +1,7 @@
-use std::sync::Arc;
+use std::{
+    iter::from_fn,
+    sync::Arc,
+};
 
 use crate::{
     error::IndexResult,
@@ -25,8 +28,36 @@ impl<T> MaterializeLens<T> {
         Self { size, values }
     }
 
-    pub fn take_values(self) -> Arc<[T]> {
-        self.values.clone()
+    #[cfg(feature = "parallel")]
+    pub fn new_par<S>(source: S) -> Self
+    where
+        S: Lens<Item = T> + Send + Sync,
+        T: Send + Default,
+    {
+        use std::thread;
+
+        let size = source.size();
+        let cpus = num_cpus::get();
+        let chunk_size = (size.area() as f32 / cpus as f32).ceil() as usize;
+
+        let mut values = Box::from_iter(from_fn(|| Some(T::default())).take(size.area()));
+
+        let value_chunks = values.chunks_mut(chunk_size);
+
+        thread::scope(|scope| {
+            value_chunks.enumerate().for_each(|(index, chunk)| {
+                let source = &source;
+                scope.spawn(move || {
+                    let starting_index = index * chunk_size;
+                    chunk.iter_mut().enumerate().for_each(|(index, value)| {
+                        let point = Point::from_index(starting_index + index, size).unwrap();
+                        *value = source.look(point).unwrap();
+                    });
+                });
+            });
+        });
+
+        Self { size, values: values.into() }
     }
 }
 

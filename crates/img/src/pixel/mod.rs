@@ -20,7 +20,7 @@ bitflags! {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Pixel([u8; PIXEL_SIZE]);
 
 impl Pixel {

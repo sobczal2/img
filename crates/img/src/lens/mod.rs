@@ -30,6 +30,7 @@ pub mod kernel;
 pub mod map;
 pub mod materialize;
 pub mod remap;
+pub mod value;
 
 /// A trait for chaining operations for a 2D structures.
 ///

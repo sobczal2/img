@@ -35,6 +35,7 @@ pub enum CreationError {
 
 pub type CreationResult = Result<GaussianKernel, CreationError>;
 
+#[derive(Clone)]
 pub struct GaussianKernel {
     inner: ConvolutionKernel,
 }

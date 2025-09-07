@@ -14,10 +14,12 @@ use crate::{
 };
 
 // TODO: consider trait instead
+#[derive(Clone)]
 pub enum BorderFill {
     PickZero,
 }
 
+#[derive(Clone)]
 pub struct BorderLens<S>
 where
     S: Lens,

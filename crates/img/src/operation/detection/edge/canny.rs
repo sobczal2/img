@@ -18,7 +18,6 @@ use crate::{
         FromLens,
         Lens,
         border::BorderFill,
-        image::PixelLens,
         kernel,
     },
     pixel::{
@@ -41,45 +40,47 @@ pub enum CreationError {
 
 pub type CreationResult<T> = std::result::Result<T, CreationError>;
 
-pub fn canny_lens<S>(source: S) -> Result<impl Lens<Item = Pixel>, CreationError>
+pub fn canny_lens<S>(source: S) -> impl Lens<Item = Pixel>
 where
-    S: Lens,
+    S: Lens + Clone,
     S::Item: AsRef<Pixel>,
 {
-    let lens = source
+    source
         .border(Margin::unified(2), BorderFill::PickZero)
-        .kernel(GaussianKernel::new(Size::from_radius(2), 2f32, PixelFlags::RGB).unwrap())?
-        .colors(
-            single_channel_lens,
-            single_channel_lens,
-            single_channel_lens,
-            CreationResult::Ok,
-        )?;
-
-    Ok(lens)
+        .kernel(GaussianKernel::new(Size::from_radius(2), 2f32, PixelFlags::RGB).unwrap())
+        .unwrap()
+        .materialize()
+        .split4(
+            |s| single_channel_lens(s.map(|p| p.r())),
+            |s| single_channel_lens(s.map(|p| p.g())),
+            |s| single_channel_lens(s.map(|p| p.b())),
+            |s| s.map(|p| p.a()),
+        )
+        .map(|(r, g, b, a)| Pixel::new([r, g, b, a]))
 }
 
 #[cfg(feature = "parallel")]
-pub fn canny_lens_par<S>(source: S) -> Result<impl Lens<Item = Pixel>, CreationError>
+pub fn canny_lens_par<S>(source: S) -> impl Lens<Item = Pixel>
 where
-    S: Lens + Send + Sync,
+    S: Lens + Clone + Send + Sync,
     S::Item: AsRef<Pixel>,
 {
-    let lens = source
+    source
         .border(Margin::unified(2), BorderFill::PickZero)
-        .kernel(GaussianKernel::new(Size::from_radius(2), 2f32, PixelFlags::RGB).unwrap())?
-        .colors_par(
-            single_channel_lens,
-            single_channel_lens,
-            single_channel_lens,
-            CreationResult::Ok,
-        )?;
-
-    Ok(lens)
+        .kernel(GaussianKernel::new(Size::from_radius(2), 2f32, PixelFlags::RGB).unwrap())
+        .unwrap()
+        .materialize_par()
+        .split4(
+            |s| single_channel_lens(s.map(|p| p.r())),
+            |s| single_channel_lens(s.map(|p| p.g())),
+            |s| single_channel_lens(s.map(|p| p.b())),
+            |s| s.map(|p| p.a()),
+        )
+        .map(|(r, g, b, a)| Pixel::new([r, g, b, a]))
 }
 
 pub fn canny(image: &Image) -> Image {
-    let lens = canny_lens(image.lens()).unwrap();
+    let lens = canny_lens(image.lens());
     Image::from_lens(lens)
 }
 
@@ -87,22 +88,20 @@ pub fn canny(image: &Image) -> Image {
 pub fn canny_par(image: &Image) -> Image {
     use crate::lens::FromLensPar;
 
-    let lens = canny_lens_par(image.lens()).unwrap();
+    let lens = canny_lens_par(image.lens());
     Image::from_lens_par(lens)
 }
 
-fn single_channel_lens<S>(source: S) -> Result<impl Lens<Item = u8>, CreationError>
+fn single_channel_lens<S>(source: S) -> impl Lens<Item = u8>
 where
     S: Lens<Item = u8>,
 {
     let lens = source.border(Margin::unified(1), BorderFill::PickZero);
-    let lens = lens.kernel(SobelKernel::new())?;
+    let lens = lens.kernel(SobelKernel::new()).unwrap();
     let lens = lens.border(Margin::unified(1), BorderFill::PickZero);
     let lens = non_maximum_suppression_lens(lens);
     let lens = lens.border(Margin::unified(1), BorderFill::PickZero);
-    let lens = hysteresis_thresholding_lens(lens);
-
-    Ok(lens)
+    hysteresis_thresholding_lens(lens)
 }
 
 enum GradientDirection {

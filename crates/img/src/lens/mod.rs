@@ -13,7 +13,13 @@ use crate::{
         },
         kernel::KernelLens,
         map::MapLens,
+        materialize::MaterializeLens,
         remap::RemapLens,
+        split::{
+            SplitLens2,
+            SplitLens3,
+            SplitLens4,
+        },
     },
     primitive::{
         margin::Margin,
@@ -167,6 +173,72 @@ pub trait Lens {
         Self: Sized,
     {
         BorderLens::new(self, margin, fill)
+    }
+
+    fn materialize(self) -> MaterializeLens<Self::Item>
+    where
+        Self: Sized,
+    {
+        MaterializeLens::new(self)
+    }
+
+    #[cfg(feature = "parallel")]
+    fn materialize_par(self) -> MaterializeLens<Self::Item>
+    where
+        Self: Sized + Send + Sync,
+        Self::Item: Send,
+    {
+        MaterializeLens::new_par(self)
+    }
+
+    fn split2<F1, F2, L1, L2, D1, D2>(self, factory1: F1, factory2: F2) -> SplitLens2<L1, L2>
+    where
+        Self: Sized + Clone,
+        F1: Fn(Self) -> L1,
+        F2: Fn(Self) -> L2,
+        L1: Lens<Item = D1>,
+        L2: Lens<Item = D2>,
+    {
+        SplitLens2::new(self, factory1, factory2)
+    }
+
+    fn split3<F1, F2, F3, L1, L2, L3, D1, D2, D3>(
+        self,
+        factory1: F1,
+        factory2: F2,
+        factory3: F3,
+    ) -> SplitLens3<L1, L2, L3>
+    where
+        Self: Sized + Clone,
+        F1: Fn(Self) -> L1,
+        F2: Fn(Self) -> L2,
+        F3: Fn(Self) -> L3,
+        L1: Lens<Item = D1>,
+        L2: Lens<Item = D2>,
+        L3: Lens<Item = D3>,
+    {
+        SplitLens3::new(self, factory1, factory2, factory3)
+    }
+
+    fn split4<F1, F2, F3, F4, L1, L2, L3, L4, D1, D2, D3, D4>(
+        self,
+        factory1: F1,
+        factory2: F2,
+        factory3: F3,
+        factory4: F4,
+    ) -> SplitLens4<L1, L2, L3, L4>
+    where
+        Self: Sized + Clone,
+        F1: Fn(Self) -> L1,
+        F2: Fn(Self) -> L2,
+        F3: Fn(Self) -> L3,
+        F4: Fn(Self) -> L4,
+        L1: Lens<Item = D1>,
+        L2: Lens<Item = D2>,
+        L3: Lens<Item = D3>,
+        L4: Lens<Item = D4>,
+    {
+        SplitLens4::new(self, factory1, factory2, factory3, factory4)
     }
 }
 

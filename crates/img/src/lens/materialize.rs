@@ -13,7 +13,7 @@ use crate::{
 };
 
 pub struct MaterializeLens<T> {
-    values: Arc<[T]>,
+    values: Arc<[Option<T>]>,
     size: Size,
 }
 
@@ -23,7 +23,7 @@ impl<T> MaterializeLens<T> {
         S: Lens<Item = T>,
     {
         let size = source.size();
-        let values = Arc::from_iter(source.elements());
+        let values = Arc::from_iter(source.elements().map(|e| Some(e)));
 
         Self { size, values }
     }
@@ -32,7 +32,7 @@ impl<T> MaterializeLens<T> {
     pub fn new_par<S>(source: S) -> Self
     where
         S: Lens<Item = T> + Send + Sync,
-        T: Send + Default,
+        T: Send,
     {
         use std::thread;
 
@@ -40,7 +40,7 @@ impl<T> MaterializeLens<T> {
         let cpus = num_cpus::get();
         let chunk_size = (size.area() as f32 / cpus as f32).ceil() as usize;
 
-        let mut values = Box::from_iter(from_fn(|| Some(T::default())).take(size.area()));
+        let mut values = Box::from_iter(from_fn(|| Some(None)).take(size.area()));
 
         let value_chunks = values.chunks_mut(chunk_size);
 
@@ -51,7 +51,7 @@ impl<T> MaterializeLens<T> {
                     let starting_index = index * chunk_size;
                     chunk.iter_mut().enumerate().for_each(|(index, value)| {
                         let point = Point::from_index(starting_index + index, size).unwrap();
-                        *value = source.look(point).unwrap();
+                        *value = Some(source.look(point).unwrap());
                     });
                 });
             });
@@ -75,7 +75,7 @@ where
 
     fn look(&self, point: Point) -> IndexResult<Self::Item> {
         let index = point.index(self.size)?;
-        Ok(self.values[index].clone())
+        Ok(self.values[index].clone().unwrap())
     }
 
     fn size(&self) -> Size {

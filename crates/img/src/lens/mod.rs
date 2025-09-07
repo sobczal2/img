@@ -24,7 +24,6 @@ use crate::{
 
 pub mod border;
 pub mod cloned;
-pub mod quick_split;
 pub mod image;
 pub mod iter;
 pub mod kernel;

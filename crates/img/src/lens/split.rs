@@ -1,78 +1,55 @@
+use std::marker::PhantomData;
+
 use crate::{
     error::IndexResult,
-    lens::{
-        Lens,
-        materialize::MaterializeLens,
-    },
+    lens::Lens,
     primitive::{
         point::Point,
         size::Size,
     },
 };
 
-pub struct SplitLens<L, R> {
-    left: L,
-    right: R,
-    size: Size,
+pub struct QuickSplitLens<S, LF, RF, L, R> {
+    source: S,
+    left_factory: LF,
+    right_factory: RF,
+    _phantom_data_l: PhantomData<L>,
+    _phantom_data_r: PhantomData<R>,
 }
 
-impl<L, R> SplitLens<L, R> {
-    pub fn new<S, LF, RF, E>(source: S, left_factory: LF, right_factory: RF) -> Result<Self, E>
-    where
-        S: Lens,
-        LF: FnOnce(MaterializeLens<S::Item>) -> Result<L, E>,
-        RF: FnOnce(MaterializeLens<S::Item>) -> Result<R, E>,
-        L: Lens,
-        R: Lens,
-    {
-        let materialize = MaterializeLens::new(source);
-
-        let left = (left_factory)(materialize.clone())?;
-        let right = (right_factory)(materialize.clone())?;
-
-        let min_width = left.size().width().min(right.size().width());
-        let min_height = left.size().height().min(right.size().height());
-
-        let size = Size::from_usize(min_width, min_height).unwrap();
-
-        Ok(Self { left, right, size })
-    }
-
-    pub fn new_par<S, LF, RF, E>(source: S, left_factory: LF, right_factory: RF) -> Result<Self, E>
-    where
-        S: Lens + Send + Sync,
-        S::Item: Send,
-        LF: FnOnce(MaterializeLens<S::Item>) -> Result<L, E>,
-        RF: FnOnce(MaterializeLens<S::Item>) -> Result<R, E>,
-        L: Lens,
-        R: Lens,
-    {
-        let materialize = MaterializeLens::new_par(source);
-
-        let left = (left_factory)(materialize.clone())?;
-        let right = (right_factory)(materialize.clone())?;
-
-        let min_width = left.size().width().min(right.size().width());
-        let min_height = left.size().height().min(right.size().height());
-
-        let size = Size::from_usize(min_width, min_height).unwrap();
-
-        Ok(Self { left, right, size })
+impl<S, LF, RF, L, R> QuickSplitLens<S, LF, RF, L, R> {
+    pub fn new(source: S, left_factory: LF, right_factory: RF) -> Self {
+        Self {
+            source,
+            left_factory,
+            right_factory,
+            _phantom_data_l: Default::default(),
+            _phantom_data_r: Default::default(),
+        }
     }
 }
 
-impl<L, R> Lens for SplitLens<L, R>
+impl<S, LF, RF, L, R, LL, RL> Lens for QuickSplitLens<S, LF, RF, L, R>
 where
-    L: Lens,
-    R: Lens,
+    S: Lens + Clone,
+    LF: Fn(S) -> LL,
+    RF: Fn(S) -> RL,
+    LL: Lens<Item = L>,
+    RL: Lens<Item = R>,
 {
-    type Item = (L::Item, R::Item);
+    type Item = (L, R);
 
     fn look(&self, point: Point) -> IndexResult<Self::Item> {
-        Ok((self.left.look(point)?, self.right.look(point)?))
+        let left = (self.left_factory)(self.source.clone());
+        let right = (self.right_factory)(self.source.clone());
+        Ok((left.look(point)?, right.look(point)?))
     }
 
     fn size(&self) -> Size {
-        self.size
+        let left = (self.left_factory)(self.source.clone()).size();
+        let right = (self.right_factory)(self.source.clone()).size();
+
+        Size::from_usize(left.width().min(right.width()), left.height().min(right.height()))
+            .unwrap()
     }
 }

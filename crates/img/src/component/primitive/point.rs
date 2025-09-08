@@ -32,7 +32,7 @@ pub struct Point {
 }
 
 impl Point {
-    /// Create a new `Point` with the specified `x` and `y`.
+    /// Create a new [`Point`] with the specified `x` and `y`.
     ///
     /// # Examples
     ///
@@ -49,7 +49,7 @@ impl Point {
         Self { x, y }
     }
 
-    /// Create a new `Point` with both dimensions equal to 0.
+    /// Create a new [`Point`] with both dimensions equal to 0.
     ///
     /// # Examples
     ///
@@ -69,10 +69,10 @@ impl Point {
         Self { x: 0, y: 0 }
     }
 
-    /// Creates `Point` given 1D index based on `Size` of 2D structure represented by 1D array.
+    /// Creates [`Point`] given 1D index based on [`Size`] of 2D structure represented by 1D array.
     /// Performs bounds check.
     ///
-    /// Returns `Point` if successful, `OutOfBoundsError` otherwise.
+    /// Returns [`Point`] if successful, [`OutOfBoundsError`] otherwise.
     ///
     /// # Examples
     ///
@@ -101,20 +101,20 @@ impl Point {
         Ok(Point::new(index % size.width(), index / size.width()))
     }
 
-    /// Returns `Point`'s x.
+    /// Returns [`Point`]'s x.
     pub fn x(&self) -> usize {
         self.x
     }
 
-    /// Returns `Point`'s y.
+    /// Returns [`Point`]'s y.
     pub fn y(&self) -> usize {
         self.y
     }
 
-    /// Create 1D index for `Point` based on `Size` of 2D structure represented by 1D array.
+    /// Create 1D index for [`Point`] based on [`Size`] of 2D structure represented by 1D array.
     /// Performs bounds check.
     ///
-    /// Returns `usize` if successful, `OutOfBoundsError` otherwise.
+    /// Returns `usize` if successful, [`OutOfBoundsError`] otherwise.
     ///
     /// # Examples
     ///
@@ -147,9 +147,9 @@ impl Point {
         Ok(self.y * size.width() + self.x)
     }
 
-    /// Translate `Point` by given `Offset`.
+    /// Translate [`Point`] by given [`Offset`].
     ///
-    /// Returns `Point` if point components are non-negative, `CreationError` otherwise.
+    /// Returns [`Point`] if point components are non-negative, [`CreationError`] otherwise.
     ///
     /// # Errors
     ///
@@ -201,16 +201,18 @@ impl Point {
 impl Sub for Point {
     type Output = Offset;
 
-    /// Subtract one `Point` from another
+    /// Subtract one [`Point`] from another
     ///
     /// # Examples
     ///
     /// ```
     /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
     /// assert_eq!(Point::new(10, 20) - Point::new(5, 10), Offset::new(5, 10));
     /// assert_eq!(Point::new(10, 20) - Point::new(20, 10), Offset::new(-10, 10));
     /// assert_eq!(Point::new(10, 20) - Point::new(20, 40), Offset::new(-10, -20));
+    ///
     /// # Ok(())
     /// # }
     fn sub(self, rhs: Self) -> Self::Output {
@@ -222,11 +224,12 @@ impl Sub for Point {
 }
 
 impl PartialOrd for Point {
-    /// Returns ordering of Points or none if it is not possible to compare them.
+
+    /// Returns [`Ordering`] of [`Point`]s or none if it is not possible to compare them.
     ///
     /// A size `a` is less than or equal to `b` if both `width` and `height` components
     /// are less than or equal. If one component is greater and other is smaller
-    /// then it returns `None`.
+    /// then it returns [`None`].
     ///
     /// # Examples
     ///
@@ -234,6 +237,7 @@ impl PartialOrd for Point {
     /// use img::prelude::*;
     /// use std::cmp::Ordering;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
     /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(10, 10)), Some(Ordering::Equal));
     /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(20, 20)), Some(Ordering::Less));
     /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(10, 20)), Some(Ordering::Less));
@@ -243,6 +247,7 @@ impl PartialOrd for Point {
     /// assert_eq!(Point::new(10, 20).partial_cmp(&Point::new(10, 10)), Some(Ordering::Greater));
     /// assert_eq!(Point::new(20, 10).partial_cmp(&Point::new(10, 20)), None);
     /// assert_eq!(Point::new(10, 20).partial_cmp(&Point::new(20, 10)), None);
+    ///
     /// # Ok(())
     /// # }
     /// ```
@@ -266,11 +271,12 @@ impl PartialOrd for Point {
 impl TryFrom<Offset> for Point {
     type Error = CreationError;
 
-    /// Create `Point` from `Offset`.
+    /// Create [`Point`] from [`Offset`].
     ///
-    /// Returns `Point` if point components are non-negative, `CreationError` otherwise.
+    /// Returns [`Point`] if point components are non-negative, [`CreationError`] otherwise.
     ///
     /// # Errors
+    ///
     /// * `CreationError::InvalidX` - if x is negative after applying offset.
     /// * `CreationError::InvalidY` - if y is negative after applying offset.
     ///

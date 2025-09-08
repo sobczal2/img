@@ -114,3 +114,4 @@ fn prepare_overlay_lens(width: usize, height: usize) -> impl Lens<Item = Pixel> 
 }
 
 test_lens!(overlay_lens, prepare_overlay_lens(50, 100), 100);
+

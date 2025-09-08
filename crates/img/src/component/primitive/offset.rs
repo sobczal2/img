@@ -10,7 +10,8 @@ pub struct Offset {
 }
 
 impl Offset {
-    /// Create a new `Offset` with specified `x` and `y`.
+
+    /// Create a new [`Offset`] with specified `x` and `y`.
     ///
     /// # Examples
     ///
@@ -27,12 +28,12 @@ impl Offset {
         Self { x, y }
     }
 
-    /// Returns `Offset`'s x.
+    /// Returns [`Offset`]'s x.
     pub fn x(&self) -> isize {
         self.x
     }
 
-    /// Returns `Offset`'s y.
+    /// Returns [`Offset`]'s y.
     pub fn y(&self) -> isize {
         self.y
     }

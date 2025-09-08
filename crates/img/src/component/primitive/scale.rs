@@ -20,20 +20,6 @@ pub enum CreationError {
 pub type CreationResult<T> = Result<T, CreationError>;
 
 /// Represents a 2D scale with separate x and y scaling factors.
-///
-/// # Examples
-/// ```
-/// use img::prelude::*;
-///
-/// // Crate a scale that doubles width and triples height
-/// let scale = Scale::new(2.0, 3.0).unwrap();
-///
-/// // Create a scale that halves width and height
-/// let half_scale = Scale::new(0.5, 0.5).unwrap();
-///
-/// // Tries to create scale, but x value is invalid
-/// let invalid_scale = Scale::new(0.00001, 1.0).unwrap_err(); // return ScaleCreationError::ScaleXInvalid
-/// ```
 #[derive(Debug, Copy, Clone)]
 pub struct Scale(f32, f32);
 
@@ -44,19 +30,21 @@ impl Scale {
     /// Maximum valid scaling factor.
     pub const MAX: f32 = 1f32 / Self::MIN;
 
-    /// Create a new `Scale` with the specified x and y scaling factors.
+    /// Create a new [`Scale`] with the specified x and y scaling factors.
     ///
-    /// Both x and y must be within range `[Scale::MIN, Scale::MAX]` inclusive.
+    /// Both x and y must be within range <[`Scale::MIN`], [`Scale::MAX`]> inclusive.
     ///
-    /// Returns `Ok(Scale)` if both parameters are valid, otherwise returns a
-    /// `ScaleCreationError`.
+    /// Returns [`Scale`] if both parameters are valid, [`CreationError`] otherwise.
     ///
     /// # Errors
     ///
-    /// * `ScaleCreationError::ScaleXInvalid` - if `x` is not within `[Scale::MIN, Scale::MAX]`, is
-    ///   `NAN`, or is `INFINITE`
-    /// * `ScaleCreationError::ScaleYInvalid` - if `y` is not within `[Scale::MIN, Scale::MAX]`, is
-    ///   `NAN`, or is `INFINITE`
+    /// * `ScaleCreationError::ScaleXInvalid` - if `x` is not within <[`Scale::MIN`], [`Scale::MAX`]>, is
+    ///   [`NAN`], or is [`INFINITY`]
+    /// * `ScaleCreationError::ScaleYInvalid` - if `y` is not within <[`Scale::MIN`], [`Scale::MAX`]>, is
+    ///   [`NAN`], or is [`INFINITY`]
+    ///
+    /// [`NAN`]: f32::NAN
+    /// [`INFINITY`]: f32::INFINITY
     ///
     /// # Examples
     ///
@@ -75,7 +63,7 @@ impl Scale {
     /// assert!(Scale::new(f32::INFINITY, 1.0).is_err()); // NaN not allowed
     ///
     /// # Ok(())
-    /// }
+    /// # }
     /// ```
     pub fn new(x: f32, y: f32) -> CreationResult<Self> {
         let valid_range = Self::MIN..=Self::MAX;
@@ -123,11 +111,11 @@ impl Scale {
         Scale(1.0 / self.0, 1.0 / self.1)
     }
 
-    /// Applies the scale transformation to a `Size`, returning a new scaled `Size`.
+    /// Applies the scale transformation to a [`Size`], returning a new scaled [`Size`].
     /// Rounds results to the nearest integer or further from zero if value is in the
     /// middle.
     ///
-    /// Returns scaled `Ok(Size)` or `CreationError` if resulting Size would not
+    /// Returns scaled [`Size`] or [`CreationError`] if resulting Size would not
     /// be valid.
     ///
     /// # Examples
@@ -160,7 +148,7 @@ impl Scale {
     /// Rounds results to the nearest integer or further from zero if value is in the
     /// middle.
     ///
-    /// Returns scaled `Point`.
+    /// Returns scaled [`Point`].
     ///
     /// # Examples
     ///
@@ -195,16 +183,16 @@ impl PartialEq for Scale {
     }
 }
 
-/// `Eq` can be safely implemented since we guarantee that `Scale` has floats within range
-/// `[Scale::MIN, Scale::MAX]`.
+/// [`Eq`] can be safely implemented since we guarantee that [`Scale`] has floats within range
+/// <[`Scale::MIN`], [`Scale::MAX`]>.
 impl Eq for Scale {}
 
 impl PartialOrd for Scale {
-    /// Returns ordering of scales or none if it is not possible to compare them.
+    /// Returns [`Ordering`] of scales or [`None`] if it is not possible to compare them.
     ///
     /// A scale `a` is less than or equal to `b` if both `x` and `y` components
     /// are less than or equal. If one component is greater and other is smaller
-    /// then it returns `None`.
+    /// then it returns [`None`].
     ///
     /// # Examples
     /// ```

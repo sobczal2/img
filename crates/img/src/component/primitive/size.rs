@@ -10,7 +10,7 @@ use super::{
     Point,
 };
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum CreationError {
     #[error("width is zero")]
     WidthZero,
@@ -28,7 +28,7 @@ pub struct Size {
 }
 
 impl Size {
-    /// Create a new `Size` with specified `width` and `height`.
+    /// Create a new [`Size`] with specified `width` and `height`.
     ///
     /// # Examples
     ///
@@ -45,10 +45,10 @@ impl Size {
         Self { width, height }
     }
 
-    /// Create a new `Size` with the specified width and height. Unlike `new` this takes in `usize`
+    /// Create a new [`Size`] with the specified width and height. Unlike [`Size::new`] this takes in `usize`
     /// arguments and can fail in case width or height is 0.
     ///
-    /// Returns `Size` if both parameters valid, otherwise returns a `CreationError`.
+    /// Returns [`Size`] if both parameters valid, otherwise returns a `CreationError`.
     ///
     /// # Errors
     ///
@@ -80,7 +80,7 @@ impl Size {
         Ok(Size { width, height })
     }
 
-    /// Create a new `Size` from specified radius. Radius is defined as distance between central
+    /// Create a new [`Size`] from specified radius. Radius is defined as distance between central
     /// point and any border.
     ///
     /// # Examples
@@ -108,26 +108,26 @@ impl Size {
         Self::from_usize(diameter, diameter).unwrap()
     }
 
-    /// Returns `Size`'s width as `usize`. Is guaranteed to not be 0.
+    /// Returns [`Size`]'s width as `usize`. Is guaranteed to not be 0.
     pub fn width(&self) -> usize {
         self.width.into()
     }
 
-    /// Returns `Size`'s height as `usize`. Is guaranteed to not be 0.
+    /// Returns [`Size`]'s height as `usize`. Is guaranteed to not be 0.
     pub fn height(&self) -> usize {
         self.height.into()
     }
 
-    /// Calculate `Size`'s area (width*height).
+    /// Calculate [`Size`]'s area (width * height).
     ///
-    /// Returns Size's area as `usize`. Is guaranteed to not be 0.
+    /// Returns [`Size`]'s area as `usize`. Is guaranteed to not be 0.
     pub fn area(&self) -> usize {
         self.width() * self.height()
     }
 
     /// Get rounded up middle point.
     ///
-    /// Returns Size's middle point. Rounds point up in case dimension is even.
+    /// Returns [`Size`]'s middle point. Rounds point up in case dimension is even.
     ///
     /// # Examples
     ///
@@ -151,7 +151,7 @@ impl Size {
         Point::new(self.width() / 2, self.height() / 2)
     }
 
-    /// Checks if point is within `Size` bounds.
+    /// Checks if point is within [`Size`] bounds.
     ///
     /// # Examples
     ///
@@ -183,6 +183,41 @@ impl Size {
         point.x() < self.width() && point.y() < self.height()
     }
 
+    /// Apply [`Margin`] to [`Size`] - this results in a [`Size`] reduced by margins.
+    ///
+    /// Returns modifed [`Size`] or [`CreationError`] in case resulting [`Size`] would not be
+    /// valid.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    /// use img::component::primitive::{SizeCreationError, SizeCreationResult};
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let size = Size::from_usize(10, 20)?;
+    ///
+    /// // Reduce size by 2 from the top, 3 from the right, 4 from the bottom, 5 from the left.
+    /// let reduced_size = size.apply_margin(Margin::new(2, 3, 4, 5))?;
+    ///
+    /// assert_eq!(reduced_size.width(), 2);
+    /// assert_eq!(reduced_size.height(), 14);
+    ///
+    /// let invalid_width_size = size.apply_margin(Margin::new(0, 4, 0, 6));
+    /// assert_eq!(invalid_width_size, SizeCreationResult::Err(SizeCreationError::WidthZero));
+    ///
+    /// let invalid_width_size = size.apply_margin(Margin::new(0, 10, 0, 20));
+    /// assert_eq!(invalid_width_size, SizeCreationResult::Err(SizeCreationError::WidthZero));
+    ///
+    /// let invalid_height_size = size.apply_margin(Margin::new(14, 0, 6, 0));
+    /// assert_eq!(invalid_height_size, SizeCreationResult::Err(SizeCreationError::HeightZero));
+    ///
+    /// let invalid_height_size = size.apply_margin(Margin::new(30, 0, 20, 0));
+    /// assert_eq!(invalid_height_size, SizeCreationResult::Err(SizeCreationError::HeightZero));
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn apply_margin(&self, margin: Margin) -> CreationResult<Self> {
         if margin.left() + margin.right() >= self.width() {
             return Err(CreationError::WidthZero);
@@ -200,13 +235,14 @@ impl Size {
 }
 
 impl PartialOrd for Size {
-    /// Returns `Some(Ordering)` of sizes or `None` if it is not possible to compare them.
+    /// Returns [`Ordering`] of sizes or [`None`] if it is not possible to compare them.
     ///
-    /// A `Size` `a` is less than or equal to `b` if both `width` and `height` components
+    /// A [`Size`] `a` is less than or equal to `b` if both `width` and `height` components
     /// are less than or equal. If one component is greater and other is smaller
-    /// then it returns `None`.
+    /// then it returns [`None`].
     ///
     /// # Examples
+    ///
     /// ```
     /// use img::prelude::*;
     /// use std::cmp::Ordering;
@@ -241,6 +277,7 @@ impl PartialOrd for Size {
     /// );
     /// assert_eq!(Size::from_usize(20, 10)?.partial_cmp(&Size::from_usize(10, 20)?), None);
     /// assert_eq!(Size::from_usize(10, 20)?.partial_cmp(&Size::from_usize(20, 10)?), None);
+    ///
     /// # Ok(())
     /// # }
     /// ```
@@ -265,6 +302,8 @@ impl Add<Margin> for Size {
     type Output = Size;
 
     fn add(self, rhs: Margin) -> Self::Output {
+
+        // UNWRAP: `Size::from_usize` fails only if either dimension is 0
         Size::from_usize(
             self.width() + rhs.left() + rhs.right(),
             self.height() + rhs.top() + rhs.bottom(),

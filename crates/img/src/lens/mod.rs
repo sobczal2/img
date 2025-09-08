@@ -2,10 +2,6 @@ use crate::{
     component::kernel::Kernel,
     error::IndexResult,
     lens::{
-        border::{
-            BorderFill,
-            BorderLens,
-        },
         cloned::ClonedLens,
         iter::{
             Elements,
@@ -14,6 +10,7 @@ use crate::{
         kernel::KernelLens,
         map::MapLens,
         materialize::MaterializeLens,
+        overlay::OverlayLens,
         remap::RemapLens,
         split::{
             SplitLens2,
@@ -22,19 +19,18 @@ use crate::{
         },
     },
     primitive::{
-        margin::Margin,
         point::Point,
         size::Size,
     },
 };
 
-pub mod border;
 pub mod cloned;
 pub mod image;
 pub mod iter;
 pub mod kernel;
 pub mod map;
 pub mod materialize;
+pub mod overlay;
 pub mod remap;
 pub mod split;
 pub mod value;
@@ -168,13 +164,6 @@ pub trait Lens {
         KernelLens::new(self, kernel)
     }
 
-    fn border(self, margin: Margin, fill: BorderFill) -> BorderLens<Self>
-    where
-        Self: Sized,
-    {
-        BorderLens::new(self, margin, fill)
-    }
-
     fn materialize(self) -> MaterializeLens<Self::Item>
     where
         Self: Sized,
@@ -239,6 +228,18 @@ pub trait Lens {
         L4: Lens<Item = D4>,
     {
         SplitLens4::new(self, factory1, factory2, factory3, factory4)
+    }
+
+    fn overlay<S>(
+        self,
+        overlay: S,
+        overlay_start: Point,
+    ) -> overlay::CreationResult<OverlayLens<Self, S>>
+    where
+        Self: Sized,
+        S: Lens<Item = Self::Item>,
+    {
+        OverlayLens::new(self, overlay, overlay_start)
     }
 }
 

@@ -17,6 +17,7 @@ const SOBEL_X: [[i16; 3]; 3] = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
 
 const SOBEL_Y: [[i16; 3]; 3] = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]];
 
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Gradient {
     x: i16,
     y: i16,

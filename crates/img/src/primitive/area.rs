@@ -19,6 +19,7 @@ pub enum CreationError {
 pub type CreationResult = Result<Area, CreationError>;
 
 /// Represents a 2D area defined by size and top left point.
+#[derive(Debug, Clone, Copy)]
 pub struct Area {
     size: Size,
     top_left: Point,

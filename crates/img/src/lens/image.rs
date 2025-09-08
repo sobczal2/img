@@ -29,7 +29,3 @@ impl<'a> Lens for ImageLens<'a> {
         self.0.size()
     }
 }
-
-pub trait PixelLens: Lens<Item = Pixel> {}
-
-impl<P> PixelLens for P where P: Lens<Item = Pixel> {}

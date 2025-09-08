@@ -20,7 +20,7 @@ use printing::print_error;
 
 use crate::cmd::{
     blur,
-    canny,
+    canny, kuwahara,
 };
 
 fn main() {
@@ -32,7 +32,8 @@ fn main() {
         .subcommand(crop::subcommand())
         .subcommand(blur::subcommand())
         .subcommand(gamma_correction::subcommand())
-        .subcommand(canny::subcommand());
+        .subcommand(canny::subcommand())
+        .subcommand(kuwahara::subcommand());
 
     if let Err(e) = execute_command(command) {
         print_error(e.to_string());
@@ -50,6 +51,7 @@ fn execute_command(command: Command) -> anyhow::Result<()> {
         Some((blur::CMD_NAME, m)) => blur::action(m),
         Some((gamma_correction::CMD_NAME, m)) => gamma_correction::action(m),
         Some((canny::CMD_NAME, m)) => canny::action(m),
+        Some((kuwahara::CMD_NAME, m)) => kuwahara::action(m),
         _ => unreachable!(),
     }
 }

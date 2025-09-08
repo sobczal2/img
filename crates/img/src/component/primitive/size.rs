@@ -33,7 +33,7 @@ impl Size {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::size::Size;
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let size = Size::new(100.try_into()?, 200.try_into()?);
@@ -58,7 +58,7 @@ impl Size {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::size::Size;
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let small = Size::from_usize(1, 2)?;
@@ -86,7 +86,7 @@ impl Size {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::size::Size;
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let small = Size::from_radius(0);
@@ -132,10 +132,7 @@ impl Size {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{
-    ///     point::Point,
-    ///     size::Size,
-    /// };
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let smallest = Size::from_usize(1, 1)?;
@@ -159,10 +156,7 @@ impl Size {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{
-    ///     point::Point,
-    ///     size::Size,
-    /// };
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let small = Size::from_usize(1, 1)?;
@@ -214,7 +208,7 @@ impl PartialOrd for Size {
     ///
     /// # Examples
     /// ```
-    /// use img::primitive::size::Size;
+    /// use img::prelude::*;
     /// use std::cmp::Ordering;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// assert_eq!(

@@ -59,14 +59,8 @@ pub trait Lens {
     /// # Examples
     ///
     /// ```
-    /// use img::{
-    ///     image::Image,
-    ///     lens::Lens,
-    ///     primitive::{
-    ///         point::Point,
-    ///         size::Size,
-    ///     },
-    /// };
+    /// use img::prelude::*;
+    /// use img::lens::Lens;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let image = Image::empty(Size::from_usize(10, 20)?);
@@ -90,14 +84,8 @@ pub trait Lens {
     /// # Examples
     ///
     /// ```
-    /// use img::{
-    ///     image::Image,
-    ///     lens::Lens,
-    ///     primitive::{
-    ///         point::Point,
-    ///         size::Size,
-    ///     },
-    /// };
+    /// use img::prelude::*;
+    /// use img::lens::Lens;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let size = Size::from_usize(10, 20)?;

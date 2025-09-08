@@ -12,7 +12,11 @@ pub use area::{
 };
 pub use margin::Margin;
 pub use offset::Offset;
-pub use point::Point;
+pub use point::{
+    Point,
+    CreationError as PointCreationError,
+    CreationResult as PointCreationResult,
+};
 pub use scale::{
     CreationError as ScaleCreationError,
     CreationResult as ScaleCreationResult,

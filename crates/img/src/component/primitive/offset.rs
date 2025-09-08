@@ -15,7 +15,7 @@ impl Offset {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::offset::Offset;
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let offset = Offset::new(100, 200);

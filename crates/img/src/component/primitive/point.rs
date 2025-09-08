@@ -37,7 +37,7 @@ impl Point {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::point::Point;
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let point = Point::new(100, 200);
@@ -54,7 +54,7 @@ impl Point {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::point::Point;
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let zero1 = Point::new(0, 0);
@@ -77,10 +77,7 @@ impl Point {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{
-    ///     point::Point,
-    ///     size::Size,
-    /// };
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let size = Size::from_usize(2, 2)?;
@@ -122,10 +119,7 @@ impl Point {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{
-    ///     point::Point,
-    ///     size::Size,
-    /// };
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let point_top_left = Point::new(0, 0);
@@ -165,14 +159,8 @@ impl Point {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{
-    ///     offset::Offset,
-    ///     point::{
-    ///         CreationError,
-    ///         CreationResult,
-    ///         Point,
-    ///     },
-    /// };
+    /// use img::prelude::*;
+    /// use img::component::primitive::{PointCreationError, PointCreationResult};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let point = Point::new(100, 200);
@@ -185,15 +173,15 @@ impl Point {
     /// assert!(Point::new(10, 10).translate(Offset::new(-10, -10)).is_ok());
     /// assert_eq!(
     ///     Point::new(10, 10).translate(Offset::new(-11, -10)),
-    ///     CreationResult::Err(CreationError::InvalidX)
+    ///     PointCreationResult::Err(PointCreationError::InvalidX)
     /// );
     /// assert_eq!(
     ///     Point::new(10, 10).translate(Offset::new(-10, -11)),
-    ///     CreationResult::Err(CreationError::InvalidY)
+    ///     PointCreationResult::Err(PointCreationError::InvalidY)
     /// );
     /// assert_eq!(
     ///     Point::new(10, 10).translate(Offset::new(-11, -11)),
-    ///     CreationResult::Err(CreationError::InvalidX)
+    ///     PointCreationResult::Err(PointCreationError::InvalidX)
     /// );
     ///
     /// # Ok(())
@@ -218,7 +206,7 @@ impl Sub for Point {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{point::Point, offset::Offset};
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// assert_eq!(Point::new(10, 20) - Point::new(5, 10), Offset::new(5, 10));
     /// assert_eq!(Point::new(10, 20) - Point::new(20, 10), Offset::new(-10, 10));
@@ -243,7 +231,7 @@ impl PartialOrd for Point {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::point::Point;
+    /// use img::prelude::*;
     /// use std::cmp::Ordering;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// assert_eq!(Point::new(10, 10).partial_cmp(&Point::new(10, 10)), Some(Ordering::Equal));
@@ -289,21 +277,15 @@ impl TryFrom<Offset> for Point {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{
-    ///     offset::Offset,
-    ///     point::{
-    ///         CreationError,
-    ///         CreationResult,
-    ///         Point,
-    ///     },
-    /// };
+    /// use img::prelude::*;
+    /// use img::component::primitive::{PointCreationError, PointCreationResult};
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// assert_eq!(Point::try_from(Offset::new(1, 1))?, Point::new(1, 1));
     ///
-    /// assert_eq!(Point::try_from(Offset::new(-1, -1)), CreationResult::Err(CreationError::InvalidX));
-    /// assert_eq!(Point::try_from(Offset::new(1, -1)), CreationResult::Err(CreationError::InvalidY));
-    /// assert_eq!(Point::try_from(Offset::new(-1, 1)), CreationResult::Err(CreationError::InvalidX));
+    /// assert_eq!(Point::try_from(Offset::new(-1, -1)), PointCreationResult::Err(PointCreationError::InvalidX));
+    /// assert_eq!(Point::try_from(Offset::new(1, -1)), PointCreationResult::Err(PointCreationError::InvalidY));
+    /// assert_eq!(Point::try_from(Offset::new(-1, 1)), PointCreationResult::Err(PointCreationError::InvalidX));
     ///
     /// # Ok(())
     /// # }

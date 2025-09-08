@@ -13,7 +13,7 @@ impl Margin {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::margin::Margin;
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let margin = Margin::new(100, 200, 300, 400);
@@ -30,7 +30,7 @@ impl Margin {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::margin::Margin;
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let margin = Margin::unified(100);

@@ -133,8 +133,8 @@ impl WritePng for Image {
 mod test {
     use super::*;
     use crate::{
+        component::primitive::Point,
         image::Image,
-        primitive::point::Point,
     };
 
     #[test]

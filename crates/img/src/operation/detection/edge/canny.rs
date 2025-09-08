@@ -1,7 +1,6 @@
 use std::f32::consts::PI;
 
 use itertools::Itertools;
-use thiserror::Error;
 
 use crate::{
     component::{
@@ -26,7 +25,6 @@ use crate::{
     lens::{
         FromLens,
         Lens,
-        kernel,
     },
     pixel::{
         Pixel,

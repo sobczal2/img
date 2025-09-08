@@ -23,7 +23,7 @@ pub type CreationResult<T> = Result<T, CreationError>;
 ///
 /// # Examples
 /// ```
-/// use img::primitive::scale::Scale;
+/// use img::prelude::*;
 ///
 /// // Crate a scale that doubles width and triples height
 /// let scale = Scale::new(2.0, 3.0).unwrap();
@@ -61,7 +61,7 @@ impl Scale {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::scale::Scale;
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let normal = Scale::new(1.0, 1.0)?; // Identity scale
@@ -104,7 +104,7 @@ impl Scale {
     ///
     /// # Examples
     /// ```
-    /// use img::primitive::scale::Scale;
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let identity = Scale::new(1.0, 1.0)?;
@@ -133,10 +133,7 @@ impl Scale {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{
-    ///     scale::Scale,
-    ///     size::Size,
-    /// };
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let identity = Scale::new(1.0, 1.0)?;
@@ -168,10 +165,7 @@ impl Scale {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{
-    ///     point::Point,
-    ///     scale::Scale,
-    /// };
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let identity = Scale::new(1.0, 1.0)?;
@@ -214,7 +208,7 @@ impl PartialOrd for Scale {
     ///
     /// # Examples
     /// ```
-    /// use img::primitive::scale::Scale;
+    /// use img::prelude::*;
     /// use std::cmp::Ordering;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// assert_eq!(

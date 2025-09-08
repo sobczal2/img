@@ -29,11 +29,7 @@ impl Area {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{
-    ///     area::Area,
-    ///     point::Point,
-    ///     size::Size,
-    /// };
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// // Create a 1x1 area in without any offset
@@ -60,12 +56,7 @@ impl Area {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{
-    ///     area::Area,
-    ///     margin::Margin,
-    ///     point::Point,
-    ///     size::Size,
-    /// };
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// // Create a 5x10 area in with 15x20 offset
@@ -125,11 +116,7 @@ impl Area {
     /// # Examples
     ///
     /// ```
-    /// use img::primitive::{
-    ///     area::Area,
-    ///     point::Point,
-    ///     size::Size,
-    /// };
+    /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// // Create a 1x1 area in without any offset

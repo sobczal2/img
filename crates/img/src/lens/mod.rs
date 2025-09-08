@@ -1,5 +1,11 @@
 use crate::{
-    component::kernel::Kernel,
+    component::{
+        kernel::Kernel,
+        primitive::{
+            Point,
+            Size,
+        },
+    },
     error::IndexResult,
     lens::{
         cloned::ClonedLens,
@@ -17,10 +23,6 @@ use crate::{
             SplitLens3,
             SplitLens4,
         },
-    },
-    primitive::{
-        point::Point,
-        size::Size,
     },
 };
 

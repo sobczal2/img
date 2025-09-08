@@ -4,7 +4,6 @@ use anyhow::{
     anyhow,
     bail,
 };
-use img::primitive::size::CreationError;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Size {
@@ -28,10 +27,10 @@ impl FromStr for Size {
     }
 }
 
-impl TryFrom<Size> for img::primitive::size::Size {
-    type Error = CreationError;
+impl TryFrom<Size> for img::prelude::Size {
+    type Error = img::component::primitive::SizeCreationError;
 
-    fn try_from(value: Size) -> img::primitive::size::CreationResult {
+    fn try_from(value: Size) -> img::component::primitive::SizeCreationResult<img::prelude::Size> {
         Self::from_usize(value.width, value.height)
     }
 }

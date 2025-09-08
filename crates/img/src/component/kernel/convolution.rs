@@ -3,7 +3,15 @@ use std::ops::Add;
 use thiserror::Error;
 
 use crate::{
-    component::kernel::Kernel,
+    component::{
+        kernel::Kernel,
+        primitive::{
+            Area,
+            Margin,
+            Point,
+            Size,
+        },
+    },
     error::{
         IndexResult,
         OutOfBoundsError,
@@ -13,12 +21,6 @@ use crate::{
         Pixel,
         PixelFlags,
         PixelRgbaf32,
-    },
-    primitive::{
-        area::Area,
-        margin::Margin,
-        point::Point,
-        size::Size,
     },
 };
 

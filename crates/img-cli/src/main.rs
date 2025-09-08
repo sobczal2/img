@@ -20,7 +20,8 @@ use printing::print_error;
 
 use crate::cmd::{
     blur,
-    canny, kuwahara,
+    canny,
+    kuwahara,
 };
 
 fn main() {

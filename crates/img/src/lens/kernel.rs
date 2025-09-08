@@ -3,14 +3,16 @@ use std::marker::PhantomData;
 use thiserror::Error;
 
 use crate::{
-    component::kernel::Kernel,
+    component::{
+        kernel::Kernel,
+        primitive::{
+            Margin,
+            Point,
+            Size,
+        },
+    },
     error::IndexResult,
     lens::Lens,
-    primitive::{
-        margin::Margin,
-        point::Point,
-        size::Size,
-    },
 };
 
 #[derive(Debug, Error)]

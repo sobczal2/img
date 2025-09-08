@@ -8,13 +8,7 @@ use clap::{
     Command,
     arg,
 };
-use img::{
-    operation::geometry::crop::crop,
-    primitive::{
-        margin::Margin,
-        size::Size,
-    },
-};
+use img::prelude::*;
 
 use crate::{
     io::{

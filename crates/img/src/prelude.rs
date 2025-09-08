@@ -1,14 +1,52 @@
 pub use crate::{
+    component::primitive::{
+        Area,
+        Margin,
+        Offset,
+        Point,
+        Scale,
+        Size,
+    },
     image::Image,
     operation::{
         blur::{
-            gaussian::gaussian_blur,
-            mean::mean_blur,
+            gaussian_blur,
+            kuwahara,
+            mean_blur,
         },
         color::{
-            gamma_correction::gamma_correction,
-            grayscale::grayscale,
-            sepia::sepia,
+            gamma_correction,
+            grayscale,
+            sepia,
         },
+        detection::edge::canny,
+        geometry::{
+            crop,
+            resize,
+        },
+    },
+    pixel::{
+        Pixel,
+        PixelFlags,
+        PixelRgbaf32,
+        hsv::HsvPixel,
+    },
+};
+
+#[cfg(feature = "parallel")]
+pub use crate::operation::{
+    blur::{
+        gaussian_blur_par,
+        mean_blur_par,
+    },
+    color::{
+        gamma_correction_par,
+        grayscale_par,
+        sepia_par,
+    },
+    detection::edge::canny_par,
+    geometry::{
+        crop_par,
+        resize_par,
     },
 };

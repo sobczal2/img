@@ -1,6 +1,6 @@
 use crate::{
+    component::primitive::Point,
     lens::Lens,
-    primitive::point::Point,
 };
 
 #[derive(Clone)]

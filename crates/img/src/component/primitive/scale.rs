@@ -2,12 +2,11 @@ use std::cmp::Ordering;
 
 use thiserror::Error;
 
-use crate::primitive::{
-    point::Point,
-    size::{
-        self,
-        Size,
-    },
+use crate::component::primitive::SizeCreationResult;
+
+use super::{
+    Point,
+    Size,
 };
 
 #[derive(Error, Debug)]
@@ -18,7 +17,7 @@ pub enum CreationError {
     ScaleYInvalid(f32),
 }
 
-pub type CreationResult = Result<Scale, CreationError>;
+pub type CreationResult<T> = Result<T, CreationError>;
 
 /// Represents a 2D scale with separate x and y scaling factors.
 ///
@@ -78,7 +77,7 @@ impl Scale {
     /// # Ok(())
     /// }
     /// ```
-    pub fn new(x: f32, y: f32) -> CreationResult {
+    pub fn new(x: f32, y: f32) -> CreationResult<Self> {
         let valid_range = Self::MIN..=Self::MAX;
         if !valid_range.contains(&x) {
             return Err(CreationError::ScaleXInvalid(x));
@@ -153,7 +152,7 @@ impl Scale {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn apply(&self, size: Size) -> size::CreationResult {
+    pub fn apply(&self, size: Size) -> SizeCreationResult<Size> {
         let new_width: f32 = size.width() as f32 * self.0;
         let new_height: f32 = size.height() as f32 * self.1;
 

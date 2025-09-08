@@ -1,22 +1,22 @@
 use thiserror::Error;
 
 use crate::{
+    component::primitive::{
+        Scale,
+        SizeCreationError,
+    },
     image::Image,
     lens::{
         FromLens,
         Lens,
     },
     pixel::Pixel,
-    primitive::{
-        scale::Scale,
-        size,
-    },
 };
 
 #[derive(Debug, Error)]
 pub enum CreationError {
     #[error("new size is invalid: {0}")]
-    NewSizeInvalid(#[from] size::CreationError),
+    NewSizeInvalid(#[from] SizeCreationError),
 }
 
 pub fn resize_lens<S>(source: S, scale: Scale) -> Result<impl Lens<Item = Pixel>, CreationError>

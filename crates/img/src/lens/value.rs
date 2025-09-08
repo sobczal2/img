@@ -1,13 +1,13 @@
 use crate::{
+    component::primitive::{
+        Point,
+        Size,
+    },
     error::{
         IndexResult,
         OutOfBoundsError,
     },
     lens::Lens,
-    primitive::{
-        point::Point,
-        size::Size,
-    },
 };
 
 pub struct ValueLens<T> {

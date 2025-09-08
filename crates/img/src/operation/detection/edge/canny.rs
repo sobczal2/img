@@ -14,6 +14,12 @@ use crate::{
             },
         },
         lens::border::value_border,
+        primitive::{
+            Margin,
+            Offset,
+            Point,
+            Size,
+        },
     },
     error::IndexResult,
     image::Image,
@@ -26,21 +32,15 @@ use crate::{
         Pixel,
         PixelFlags,
     },
-    primitive::{
-        margin::Margin,
-        offset::Offset,
-        point::Point,
-        size::Size,
-    },
 };
 
-#[derive(Debug, Error)]
-pub enum CreationError {
-    #[error("kernel creation error: {0}")]
-    KernelCreationError(#[from] kernel::CreationError),
-}
-
-pub type CreationResult<T> = std::result::Result<T, CreationError>;
+// #[derive(Debug, Error)]
+// pub enum CreationError {
+//     #[error("kernel creation error: {0}")]
+//     KernelCreationError(#[from] kernel::CreationError),
+// }
+//
+// pub type CreationResult<T> = std::result::Result<T, CreationError>;
 
 pub fn canny_lens<S>(source: S) -> impl Lens<Item = Pixel>
 where

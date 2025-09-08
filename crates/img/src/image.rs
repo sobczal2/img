@@ -1,6 +1,10 @@
 use thiserror::Error;
 
 use crate::{
+    component::primitive::{
+        Point,
+        Size,
+    },
     error::IndexResult,
     lens::{
         FromLens,
@@ -9,10 +13,6 @@ use crate::{
         image::ImageLens,
     },
     pixel::Pixel,
-    primitive::{
-        point::Point,
-        size::Size,
-    },
 };
 
 #[derive(Debug, Error)]

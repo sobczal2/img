@@ -1,10 +1,10 @@
 use crate::{
+    component::primitive::{
+        Margin,
+        Point,
+    },
     error::IndexResult,
     lens::Lens,
-    primitive::{
-        margin::Margin,
-        point::Point,
-    },
 };
 
 pub mod convolution;

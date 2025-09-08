@@ -1,4 +1,9 @@
 use crate::{
+    component::primitive::{
+        Margin,
+        Offset,
+        SizeCreationError,
+    },
     image::Image,
     lens::{
         FromLens,
@@ -6,19 +11,9 @@ use crate::{
         Lens,
     },
     pixel::Pixel,
-    primitive::{
-        margin::Margin,
-        offset::Offset,
-        size::{
-            self,
-        },
-    },
 };
 
-pub fn crop_lens<S>(
-    source: S,
-    margin: Margin,
-) -> Result<impl Lens<Item = Pixel>, size::CreationError>
+pub fn crop_lens<S>(source: S, margin: Margin) -> Result<impl Lens<Item = Pixel>, SizeCreationError>
 where
     S: Lens,
     S::Item: AsRef<Pixel>,
@@ -38,7 +33,7 @@ where
     ))
 }
 
-pub fn crop(image: &Image, margin: Margin) -> Result<Image, size::CreationError> {
+pub fn crop(image: &Image, margin: Margin) -> Result<Image, SizeCreationError> {
     let lens = crop_lens(image.lens(), margin)?;
     let image = Image::from_lens(lens);
 
@@ -46,7 +41,7 @@ pub fn crop(image: &Image, margin: Margin) -> Result<Image, size::CreationError>
 }
 
 #[cfg(feature = "parallel")]
-pub fn crop_par(image: &Image, margin: Margin) -> Result<Image, size::CreationError> {
+pub fn crop_par(image: &Image, margin: Margin) -> Result<Image, SizeCreationError> {
     let lens = crop_lens(image.lens(), margin)?;
     let image = Image::from_lens_par(lens);
 

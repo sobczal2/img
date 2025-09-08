@@ -1,21 +1,23 @@
 use thiserror::Error;
 
 use crate::{
-    component::kernel::{
-        self,
-        Kernel,
-        convolution::ConvolutionKernel,
+    component::{
+        kernel::{
+            self,
+            Kernel,
+            convolution::ConvolutionKernel,
+        },
+        primitive::{
+            Margin,
+            Point,
+            Size,
+        },
     },
     error::IndexResult,
     lens::Lens,
     pixel::{
         Pixel,
         PixelFlags,
-    },
-    primitive::{
-        margin::Margin,
-        point::Point,
-        size::Size,
     },
 };
 

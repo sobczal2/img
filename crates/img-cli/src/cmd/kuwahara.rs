@@ -1,10 +1,23 @@
 use std::path::PathBuf;
 
-use clap::{ArgMatches, Command};
-use img::operation::blur::kuwahara::kuwahara;
+use clap::{
+    ArgMatches,
+    Command,
+};
+use img::prelude::*;
 
-use crate::{cmd::common::{input_arg, output_arg, INPUT_ARG_NAME, OUTPUT_ARG_NAME}, io::{read_image, write_image}};
-
+use crate::{
+    cmd::common::{
+        INPUT_ARG_NAME,
+        OUTPUT_ARG_NAME,
+        input_arg,
+        output_arg,
+    },
+    io::{
+        read_image,
+        write_image,
+    },
+};
 
 pub const CMD_NAME: &str = "kuwahara";
 

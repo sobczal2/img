@@ -5,11 +5,11 @@ use criterion::{
     criterion_main,
 };
 use img::{
+    component::primitive::margin::Margin,
     operation::geometry::crop::{
         crop,
         crop_par,
     },
-    primitive::margin::Margin,
 };
 
 mod common;

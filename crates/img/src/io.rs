@@ -4,13 +4,13 @@ use png::{
 };
 
 use crate::{
+    component::primitive::Size,
     error::{
         IoError,
         IoResult,
     },
     image::Image,
     pixel::Pixel,
-    primitive::size::Size,
 };
 
 fn pixel_size_by_color_type(color_type: ColorType) -> usize {

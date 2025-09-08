@@ -6,22 +6,24 @@ use std::f32::consts::{
 use thiserror::Error;
 
 use crate::{
-    component::kernel::{
-        self,
-        Kernel,
-        convolution::ConvolutionKernel,
+    component::{
+        kernel::{
+            self,
+            Kernel,
+            convolution::ConvolutionKernel,
+        },
+        primitive::{
+            Margin,
+            Offset,
+            Point,
+            Size,
+        },
     },
     error::IndexResult,
     lens::Lens,
     pixel::{
         Pixel,
         PixelFlags,
-    },
-    primitive::{
-        margin::Margin,
-        offset::Offset,
-        point::Point,
-        size::Size,
     },
 };
 

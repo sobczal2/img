@@ -3,7 +3,7 @@ pub mod canny;
 pub mod common;
 pub mod crop;
 pub mod gamma_correction;
-pub mod kuwahara;
 pub mod grayscale;
+pub mod kuwahara;
 pub mod resize;
 pub mod sepia;

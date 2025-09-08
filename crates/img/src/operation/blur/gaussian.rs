@@ -1,9 +1,12 @@
 use thiserror::Error;
 
 use crate::{
-    component::kernel::{
-        self,
-        gaussian::GaussianKernel,
+    component::{
+        kernel::{
+            self,
+            gaussian::GaussianKernel,
+        },
+        primitive::Size,
     },
     image::Image,
     lens::{
@@ -15,7 +18,6 @@ use crate::{
         Pixel,
         PixelFlags,
     },
-    primitive::size::Size,
 };
 
 /// Error returned by mean_blur function

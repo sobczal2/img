@@ -1,22 +1,20 @@
 use thiserror::Error;
 
-use crate::primitive::{
-    margin::Margin,
-    offset::Offset,
-    point::Point,
-    size::{
-        self,
-        Size,
-    },
+use super::{
+    Margin,
+    Offset,
+    Point,
+    Size,
+    SizeCreationError,
 };
 
 #[derive(Debug, Error)]
 pub enum CreationError {
     #[error("resulting size invalid: {0}")]
-    SizeInvalid(size::CreationError),
+    SizeInvalid(SizeCreationError),
 }
 
-pub type CreationResult = Result<Area, CreationError>;
+pub type CreationResult<T> = Result<T, CreationError>;
 
 /// Represents a 2D area defined by size and top left point.
 #[derive(Debug, Clone, Copy)]
@@ -85,7 +83,7 @@ impl Area {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn from_cropped_size(size: Size, margin: Margin) -> CreationResult {
+    pub fn from_cropped_size(size: Size, margin: Margin) -> CreationResult<Self> {
         let width = size.width() - margin.left() - margin.right();
         let height = size.height() - margin.top() - margin.bottom();
 

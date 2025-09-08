@@ -1,16 +1,18 @@
 use crate::{
-    component::kernel::Kernel,
+    component::{
+        kernel::Kernel,
+        primitive::{
+            Margin,
+            Offset,
+            Point,
+            Size,
+        },
+    },
     error::{
         IndexResult,
         OutOfBoundsError,
     },
     lens::Lens,
-    primitive::{
-        margin::Margin,
-        offset::Offset,
-        point::Point,
-        size::Size,
-    },
 };
 
 const SOBEL_X: [[i16; 3]; 3] = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
@@ -72,7 +74,7 @@ impl Kernel<u8, Gradient> for SobelKernel {
         Ok(Gradient { x: g_x, y: g_y })
     }
 
-    fn margin(&self) -> crate::primitive::margin::Margin {
+    fn margin(&self) -> Margin {
         Margin::unified(1)
     }
 }

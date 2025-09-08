@@ -1,4 +1,8 @@
 use crate::{
+    component::primitive::{
+        Margin,
+        Point,
+    },
     lens::{
         Lens,
         overlay::{
@@ -6,10 +10,6 @@ use crate::{
             OverlayLens,
         },
         value::ValueLens,
-    },
-    primitive::{
-        margin::Margin,
-        point::Point,
     },
 };
 

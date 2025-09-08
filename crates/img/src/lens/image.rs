@@ -1,12 +1,12 @@
 use crate::{
+    component::primitive::{
+        Point,
+        Size,
+    },
     error::IndexResult,
     image::Image,
     lens::Lens,
     pixel::Pixel,
-    primitive::{
-        point::Point,
-        size::Size,
-    },
 };
 
 #[derive(Clone)]

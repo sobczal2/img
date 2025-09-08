@@ -5,9 +5,9 @@ use std::{
 };
 use thiserror::Error;
 
-use crate::primitive::{
-    margin::Margin,
-    point::Point,
+use super::{
+    Margin,
+    Point,
 };
 
 #[derive(Debug, Error)]
@@ -18,7 +18,7 @@ pub enum CreationError {
     HeightZero,
 }
 
-pub type CreationResult = Result<Size, CreationError>;
+pub type CreationResult<T> = Result<T, CreationError>;
 
 /// Represents a 2D size. Minimum size is 1x1.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -73,7 +73,7 @@ impl Size {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn from_usize(width: usize, height: usize) -> CreationResult {
+    pub fn from_usize(width: usize, height: usize) -> CreationResult<Self> {
         let width: NonZeroUsize = width.try_into().map_err(|_| CreationError::WidthZero)?;
         let height: NonZeroUsize = height.try_into().map_err(|_| CreationError::HeightZero)?;
 
@@ -189,7 +189,7 @@ impl Size {
         point.x() < self.width() && point.y() < self.height()
     }
 
-    pub fn apply_margin(&self, margin: Margin) -> CreationResult {
+    pub fn apply_margin(&self, margin: Margin) -> CreationResult<Self> {
         if margin.left() + margin.right() >= self.width() {
             return Err(CreationError::WidthZero);
         }

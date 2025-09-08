@@ -6,10 +6,7 @@ use clap::{
     arg,
     value_parser,
 };
-use img::{
-    operation::color::gamma_correction::gamma_correction,
-    pixel::PixelFlags,
-};
+use img::prelude::*;
 
 use crate::io::{
     read_image,

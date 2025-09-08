@@ -1,14 +1,14 @@
 use thiserror::Error;
 
 use crate::{
+    component::primitive::{
+        Area,
+        Offset,
+        Point,
+        Size,
+    },
     error::IndexResult,
     lens::Lens,
-    primitive::{
-        area::Area,
-        offset::Offset,
-        point::Point,
-        size::Size,
-    },
 };
 
 #[derive(Debug, Error)]

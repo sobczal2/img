@@ -4,12 +4,12 @@ use std::{
 };
 
 use crate::{
+    component::primitive::{
+        Point,
+        Size,
+    },
     error::IndexResult,
     lens::Lens,
-    primitive::{
-        point::Point,
-        size::Size,
-    },
 };
 
 pub struct MaterializeLens<T> {

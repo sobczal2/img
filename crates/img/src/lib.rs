@@ -6,4 +6,3 @@ pub mod lens;
 pub mod operation;
 pub mod pixel;
 pub mod prelude;
-pub mod primitive;

@@ -5,15 +5,13 @@ use std::{
 
 use thiserror::Error;
 
-use crate::{
-    error::{
-        IndexResult,
-        OutOfBoundsError,
-    },
-    primitive::{
-        offset::Offset,
-        size::Size,
-    },
+use super::{
+    Offset,
+    Size,
+};
+use crate::error::{
+    IndexResult,
+    OutOfBoundsError,
 };
 
 #[derive(Debug, Error, PartialEq, Eq)]
@@ -24,7 +22,7 @@ pub enum CreationError {
     InvalidY,
 }
 
-pub type CreationResult = Result<Point, CreationError>;
+pub type CreationResult<T> = Result<T, CreationError>;
 
 /// Represents point on a 2D structure. Both dimensions are represented as positive integers.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -201,7 +199,7 @@ impl Point {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn translate(mut self, offset: Offset) -> CreationResult {
+    pub fn translate(mut self, offset: Offset) -> CreationResult<Self> {
         let x = self.x as isize + offset.x();
         let y = self.y as isize + offset.y();
 
@@ -310,7 +308,7 @@ impl TryFrom<Offset> for Point {
     /// # Ok(())
     /// # }
     /// ```
-    fn try_from(value: Offset) -> CreationResult {
+    fn try_from(value: Offset) -> CreationResult<Self> {
         let x: usize = value.x().try_into().map_err(|_| CreationError::InvalidX)?;
         let y: usize = value.y().try_into().map_err(|_| CreationError::InvalidY)?;
 

@@ -1,10 +1,10 @@
 use crate::{
+    component::primitive::{
+        Point,
+        Size,
+    },
     error::IndexResult,
     lens::Lens,
-    primitive::{
-        point::Point,
-        size::Size,
-    },
 };
 
 pub struct SplitLens2<L1, L2> {

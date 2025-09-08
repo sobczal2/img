@@ -1,9 +1,12 @@
 use thiserror::Error;
 
 use crate::{
-    component::kernel::{
-        self,
-        mean::MeanKernel,
+    component::{
+        kernel::{
+            self,
+            mean::MeanKernel,
+        },
+        primitive::Size,
     },
     image::Image,
     lens::{
@@ -15,7 +18,6 @@ use crate::{
         Pixel,
         PixelFlags,
     },
-    primitive::size::Size,
 };
 
 #[derive(Debug, Error)]

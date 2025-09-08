@@ -1,6 +1,6 @@
 use std::ops::Neg;
 
-use crate::primitive::point::Point;
+use super::Point;
 
 /// Represents a 2D offset between 2 `Point`s.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]

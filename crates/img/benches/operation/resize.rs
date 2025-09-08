@@ -5,11 +5,11 @@ use criterion::{
     criterion_main,
 };
 use img::{
+    component::primitive::Scale,
     operation::geometry::resize::{
         resize,
         resize_par,
     },
-    primitive::scale::Scale,
 };
 
 mod common;

@@ -7,14 +7,7 @@ use clap::{
     arg,
     value_parser,
 };
-use img::{
-    image::Image,
-    operation::blur::{
-        gaussian::gaussian_blur,
-        mean::mean_blur,
-    },
-    pixel::PixelFlags,
-};
+use img::prelude::*;
 
 use crate::io::{
     read_image,

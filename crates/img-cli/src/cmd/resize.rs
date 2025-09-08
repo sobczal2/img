@@ -8,10 +8,7 @@ use clap::{
     Command,
     arg,
 };
-use img::{
-    operation::geometry::resize::resize,
-    primitive::scale::Scale,
-};
+use img::prelude::*;
 
 use crate::{
     io::{

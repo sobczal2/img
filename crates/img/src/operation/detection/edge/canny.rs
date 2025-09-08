@@ -138,9 +138,9 @@ where
             };
 
             if gradient_a.0 > gradient_b.0 && gradient_a.0 > gradient_c.0 {
-                gradient_a.0
+                Ok(gradient_a.0)
             } else {
-                0f32
+                Ok(0f32)
             }
         },
         size,

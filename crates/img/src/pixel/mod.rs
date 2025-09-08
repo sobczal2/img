@@ -1,4 +1,5 @@
 use bitflags::bitflags;
+use rand::Rng;
 
 use crate::pixel::hsv::HsvPixel;
 
@@ -30,6 +31,12 @@ impl Pixel {
 
     pub const fn zero() -> Self {
         Self([0; PIXEL_SIZE])
+    }
+
+    pub fn random<R>(rng: &mut R) -> Self
+    where R: Rng
+    {
+        Pixel(rng.random())
     }
 
     /// get red value

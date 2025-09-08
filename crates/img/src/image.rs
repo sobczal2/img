@@ -1,3 +1,6 @@
+use std::iter::from_fn;
+
+use rand::{rngs::SmallRng, Rng, SeedableRng};
 use thiserror::Error;
 
 use crate::{
@@ -38,10 +41,14 @@ impl Image {
 
     /// create empty image with specified size
     pub fn empty(size: Size) -> Self {
-        let width: usize = size.width();
-        let height: usize = size.height();
+        Self { size, pixels: vec![Pixel::zero(); size.area()].into_boxed_slice() }
+    }
 
-        Self { size, pixels: vec![Pixel::zero(); width * height].into_boxed_slice() }
+    pub fn random<R>(size: Size, rng: &mut R) -> Self
+    where R: Rng
+    {
+        let pixels = from_fn(|| Some(Pixel::random(rng))).take(size.area()).collect();
+        Self { size, pixels }
     }
 
     pub fn size(&self) -> Size {
@@ -52,7 +59,7 @@ impl Image {
     pub fn pixel(&self, point: Point) -> IndexResult<&Pixel> {
         let index = point.index(self.size())?;
 
-        // SAFETY: index from point.to_idx is always valid
+        // SAFETY: index from point.to_index is always valid
         Ok(&self.pixels[index])
     }
 
@@ -60,7 +67,7 @@ impl Image {
     pub fn pixel_mut(&mut self, point: Point) -> IndexResult<&mut Pixel> {
         let index = point.index(self.size())?;
 
-        // SAFETY: index from point.to_idx is always valid
+        // SAFETY: index from point.to_index is always valid
         Ok(&mut self.pixels[index])
     }
 

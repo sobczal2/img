@@ -133,7 +133,7 @@ pub trait Lens {
     fn remap<T, F>(self, f: F, size: Size) -> RemapLens<Self, F>
     where
         Self: Sized,
-        F: Fn(&Self, Point) -> T,
+        F: Fn(&Self, Point) -> IndexResult<T>,
     {
         RemapLens::new(self, f, size)
     }

@@ -23,12 +23,12 @@ impl<S, F> RemapLens<S, F> {
 impl<T, S, F> Lens for RemapLens<S, F>
 where
     S: Lens,
-    F: Fn(&S, Point) -> T,
+    F: Fn(&S, Point) -> IndexResult<T>,
 {
     type Item = T;
 
     fn look(&self, point: Point) -> IndexResult<Self::Item> {
-        Ok((self.f)(&self.source, point))
+        (self.f)(&self.source, point)
     }
 
     fn size(&self) -> Size {

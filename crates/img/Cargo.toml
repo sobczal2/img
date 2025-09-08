@@ -10,6 +10,7 @@ itertools.workspace = true
 bitflags.workspace = true
 paste.workspace = true
 num_cpus = { workspace = true, optional = true }
+rand.workspace = true
 
 [features]
 default = ["parallel"]

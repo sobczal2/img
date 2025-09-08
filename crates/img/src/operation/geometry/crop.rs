@@ -15,8 +15,7 @@ use crate::{
 
 pub fn crop_lens<S>(source: S, margin: Margin) -> Result<impl Lens<Item = Pixel>, SizeCreationError>
 where
-    S: Lens,
-    S::Item: AsRef<Pixel>,
+    S: Lens<Item = Pixel>,
 {
     let size = source.size();
     let new_size = size.apply_margin(margin)?;
@@ -27,14 +26,14 @@ where
                 .translate(Offset::new(margin.left() as isize, margin.right() as isize))
                 .unwrap();
 
-            *lens.look(original_point).expect("bug in lens implementation").as_ref()
+            lens.look(original_point)
         },
         new_size,
     ))
 }
 
 pub fn crop(image: &Image, margin: Margin) -> Result<Image, SizeCreationError> {
-    let lens = crop_lens(image.lens(), margin)?;
+    let lens = crop_lens(image.lens().cloned(), margin)?;
     let image = Image::from_lens(lens);
 
     Ok(image)
@@ -42,7 +41,7 @@ pub fn crop(image: &Image, margin: Margin) -> Result<Image, SizeCreationError> {
 
 #[cfg(feature = "parallel")]
 pub fn crop_par(image: &Image, margin: Margin) -> Result<Image, SizeCreationError> {
-    let lens = crop_lens(image.lens(), margin)?;
+    let lens = crop_lens(image.lens().cloned(), margin)?;
     let image = Image::from_lens_par(lens);
 
     Ok(image)

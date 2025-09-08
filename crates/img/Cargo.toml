@@ -57,3 +57,8 @@ harness = false
 name = "canny"
 path = "benches/operation/canny.rs"
 harness = false
+
+[[bench]]
+name = "kuwahara"
+path = "benches/operation/kuwahara.rs"
+harness = false

@@ -9,7 +9,7 @@ use crate::{
         Size,
     },
     error::IndexResult,
-    lens::Lens,
+    lens::{FromLens, FromLensPar, Lens},
 };
 
 pub struct MaterializeLens<T> {
@@ -80,5 +80,24 @@ where
 
     fn size(&self) -> Size {
         self.size
+    }
+}
+
+impl<T> FromLens<T> for MaterializeLens<T>
+{
+    fn from_lens<S>(source: S) -> Self
+    where
+        S: Lens<Item = T> {
+        MaterializeLens::new(source)
+    }
+}
+
+#[cfg(feature = "parallel")]
+impl<T> FromLensPar<T> for MaterializeLens<T> {
+    fn from_lens_par<S>(source: S) -> Self
+    where
+        S: Lens<Item = T> + Send + Sync,
+        S::Item: Send {
+        MaterializeLens::new_par(source)
     }
 }

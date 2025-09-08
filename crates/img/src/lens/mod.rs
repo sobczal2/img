@@ -39,22 +39,29 @@ pub mod value;
 
 /// A trait for chaining operations for a 2D structures.
 ///
-/// This is main way for applying transformations and change `Image`.
+/// This is main way for applying transformations to [`Image`].
+///
+///
+/// [`Iterator`]s and [`Lens`] implementations assume unerlying 2D structure is more efficient
+/// to iterate rows first.
+///
+/// [`Image`]: crate::prelude::Image
 pub trait Lens {
-    /// Type of individual items within underlying 2d structure. This can be
-    /// `Pixel`, but this is not a requirement.
+
+    /// Type of individual items within underlying 2D structure. This can be
+    /// [`Pixel`], but this is not a requirement.
     type Item;
 
-    /// Look at value for given `point`.
+    /// Look at value for given [`Point`].
     ///
-    /// Returns `Ok(Self::Item)` if point is within bounds, `OutOfBoundsError`
-    /// otherwise. This should always return a value when `point` is contained
-    /// in `size()`, error otherwise. Each implementation should behave like
+    /// Returns `Self::Item` if point is within bounds, [`OutOfBoundsError`]
+    /// otherwise. This should always return a value when [`Point`] is contained
+    /// in [`Lens::size()`], error otherwise. Each implementation should behave like
     /// this, it leads to bugs otherwise.
     ///
     /// Most implementations will not perform any costly calculations until
     /// this method is called. Also this method should invoke only calculations
-    /// directly related to requested `Point`.
+    /// directly related to requested [`Point`].
     ///
     /// # Examples
     ///
@@ -78,8 +85,8 @@ pub trait Lens {
     /// ```
     fn look(&self, point: Point) -> IndexResult<Self::Item>;
 
-    /// Get size of lens's output. This should be aligned with the behaviour of
-    /// `get()`.
+    /// Get [`Size`] of [`Lens`]'s output. This should be aligned with the behaviour of
+    /// [`Lens::look()`].
     ///
     /// # Examples
     ///
@@ -108,6 +115,7 @@ pub trait Lens {
     /// ```
     fn size(&self) -> Size;
 
+    /// Return [`Rows`] iterator for going through rows of underlying structure.
     fn rows(&self) -> Rows<'_, Self>
     where
         Self: Sized,
@@ -115,6 +123,7 @@ pub trait Lens {
         Rows::new(self)
     }
 
+    /// Returns [`Elements`] iterator for going through all elements of underlying structure.
     fn elements(&self) -> Elements<'_, Self>
     where
         Self: Sized,
@@ -122,6 +131,9 @@ pub trait Lens {
         Elements::new(self)
     }
 
+    /// Returns [`MapLens`] which applies `f` to every [`Lens::Item`].
+    ///
+    /// See [`MapLens`] for more details.
     fn map<T, F>(self, f: F) -> MapLens<Self, F>
     where
         Self: Sized,
@@ -130,6 +142,9 @@ pub trait Lens {
         MapLens::new(self, f)
     }
 
+    /// Returns [`RemapLens`] which resizes [`Lens`] and remaps each [`Lens::Item`] using `f`.
+    ///
+    /// See [`RemapLens`] for more details.
     fn remap<T, F>(self, f: F, size: Size) -> RemapLens<Self, F>
     where
         Self: Sized,
@@ -138,6 +153,9 @@ pub trait Lens {
         RemapLens::new(self, f, size)
     }
 
+    /// Returns [`ClonedLens`] which clones every [`Lens::Item`].
+    ///
+    /// See [`ClonedLens`] for more details.
     fn cloned<'a>(self) -> ClonedLens<Self>
     where
         Self: Sized,
@@ -146,6 +164,9 @@ pub trait Lens {
         ClonedLens::new(self)
     }
 
+    /// Returns [`KernelLens`] which applies `kernel` to every [`Lens::Item`].
+    ///
+    /// See [`KernelLens`] and [`Kernel`] for more details.
     fn kernel<K, T>(self, kernel: K) -> Result<KernelLens<Self, K, T>, kernel::CreationError>
     where
         Self: Sized,
@@ -154,22 +175,40 @@ pub trait Lens {
         KernelLens::new(self, kernel)
     }
 
+    /// Returns [`MaterializeLens`] which evaluates [`Lens::look`] for every [`Lens::Item`], saves
+    /// results and provides those values using [`Lens`] interface.
+    ///
+    /// WARNING: this evaluates all calculations from preceding [`Lens`]. This is desirable in some
+    /// cases but "blocks" speedup from evaluating preceding [`Lens`] in parallel.
+    ///
+    /// See [`MaterializeLens`] for more details.
     fn materialize(self) -> MaterializeLens<Self::Item>
     where
         Self: Sized,
     {
-        MaterializeLens::new(self)
+        MaterializeLens::from_lens(self)
     }
 
+    /// Returns [`MaterializeLens`] which evaluates [`Lens::look`] for every [`Lens::Item`], saves
+    /// results and provides those values using [`Lens`] interface. Unlike [`Lens::materialize`],
+    /// this uses parallel processing.
+    ///
+    /// WARNING: this evaluates all calculations from preceding [`Lens`].
+    ///
+    /// See [`MaterializeLens`] for more details.
     #[cfg(feature = "parallel")]
     fn materialize_par(self) -> MaterializeLens<Self::Item>
     where
         Self: Sized + Send + Sync,
         Self::Item: Send,
     {
-        MaterializeLens::new_par(self)
+        MaterializeLens::from_lens_par(self)
     }
 
+    /// Returns [`SplitLens2`] which splits lens into two seperate lens and returns [`Lens`]
+    /// with `(D1, D2)` [`Lens::Item`].
+    ///
+    /// See [`SplitLens2`] for more details.
     fn split2<F1, F2, L1, L2, D1, D2>(self, factory1: F1, factory2: F2) -> SplitLens2<L1, L2>
     where
         Self: Sized + Clone,
@@ -181,6 +220,10 @@ pub trait Lens {
         SplitLens2::new(self, factory1, factory2)
     }
 
+    /// Returns [`SplitLens3`] which splits lens into three seperate lens and returns [`Lens`]
+    /// with `(D1, D2, D3)` [`Lens::Item`].
+    ///
+    /// See [`SplitLens3`] for more details.
     fn split3<F1, F2, F3, L1, L2, L3, D1, D2, D3>(
         self,
         factory1: F1,
@@ -199,6 +242,10 @@ pub trait Lens {
         SplitLens3::new(self, factory1, factory2, factory3)
     }
 
+    /// Returns [`SplitLens4`] which splits lens into four seperate lens and returns [`Lens`]
+    /// with `(D1, D2, D3, D4)` [`Lens::Item`].
+    ///
+    /// See [`SplitLens4`] for more details.
     fn split4<F1, F2, F3, F4, L1, L2, L3, L4, D1, D2, D3, D4>(
         self,
         factory1: F1,
@@ -220,6 +267,11 @@ pub trait Lens {
         SplitLens4::new(self, factory1, factory2, factory3, factory4)
     }
 
+    /// Returns [`OverlayLens`] which combines two [`Lens`] by overlaying `overlay` on top of
+    /// `self` at given `overlay_start` point (which is top left point of `overlay` [`Lens`].
+    /// with `(D1, D2, D3, D4)` [`Lens::Item`].
+    ///
+    /// See [`OverlayLens`] for more details.
     fn overlay<S>(
         self,
         overlay: S,
@@ -233,12 +285,14 @@ pub trait Lens {
     }
 }
 
+/// Trait for collecting [`Lens`].
 pub trait FromLens<T>: Sized {
     fn from_lens<S>(source: S) -> Self
     where
         S: Lens<Item = T>;
 }
 
+/// Trait for collecting [`Lens`] in parallel.
 #[cfg(feature = "parallel")]
 pub trait FromLensPar<T>: Sized {
     fn from_lens_par<S>(source: S) -> Self

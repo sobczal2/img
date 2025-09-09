@@ -26,7 +26,7 @@ pub fn subcommand() -> Command {
 
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     let image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
-    let image = sepia(&image, PixelFlags::RGB);
+    let image = sepia(&image, ChannelFlags::RGB);
     write_image(&image, matches.get_one::<PathBuf>(OUTPUT_ARG_NAME).unwrap())?;
     Ok(())
 }

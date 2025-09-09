@@ -5,13 +5,13 @@ use crate::{
         Lens,
     },
     pixel::{
+        ChannelFlags,
         Pixel,
-        PixelFlags,
         PixelRgbaf32,
     },
 };
 
-pub fn gamma_correction_lens<S>(lens: S, gamma: f32, flags: PixelFlags) -> impl Lens<Item = Pixel>
+pub fn gamma_correction_lens<S>(lens: S, gamma: f32, flags: ChannelFlags) -> impl Lens<Item = Pixel>
 where
     S: Lens,
     S::Item: AsRef<Pixel>,
@@ -19,20 +19,20 @@ where
     lens.map(move |px| map_px(px.as_ref(), gamma, flags))
 }
 
-pub fn gamma_correction(image: &Image, gamma: f32, flags: PixelFlags) -> Image {
+pub fn gamma_correction(image: &Image, gamma: f32, flags: ChannelFlags) -> Image {
     let lens = gamma_correction_lens(image.lens(), gamma, flags);
     Image::from_lens(lens)
 }
 
 #[cfg(feature = "parallel")]
-pub fn gamma_correction_par(image: &Image, gamma: f32, flags: PixelFlags) -> Image {
+pub fn gamma_correction_par(image: &Image, gamma: f32, flags: ChannelFlags) -> Image {
     use crate::lens::FromLensPar;
 
     let lens = gamma_correction_lens(image.lens(), gamma, flags);
     Image::from_lens_par(lens)
 }
 
-fn map_px(px: &Pixel, gamma: f32, flags: PixelFlags) -> Pixel {
+fn map_px(px: &Pixel, gamma: f32, flags: ChannelFlags) -> Pixel {
     let mut new_px = *px;
 
     new_px.set_with_flags_f32(

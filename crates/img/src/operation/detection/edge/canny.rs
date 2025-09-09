@@ -27,8 +27,8 @@ use crate::{
         Lens,
     },
     pixel::{
+        ChannelFlags,
         Pixel,
-        PixelFlags,
     },
 };
 
@@ -45,7 +45,7 @@ where
     S: Lens<Item = Pixel> + Clone,
 {
     let lens = value_border(source, Margin::unified(2), Pixel::zero()).unwrap();
-    lens.kernel(GaussianKernel::new(Size::from_radius(2), 2f32, PixelFlags::RGB).unwrap())
+    lens.kernel(GaussianKernel::new(Size::from_radius(2), 2f32, ChannelFlags::RGB).unwrap())
         .unwrap()
         .materialize()
         .split4(
@@ -63,7 +63,7 @@ where
     S: Lens<Item = Pixel> + Clone + Send + Sync,
 {
     let lens = value_border(source, Margin::unified(2), Pixel::zero()).unwrap();
-    lens.kernel(GaussianKernel::new(Size::from_radius(2), 2f32, PixelFlags::RGB).unwrap())
+    lens.kernel(GaussianKernel::new(Size::from_radius(2), 2f32, ChannelFlags::RGB).unwrap())
         .unwrap()
         .materialize_par()
         .split4(

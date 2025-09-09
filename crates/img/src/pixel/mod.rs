@@ -9,8 +9,8 @@ pub mod hsv;
 pub const PIXEL_SIZE: usize = 4;
 
 bitflags! {
-    #[derive(Clone, Copy)]
-    pub struct PixelFlags: u8 {
+    #[derive(Clone, Copy, Debug)]
+    pub struct ChannelFlags: u8 {
         const RED = 0b1000;
         const GREEN = 0b0100;
         const BLUE = 0b0010;
@@ -84,20 +84,20 @@ impl Pixel {
         &self.0
     }
 
-    pub fn set_with_flags(&mut self, r: u8, g: u8, b: u8, a: u8, flags: PixelFlags) {
-        if flags.contains(PixelFlags::RED) {
+    pub fn set_with_flags(&mut self, r: u8, g: u8, b: u8, a: u8, flags: ChannelFlags) {
+        if flags.contains(ChannelFlags::RED) {
             self.set_r(r);
         }
 
-        if flags.contains(PixelFlags::GREEN) {
+        if flags.contains(ChannelFlags::GREEN) {
             self.set_g(g);
         }
 
-        if flags.contains(PixelFlags::BLUE) {
+        if flags.contains(ChannelFlags::BLUE) {
             self.set_b(b);
         }
 
-        if flags.contains(PixelFlags::ALPHA) {
+        if flags.contains(ChannelFlags::ALPHA) {
             self.set_a(a);
         }
     }
@@ -112,7 +112,7 @@ pub trait PixelRgbaf32 {
     fn set_g_f32(&mut self, value: f32);
     fn set_b_f32(&mut self, value: f32);
     fn set_a_f32(&mut self, value: f32);
-    fn set_with_flags_f32(&mut self, r: f32, g: f32, b: f32, a: f32, flags: PixelFlags);
+    fn set_with_flags_f32(&mut self, r: f32, g: f32, b: f32, a: f32, flags: ChannelFlags);
 }
 
 impl PixelRgbaf32 for Pixel {
@@ -147,20 +147,20 @@ impl PixelRgbaf32 for Pixel {
         self.set_a((value * 255.0).round().clamp(0f32, 255f32) as u8);
     }
 
-    fn set_with_flags_f32(&mut self, r: f32, g: f32, b: f32, a: f32, flags: PixelFlags) {
-        if flags.contains(PixelFlags::RED) {
+    fn set_with_flags_f32(&mut self, r: f32, g: f32, b: f32, a: f32, flags: ChannelFlags) {
+        if flags.contains(ChannelFlags::RED) {
             self.set_r_f32(r);
         }
 
-        if flags.contains(PixelFlags::GREEN) {
+        if flags.contains(ChannelFlags::GREEN) {
             self.set_g_f32(g);
         }
 
-        if flags.contains(PixelFlags::BLUE) {
+        if flags.contains(ChannelFlags::BLUE) {
             self.set_b_f32(b);
         }
 
-        if flags.contains(PixelFlags::ALPHA) {
+        if flags.contains(ChannelFlags::ALPHA) {
             self.set_a_f32(a);
         }
     }

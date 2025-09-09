@@ -19,7 +19,7 @@ pub enum CreationError {
     NewSizeInvalid(#[from] SizeCreationError),
 }
 
-pub fn resize_lens<'a, S>(source: S, scale: Scale) -> Result<impl Lens<Item = Pixel>, CreationError>
+pub fn resize_lens<S>(source: S, scale: Scale) -> Result<impl Lens<Item = Pixel>, CreationError>
 where
     S: Lens<Item = Pixel>,
 {

@@ -33,7 +33,7 @@ pub fn subcommand() -> Command {
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     let image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
     let gamma = matches.get_one::<f32>("gamma").unwrap();
-    let image = gamma_correction(&image, *gamma, PixelFlags::RGB);
+    let image = gamma_correction(&image, *gamma, ChannelFlags::RGB);
     write_image(&image, matches.get_one::<PathBuf>(OUTPUT_ARG_NAME).unwrap())?;
     Ok(())
 }

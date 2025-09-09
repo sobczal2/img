@@ -15,8 +15,8 @@ use crate::{
         Lens,
     },
     pixel::{
+        ChannelFlags,
         Pixel,
-        PixelFlags,
     },
 };
 
@@ -33,7 +33,7 @@ pub type CreationResult<T> = std::result::Result<T, CreationError>;
 pub fn mean_blur_lens<S>(
     source: S,
     radius: usize,
-    flags: PixelFlags,
+    flags: ChannelFlags,
 ) -> CreationResult<impl Lens<Item = Pixel>>
 where
     S: Lens,
@@ -44,13 +44,13 @@ where
     Ok(lens)
 }
 
-pub fn mean_blur(image: &Image, radius: usize, flags: PixelFlags) -> CreationResult<Image> {
+pub fn mean_blur(image: &Image, radius: usize, flags: ChannelFlags) -> CreationResult<Image> {
     let lens = mean_blur_lens(image.lens(), radius, flags)?;
     Ok(Image::from_lens(lens))
 }
 
 #[cfg(feature = "parallel")]
-pub fn mean_blur_par(image: &Image, radius: usize, flags: PixelFlags) -> CreationResult<Image> {
+pub fn mean_blur_par(image: &Image, radius: usize, flags: ChannelFlags) -> CreationResult<Image> {
     use crate::lens::FromLensPar;
 
     let lens = mean_blur_lens(image.lens(), radius, flags)?;

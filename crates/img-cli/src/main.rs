@@ -44,15 +44,15 @@ fn main() {
 
 fn execute_command(command: Command) -> anyhow::Result<()> {
     let matches = command.get_matches();
-    match matches.subcommand() {
-        Some((grayscale::CMD_NAME, m)) => grayscale::action(m),
-        Some((sepia::CMD_NAME, m)) => sepia::action(m),
-        Some((resize::CMD_NAME, m)) => resize::action(m),
-        Some((crop::CMD_NAME, m)) => crop::action(m),
-        Some((blur::CMD_NAME, m)) => blur::action(m),
-        Some((gamma_correction::CMD_NAME, m)) => gamma_correction::action(m),
-        Some((canny::CMD_NAME, m)) => canny::action(m),
-        Some((kuwahara::CMD_NAME, m)) => kuwahara::action(m),
+    match matches.subcommand().unwrap() {
+        (grayscale::CMD_NAME, m) => grayscale::action(m),
+        (sepia::CMD_NAME, m) => sepia::action(m),
+        (resize::CMD_NAME, m) => resize::action(m),
+        (crop::CMD_NAME, m) => crop::action(m),
+        (blur::CMD_NAME, m) => blur::action(m),
+        (gamma_correction::CMD_NAME, m) => gamma_correction::action(m),
+        (canny::CMD_NAME, m) => canny::action(m),
+        (kuwahara::CMD_NAME, m) => kuwahara::action(m),
         _ => unreachable!(),
     }
 }

@@ -19,6 +19,9 @@ parallel = ["dep:num_cpus"]
 [dev-dependencies]
 criterion.workspace = true
 
+[lib]
+bench = false
+
 [[bench]]
 name = "grayscale"
 path = "benches/operation/grayscale.rs"

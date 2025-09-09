@@ -26,8 +26,8 @@ pub use crate::{
         },
     },
     pixel::{
+        ChannelFlags,
         Pixel,
-        PixelFlags,
         PixelRgbaf32,
         hsv::HsvPixel,
     },

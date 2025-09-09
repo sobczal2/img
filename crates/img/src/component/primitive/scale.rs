@@ -38,10 +38,10 @@ impl Scale {
     ///
     /// # Errors
     ///
-    /// * `ScaleCreationError::ScaleXInvalid` - if `x` is not within <[`Scale::MIN`], [`Scale::MAX`]>, is
-    ///   [`NAN`], or is [`INFINITY`]
-    /// * `ScaleCreationError::ScaleYInvalid` - if `y` is not within <[`Scale::MIN`], [`Scale::MAX`]>, is
-    ///   [`NAN`], or is [`INFINITY`]
+    /// * `ScaleCreationError::ScaleXInvalid` - if `x` is not within <[`Scale::MIN`],
+    ///   [`Scale::MAX`]>, is [`NAN`], or is [`INFINITY`]
+    /// * `ScaleCreationError::ScaleYInvalid` - if `y` is not within <[`Scale::MIN`],
+    ///   [`Scale::MAX`]>, is [`NAN`], or is [`INFINITY`]
     ///
     /// [`NAN`]: f32::NAN
     /// [`INFINITY`]: f32::INFINITY

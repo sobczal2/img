@@ -9,7 +9,11 @@ use crate::{
         Size,
     },
     error::IndexResult,
-    lens::{FromLens, FromLensPar, Lens},
+    lens::{
+        FromLens,
+        FromLensPar,
+        Lens,
+    },
 };
 
 pub struct MaterializeLens<T> {
@@ -83,11 +87,11 @@ where
     }
 }
 
-impl<T> FromLens<T> for MaterializeLens<T>
-{
+impl<T> FromLens<T> for MaterializeLens<T> {
     fn from_lens<S>(source: S) -> Self
     where
-        S: Lens<Item = T> {
+        S: Lens<Item = T>,
+    {
         MaterializeLens::new(source)
     }
 }
@@ -97,7 +101,8 @@ impl<T> FromLensPar<T> for MaterializeLens<T> {
     fn from_lens_par<S>(source: S) -> Self
     where
         S: Lens<Item = T> + Send + Sync,
-        S::Item: Send {
+        S::Item: Send,
+    {
         MaterializeLens::new_par(source)
     }
 }

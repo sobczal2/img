@@ -34,7 +34,8 @@ impl Pixel {
     }
 
     pub fn random<R>(rng: &mut R) -> Self
-    where R: Rng
+    where
+        R: Rng,
     {
         Pixel(rng.random())
     }

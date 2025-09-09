@@ -4,10 +4,7 @@ use criterion::{
     criterion_group,
     criterion_main,
 };
-use img::operation::detection::edge::canny::{
-    canny,
-    canny_par,
-};
+use img::prelude::*;
 
 mod common;
 

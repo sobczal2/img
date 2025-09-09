@@ -159,8 +159,13 @@ impl Point {
     /// # Examples
     ///
     /// ```
-    /// use img::prelude::*;
-    /// use img::component::primitive::{PointCreationError, PointCreationResult};
+    /// use img::{
+    ///     component::primitive::{
+    ///         PointCreationError,
+    ///         PointCreationResult,
+    ///     },
+    ///     prelude::*,
+    /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let point = Point::new(100, 200);
@@ -224,7 +229,6 @@ impl Sub for Point {
 }
 
 impl PartialOrd for Point {
-
     /// Returns [`Ordering`] of [`Point`]s or none if it is not possible to compare them.
     ///
     /// A size `a` is less than or equal to `b` if both `width` and `height` components
@@ -283,15 +287,29 @@ impl TryFrom<Offset> for Point {
     /// # Examples
     ///
     /// ```
-    /// use img::prelude::*;
-    /// use img::component::primitive::{PointCreationError, PointCreationResult};
+    /// use img::{
+    ///     component::primitive::{
+    ///         PointCreationError,
+    ///         PointCreationResult,
+    ///     },
+    ///     prelude::*,
+    /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// assert_eq!(Point::try_from(Offset::new(1, 1))?, Point::new(1, 1));
     ///
-    /// assert_eq!(Point::try_from(Offset::new(-1, -1)), PointCreationResult::Err(PointCreationError::InvalidX));
-    /// assert_eq!(Point::try_from(Offset::new(1, -1)), PointCreationResult::Err(PointCreationError::InvalidY));
-    /// assert_eq!(Point::try_from(Offset::new(-1, 1)), PointCreationResult::Err(PointCreationError::InvalidX));
+    /// assert_eq!(
+    ///     Point::try_from(Offset::new(-1, -1)),
+    ///     PointCreationResult::Err(PointCreationError::InvalidX)
+    /// );
+    /// assert_eq!(
+    ///     Point::try_from(Offset::new(1, -1)),
+    ///     PointCreationResult::Err(PointCreationError::InvalidY)
+    /// );
+    /// assert_eq!(
+    ///     Point::try_from(Offset::new(-1, 1)),
+    ///     PointCreationResult::Err(PointCreationError::InvalidX)
+    /// );
     ///
     /// # Ok(())
     /// # }

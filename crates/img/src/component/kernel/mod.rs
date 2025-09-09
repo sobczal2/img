@@ -9,8 +9,8 @@ use crate::{
 
 pub mod convolution;
 pub mod gaussian;
-pub mod mean;
 pub mod identity;
+pub mod mean;
 pub mod sobel;
 
 pub trait Kernel<In, Out> {

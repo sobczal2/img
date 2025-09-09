@@ -42,12 +42,11 @@ pub mod value;
 /// This is main way for applying transformations to [`Image`].
 ///
 ///
-/// [`Iterator`]s and [`Lens`] implementations assume unerlying 2D structure is more efficient
-/// to iterate rows first.
+/// [`Iterator`]s and [`Lens`] implementations assume underlying 2D structure is more efficient
+/// to iterate row-first.
 ///
 /// [`Image`]: crate::prelude::Image
 pub trait Lens {
-
     /// Type of individual items within underlying 2D structure. This can be
     /// [`Pixel`], but this is not a requirement.
     type Item;
@@ -66,8 +65,10 @@ pub trait Lens {
     /// # Examples
     ///
     /// ```
-    /// use img::prelude::*;
-    /// use img::lens::Lens;
+    /// use img::{
+    ///     lens::Lens,
+    ///     prelude::*,
+    /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let image = Image::empty(Size::from_usize(10, 20)?);
@@ -91,8 +92,10 @@ pub trait Lens {
     /// # Examples
     ///
     /// ```
-    /// use img::prelude::*;
-    /// use img::lens::Lens;
+    /// use img::{
+    ///     lens::Lens,
+    ///     prelude::*,
+    /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let size = Size::from_usize(10, 20)?;
@@ -116,6 +119,8 @@ pub trait Lens {
     fn size(&self) -> Size;
 
     /// Return [`Rows`] iterator for going through rows of underlying structure.
+    ///
+    /// See [`Rows`] for more details.
     fn rows(&self) -> Rows<'_, Self>
     where
         Self: Sized,
@@ -124,6 +129,8 @@ pub trait Lens {
     }
 
     /// Returns [`Elements`] iterator for going through all elements of underlying structure.
+    ///
+    /// See [`Elements`] for more details.
     fn elements(&self) -> Elements<'_, Self>
     where
         Self: Sized,

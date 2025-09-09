@@ -4,13 +4,7 @@ use criterion::{
     criterion_group,
     criterion_main,
 };
-use img::{
-    operation::color::gamma_correction::{
-        gamma_correction,
-        gamma_correction_par,
-    },
-    pixel::PixelFlags,
-};
+use img::prelude::*;
 
 mod common;
 

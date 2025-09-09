@@ -45,8 +45,8 @@ impl Size {
         Self { width, height }
     }
 
-    /// Create a new [`Size`] with the specified width and height. Unlike [`Size::new`] this takes in `usize`
-    /// arguments and can fail in case width or height is 0.
+    /// Create a new [`Size`] with the specified width and height. Unlike [`Size::new`] this takes
+    /// in `usize` arguments and can fail in case width or height is 0.
     ///
     /// Returns [`Size`] if both parameters valid, otherwise returns a `CreationError`.
     ///
@@ -191,8 +191,13 @@ impl Size {
     /// # Examples
     ///
     /// ```
-    /// use img::prelude::*;
-    /// use img::component::primitive::{SizeCreationError, SizeCreationResult};
+    /// use img::{
+    ///     component::primitive::{
+    ///         SizeCreationError,
+    ///         SizeCreationResult,
+    ///     },
+    ///     prelude::*,
+    /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let size = Size::from_usize(10, 20)?;
@@ -302,7 +307,6 @@ impl Add<Margin> for Size {
     type Output = Size;
 
     fn add(self, rhs: Margin) -> Self::Output {
-
         // UNWRAP: `Size::from_usize` fails only if either dimension is 0
         Size::from_usize(
             self.width() + rhs.left() + rhs.right(),

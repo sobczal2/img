@@ -10,7 +10,6 @@ pub struct Offset {
 }
 
 impl Offset {
-
     /// Create a new [`Offset`] with specified `x` and `y`.
     ///
     /// # Examples

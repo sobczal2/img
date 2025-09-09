@@ -4,13 +4,7 @@ use criterion::{
     criterion_group,
     criterion_main,
 };
-use img::{
-    operation::blur::gaussian::{
-        gaussian_blur,
-        gaussian_blur_par,
-    },
-    pixel::PixelFlags,
-};
+use img::prelude::*;
 
 mod common;
 

@@ -4,13 +4,7 @@ use criterion::{
     criterion_group,
     criterion_main,
 };
-use img::{
-    operation::color::sepia::{
-        sepia,
-        sepia_par,
-    },
-    pixel::PixelFlags,
-};
+use img::prelude::*;
 
 mod common;
 

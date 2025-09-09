@@ -34,10 +34,10 @@ pub use crate::{
 };
 
 #[cfg(feature = "parallel")]
-pub use crate::{
-    operation::{
+pub use crate::operation::{
     blur::{
         gaussian_blur_par,
+        kuwahara_par,
         mean_blur_par,
     },
     color::{
@@ -49,6 +49,5 @@ pub use crate::{
     geometry::{
         crop_par,
         resize_par,
-    },
     },
 };

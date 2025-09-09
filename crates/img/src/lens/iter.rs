@@ -3,6 +3,7 @@ use crate::{
     lens::Lens,
 };
 
+/// Iterator for going over [`RowElements`].
 #[derive(Clone)]
 pub struct Rows<'a, S> {
     source: &'a S,

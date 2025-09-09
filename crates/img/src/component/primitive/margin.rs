@@ -8,7 +8,6 @@ pub struct Margin {
 }
 
 impl Margin {
-
     /// Create a new [`Margin`] with specified top, right, bottom, left components.
     ///
     /// # Examples

@@ -4,10 +4,7 @@ use criterion::{
     criterion_group,
     criterion_main,
 };
-use img::operation::blur::kuwahara::{
-    kuwahara,
-    kuwahara_par,
-};
+use img::prelude::*;
 
 mod common;
 

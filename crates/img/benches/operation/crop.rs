@@ -4,13 +4,7 @@ use criterion::{
     criterion_group,
     criterion_main,
 };
-use img::{
-    component::primitive::margin::Margin,
-    operation::geometry::crop::{
-        crop,
-        crop_par,
-    },
-};
+use img::prelude::*;
 
 mod common;
 

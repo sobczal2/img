@@ -1,6 +1,6 @@
 use std::iter::from_fn;
 
-use rand::{rngs::SmallRng, Rng, SeedableRng};
+use rand::Rng;
 use thiserror::Error;
 
 use crate::{
@@ -45,7 +45,8 @@ impl Image {
     }
 
     pub fn random<R>(size: Size, rng: &mut R) -> Self
-    where R: Rng
+    where
+        R: Rng,
     {
         let pixels = from_fn(|| Some(Pixel::random(rng))).take(size.area()).collect();
         Self { size, pixels }

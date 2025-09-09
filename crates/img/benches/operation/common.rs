@@ -3,12 +3,12 @@ macro_rules! add_bench_for_size {
     ($operation_name:ident, $size:expr, $criterion:ident, $($args:expr),* ) => {
         paste! {
             {
-                use img::{image::Image, primitive::size::Size};
+                use img::{image::Image, prelude::Size};
                 use std::time::Duration;
 
                 let [<image $size>] = black_box(Image::empty(Size::from_usize($size, $size).unwrap()));
                 let mut group = $criterion.benchmark_group(stringify!([<$operation_name _ $size x $size>]));
-                group.sample_size(50).measurement_time(Duration::from_secs(60));
+                group.sample_size(10).measurement_time(Duration::from_secs(20));
                 group.bench_function(
                     "sequential",
                     |b| b.iter(|| $operation_name(&[<image $size>], $($args),*))

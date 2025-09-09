@@ -4,13 +4,7 @@ use criterion::{
     criterion_group,
     criterion_main,
 };
-use img::{
-    component::primitive::Scale,
-    operation::geometry::resize::{
-        resize,
-        resize_par,
-    },
-};
+use img::prelude::*;
 
 mod common;
 

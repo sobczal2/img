@@ -38,8 +38,8 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     let image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
     let target_size = matches.get_one::<Size>("size").unwrap();
     let scale = Scale::new(
-        target_size.width as f32 / image.size().width() as f32,
-        target_size.height as f32 / image.size().height() as f32,
+        target_size.width as f32 / image.size().width().get() as f32,
+        target_size.height as f32 / image.size().height().get() as f32,
     )?;
     let image = resize(&image, scale)?;
     write_image(&image, matches.get_one::<PathBuf>(OUTPUT_ARG_NAME).unwrap())?;

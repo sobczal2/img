@@ -1,3 +1,5 @@
+#[cfg(feature = "parallel")]
+use std::num::NonZeroUsize;
 use std::ops::{
     Add,
     Div,
@@ -34,11 +36,11 @@ pub fn kuwahara(image: &Image) -> Image {
 }
 
 #[cfg(feature = "parallel")]
-pub fn kuwahara_par(image: &Image) -> Image {
+pub fn kuwahara_par(image: &Image, threads: NonZeroUsize) -> Image {
     use crate::lens::FromLensPar;
 
     let lens = kuwahara_lens(image.lens().cloned(), 5);
-    Image::from_lens_par(lens)
+    Image::from_lens_par(lens, threads)
 }
 
 pub fn kuwahara_lens<S>(source: S, radius: usize) -> impl Lens<Item = S::Item>
@@ -112,15 +114,15 @@ fn calculate_std_dev<S>(source: &S, top_left: Point, size: Size) -> f32
 where
     S: Lens<Item = HsvPixel>,
 {
-    let sum: f32 = (0..size.width() as isize)
-        .cartesian_product(0..size.height() as isize)
+    let sum: f32 = (0..size.width().get() as isize)
+        .cartesian_product(0..size.height().get() as isize)
         .map(|(x, y)| source.look(top_left.translate(Offset::new(x, y)).unwrap()).unwrap().value())
         .sum();
 
     let mean = sum / size.area() as f32;
 
-    let variance_numerator: f32 = (0..size.width() as isize)
-        .cartesian_product(0..size.height() as isize)
+    let variance_numerator: f32 = (0..size.width().get() as isize)
+        .cartesian_product(0..size.height().get() as isize)
         .map(|(x, y)| source.look(top_left.translate(Offset::new(x, y)).unwrap()).unwrap().value())
         .map(|v| (v - mean).powi(2))
         .sum();
@@ -207,8 +209,8 @@ fn calculate_mean<S>(source: &S, top_left: Point, size: Size) -> IntermediatePix
 where
     S: Lens<Item = MeanCalculationInput>,
 {
-    let sum: IntermediatePixel = (0..size.width() as isize)
-        .cartesian_product(0..size.height() as isize)
+    let sum: IntermediatePixel = (0..size.width().get() as isize)
+        .cartesian_product(0..size.height().get() as isize)
         .map(|(x, y)| source.look(top_left.translate(Offset::new(x, y)).unwrap()).unwrap().pixel)
         .map(|p| IntermediatePixel { red: p.r() as u16, green: p.g() as u16, blue: p.b() as u16 })
         .reduce(|l, r| l + r)

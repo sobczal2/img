@@ -1,3 +1,6 @@
+#[cfg(feature = "parallel")]
+use std::num::NonZeroUsize;
+
 use crate::{
     image::Image,
     lens::{
@@ -35,9 +38,9 @@ pub fn grayscale(image: &Image, flags: ChannelFlags) -> Image {
 }
 
 #[cfg(feature = "parallel")]
-pub fn grayscale_par(image: &Image, flags: ChannelFlags) -> Image {
+pub fn grayscale_par(image: &Image, threads: NonZeroUsize, flags: ChannelFlags) -> Image {
     use crate::lens::FromLensPar;
 
     let lens = grayscale_lens(image.lens(), flags);
-    Image::from_lens_par(lens)
+    Image::from_lens_par(lens, threads)
 }

@@ -45,8 +45,8 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
 
     let margin = Margin::new(
         offset.height,
-        old_size.width() - new_size.width() - offset.width,
-        old_size.height() - new_size.height() - offset.height,
+        old_size.width().get() - new_size.width().get() - offset.width,
+        old_size.height().get() - new_size.height().get() - offset.height,
         offset.width,
     );
 

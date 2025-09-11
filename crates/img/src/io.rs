@@ -117,8 +117,8 @@ pub trait WritePng {
 
 impl WritePng for Image {
     fn write_png(&self, write: impl std::io::Write) -> Result<(), IoError> {
-        let width: usize = self.size().width();
-        let height: usize = self.size().height();
+        let width = self.size().width().get();
+        let height = self.size().height().get();
         let mut encoder =
             png::Encoder::new(write, width.try_into().unwrap(), height.try_into().unwrap());
         encoder.set_color(png::ColorType::Rgba);

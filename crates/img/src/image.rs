@@ -1,4 +1,6 @@
 use std::iter::from_fn;
+#[cfg(feature = "parallel")]
+use std::num::NonZeroUsize;
 
 use rand::Rng;
 use thiserror::Error;
@@ -95,7 +97,7 @@ impl<T: Into<Pixel>> FromLens<T> for Image {
 
 #[cfg(feature = "parallel")]
 impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
-    fn from_lens_par<S>(lens: S) -> Self
+    fn from_lens_par<S>(lens: S, threads: NonZeroUsize) -> Self
     where
         S: Lens<Item = T> + Send + Sync,
         S::Item: Send,
@@ -103,8 +105,8 @@ impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
         use std::thread;
 
         let size = lens.size();
-        let cpus = num_cpus::get();
-        let chunk_size = (size.area() as f32 / cpus as f32).ceil() as usize;
+        let threads = threads.get();
+        let chunk_size = (size.area() as f32 / threads as f32).ceil() as usize;
 
         let mut image = Image::empty(size);
 

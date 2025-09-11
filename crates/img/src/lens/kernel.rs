@@ -40,11 +40,11 @@ where
     pub fn new(source: S, kernel: K) -> Result<Self, CreationError> {
         let margin = kernel.margin();
 
-        if source.size().width() < margin.left() + margin.right() + 1 {
+        if source.size().width().get() < margin.left() + margin.right() + 1 {
             return Err(CreationError::KernelTooBigX);
         }
 
-        if source.size().height() < margin.top() + margin.bottom() + 1 {
+        if source.size().height().get() < margin.top() + margin.bottom() + 1 {
             return Err(CreationError::KernelTooBigY);
         }
 

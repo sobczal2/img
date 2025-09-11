@@ -1,3 +1,6 @@
+#[cfg(feature = "parallel")]
+use std::num::NonZeroUsize;
+
 use crate::{
     image::Image,
     lens::{
@@ -25,11 +28,16 @@ pub fn gamma_correction(image: &Image, gamma: f32, flags: ChannelFlags) -> Image
 }
 
 #[cfg(feature = "parallel")]
-pub fn gamma_correction_par(image: &Image, gamma: f32, flags: ChannelFlags) -> Image {
+pub fn gamma_correction_par(
+    image: &Image,
+    threads: NonZeroUsize,
+    gamma: f32,
+    flags: ChannelFlags,
+) -> Image {
     use crate::lens::FromLensPar;
 
     let lens = gamma_correction_lens(image.lens(), gamma, flags);
-    Image::from_lens_par(lens)
+    Image::from_lens_par(lens, threads)
 }
 
 fn map_px(px: &Pixel, gamma: f32, flags: ChannelFlags) -> Pixel {

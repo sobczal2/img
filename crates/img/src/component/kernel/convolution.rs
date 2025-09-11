@@ -113,16 +113,16 @@ where
     }
 
     fn margin(&self) -> Margin {
-        let (left, right) = if self.size.width() % 2 == 0 {
-            (self.size.width() / 2, self.size.width() / 2 - 1)
+        let (left, right) = if self.size.width().get() % 2 == 0 {
+            (self.size.width().get() / 2, self.size.width().get() / 2 - 1)
         } else {
-            (self.size.width() / 2, self.size.width() / 2)
+            (self.size.width().get() / 2, self.size.width().get() / 2)
         };
 
-        let (top, bottom) = if self.size.height() % 2 == 0 {
-            (self.size.height() / 2, self.size.height() / 2 - 1)
+        let (top, bottom) = if self.size.height().get() % 2 == 0 {
+            (self.size.height().get() / 2, self.size.height().get() / 2 - 1)
         } else {
-            (self.size.height() / 2, self.size.height() / 2)
+            (self.size.height().get() / 2, self.size.height().get() / 2)
         };
 
         Margin::new(top, right, bottom, left)

@@ -1,3 +1,6 @@
+#[cfg(feature = "parallel")]
+use std::num::NonZeroUsize;
+
 use thiserror::Error;
 
 use crate::{
@@ -60,6 +63,7 @@ pub fn gaussian_blur(
 #[cfg(feature = "parallel")]
 pub fn gaussian_blur_par(
     image: &Image,
+    threads: NonZeroUsize,
     radius: usize,
     sigma: f32,
     flags: ChannelFlags,
@@ -67,5 +71,5 @@ pub fn gaussian_blur_par(
     use crate::lens::FromLensPar;
 
     let lens = gaussian_blur_lens(image.lens(), radius, sigma, flags)?;
-    Ok(Image::from_lens_par(lens))
+    Ok(Image::from_lens_par(lens, threads))
 }

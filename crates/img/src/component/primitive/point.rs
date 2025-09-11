@@ -144,7 +144,7 @@ impl Point {
         if !size.contains(self) {
             return Err(OutOfBoundsError);
         }
-        Ok(self.y * size.width() + self.x)
+        Ok(self.y * size.width().get() + self.x)
     }
 
     /// Translate [`Point`] by given [`Offset`].

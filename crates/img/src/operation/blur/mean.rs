@@ -1,3 +1,6 @@
+#[cfg(feature = "parallel")]
+use std::num::NonZeroUsize;
+
 use thiserror::Error;
 
 use crate::{
@@ -50,9 +53,14 @@ pub fn mean_blur(image: &Image, radius: usize, flags: ChannelFlags) -> CreationR
 }
 
 #[cfg(feature = "parallel")]
-pub fn mean_blur_par(image: &Image, radius: usize, flags: ChannelFlags) -> CreationResult<Image> {
+pub fn mean_blur_par(
+    image: &Image,
+    threads: NonZeroUsize,
+    radius: usize,
+    flags: ChannelFlags,
+) -> CreationResult<Image> {
     use crate::lens::FromLensPar;
 
     let lens = mean_blur_lens(image.lens(), radius, flags)?;
-    Ok(Image::from_lens_par(lens))
+    Ok(Image::from_lens_par(lens, threads))
 }

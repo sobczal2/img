@@ -1,4 +1,6 @@
 use std::f32::consts::PI;
+#[cfg(feature = "parallel")]
+use std::num::NonZeroUsize;
 
 use itertools::Itertools;
 
@@ -58,14 +60,14 @@ where
 }
 
 #[cfg(feature = "parallel")]
-pub fn canny_lens_par<S>(source: S) -> impl Lens<Item = Pixel>
+pub fn canny_lens_par<S>(source: S, threads: NonZeroUsize) -> impl Lens<Item = Pixel>
 where
     S: Lens<Item = Pixel> + Clone + Send + Sync,
 {
     let lens = value_border(source, Margin::unified(2), Pixel::zero()).unwrap();
     lens.kernel(GaussianKernel::new(Size::from_radius(2), 2f32, ChannelFlags::RGB).unwrap())
         .unwrap()
-        .materialize_par()
+        .materialize_par(threads)
         .split4(
             |s| single_channel_lens(s.map(|p| p.r())),
             |s| single_channel_lens(s.map(|p| p.g())),
@@ -81,11 +83,11 @@ pub fn canny(image: &Image) -> Image {
 }
 
 #[cfg(feature = "parallel")]
-pub fn canny_par(image: &Image) -> Image {
+pub fn canny_par(image: &Image, threads: NonZeroUsize) -> Image {
     use crate::lens::FromLensPar;
 
-    let lens = canny_lens_par(image.lens().cloned());
-    Image::from_lens_par(lens)
+    let lens = canny_lens_par(image.lens().cloned(), threads);
+    Image::from_lens_par(lens, threads)
 }
 
 fn single_channel_lens<S>(source: S) -> impl Lens<Item = u8>

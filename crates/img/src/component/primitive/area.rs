@@ -75,8 +75,8 @@ impl Area {
     /// # }
     /// ```
     pub fn from_cropped_size(size: Size, margin: Margin) -> CreationResult<Self> {
-        let width = size.width() - margin.left() - margin.right();
-        let height = size.height() - margin.top() - margin.bottom();
+        let width = size.width().get() - margin.left() - margin.right();
+        let height = size.height().get() - margin.top() - margin.bottom();
 
         let size = Size::from_usize(width, height).unwrap();
         let top_left = Point::new(margin.left(), margin.top());
@@ -96,18 +96,21 @@ impl Area {
 
     /// Returns [`Area`]'s top left point
     pub fn top_right(&self) -> Point {
-        self.top_left.translate(Offset::new(self.size.width() as isize, 0)).unwrap()
+        self.top_left.translate(Offset::new(self.size.width().get() as isize, 0)).unwrap()
     }
 
     /// Returns [`Area`]'s top left point
     pub fn bottom_left(&self) -> Point {
-        self.top_left.translate(Offset::new(0, self.size.height() as isize)).unwrap()
+        self.top_left.translate(Offset::new(0, self.size.height().get() as isize)).unwrap()
     }
 
     /// Returns [`Area`]'s top left point
     pub fn bottom_right(&self) -> Point {
         self.top_left
-            .translate(Offset::new(self.size.width() as isize, self.size.height() as isize))
+            .translate(Offset::new(
+                self.size.width().get() as isize,
+                self.size.height().get() as isize,
+            ))
             .unwrap()
     }
 

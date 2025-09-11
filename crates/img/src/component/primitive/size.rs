@@ -108,21 +108,21 @@ impl Size {
         Self::from_usize(diameter, diameter).unwrap()
     }
 
-    /// Returns [`Size`]'s width as `usize`. Is guaranteed to not be 0.
-    pub fn width(&self) -> usize {
-        self.width.into()
+    /// Returns [`Size`]'s width.
+    pub fn width(&self) -> NonZeroUsize {
+        self.width
     }
 
-    /// Returns [`Size`]'s height as `usize`. Is guaranteed to not be 0.
-    pub fn height(&self) -> usize {
-        self.height.into()
+    /// Returns [`Size`]'s height.
+    pub fn height(&self) -> NonZeroUsize {
+        self.height
     }
 
     /// Calculate [`Size`]'s area (width * height).
     ///
     /// Returns [`Size`]'s area as `usize`. Is guaranteed to not be 0.
     pub fn area(&self) -> usize {
-        self.width() * self.height()
+        self.width().get() * self.height().get()
     }
 
     /// Get rounded up middle point.
@@ -148,7 +148,7 @@ impl Size {
     /// # }
     /// ```
     pub fn middle(&self) -> Point {
-        Point::new(self.width() / 2, self.height() / 2)
+        Point::new(self.width().get() / 2, self.height().get() / 2)
     }
 
     /// Checks if point is within [`Size`] bounds.
@@ -180,7 +180,7 @@ impl Size {
     /// # }
     /// ```
     pub fn contains(&self, point: &Point) -> bool {
-        point.x() < self.width() && point.y() < self.height()
+        point.x() < self.width().get() && point.y() < self.height().get()
     }
 
     /// Apply [`Margin`] to [`Size`] - this results in a [`Size`] reduced by margins.
@@ -224,16 +224,16 @@ impl Size {
     /// # }
     /// ```
     pub fn apply_margin(&self, margin: Margin) -> CreationResult<Self> {
-        if margin.left() + margin.right() >= self.width() {
+        if margin.left() + margin.right() >= self.width().get() {
             return Err(CreationError::WidthZero);
         }
 
-        if margin.top() + margin.bottom() >= self.height() {
+        if margin.top() + margin.bottom() >= self.height().get() {
             return Err(CreationError::HeightZero);
         }
 
-        let width = self.width() - margin.left() - margin.right();
-        let height = self.height() - margin.top() - margin.bottom();
+        let width = self.width().get() - margin.left() - margin.right();
+        let height = self.height().get() - margin.top() - margin.bottom();
 
         Ok(Size::from_usize(width, height).unwrap())
     }
@@ -309,8 +309,8 @@ impl Add<Margin> for Size {
     fn add(self, rhs: Margin) -> Self::Output {
         // UNWRAP: `Size::from_usize` fails only if either dimension is 0
         Size::from_usize(
-            self.width() + rhs.left() + rhs.right(),
-            self.height() + rhs.top() + rhs.bottom(),
+            self.width().get() + rhs.left() + rhs.right(),
+            self.height().get() + rhs.top() + rhs.bottom(),
         )
         .unwrap()
     }

@@ -138,8 +138,8 @@ impl Scale {
     /// # }
     /// ```
     pub fn apply(&self, size: Size) -> SizeCreationResult<Size> {
-        let new_width: f32 = size.width() as f32 * self.0;
-        let new_height: f32 = size.height() as f32 * self.1;
+        let new_width: f32 = size.width().get() as f32 * self.0;
+        let new_height: f32 = size.height().get() as f32 * self.1;
 
         Size::from_usize(new_width.round() as usize, new_height.round() as usize)
     }

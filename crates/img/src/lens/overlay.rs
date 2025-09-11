@@ -40,8 +40,8 @@ where
         let overlay_size = overlay.size();
 
         let bottom_right = Point::new(
-            overlay_size.width() + overlay_start.x(),
-            overlay_size.height() + overlay_start.y(),
+            overlay_size.width().get() + overlay_start.x(),
+            overlay_size.height().get() + overlay_start.y(),
         );
         if !base.size().contains(&bottom_right) {
             return Err(CreationError::OverlayTooBig);

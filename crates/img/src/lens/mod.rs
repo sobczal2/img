@@ -1,3 +1,6 @@
+#[cfg(feature = "parallel")]
+use std::num::NonZeroUsize;
+
 use crate::{
     component::{
         kernel::Kernel,
@@ -204,12 +207,12 @@ pub trait Lens {
     ///
     /// See [`MaterializeLens`] for more details.
     #[cfg(feature = "parallel")]
-    fn materialize_par(self) -> MaterializeLens<Self::Item>
+    fn materialize_par(self, threads: NonZeroUsize) -> MaterializeLens<Self::Item>
     where
         Self: Sized + Send + Sync,
         Self::Item: Send,
     {
-        MaterializeLens::from_lens_par(self)
+        MaterializeLens::from_lens_par(self, threads)
     }
 
     /// Returns [`SplitLens2`] which splits lens into two seperate lens and returns [`Lens`]
@@ -302,7 +305,7 @@ pub trait FromLens<T>: Sized {
 /// Trait for collecting [`Lens`] in parallel.
 #[cfg(feature = "parallel")]
 pub trait FromLensPar<T>: Sized {
-    fn from_lens_par<S>(source: S) -> Self
+    fn from_lens_par<S>(source: S, threads: NonZeroUsize) -> Self
     where
         S: Lens<Item = T> + Send + Sync,
         S::Item: Send;

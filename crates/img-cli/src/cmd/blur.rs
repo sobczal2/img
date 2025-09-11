@@ -27,14 +27,21 @@ use super::common::{
 
 pub const CMD_NAME: &str = "blur";
 
+const MEAN_CMD_NAME: &str = "mean";
+const MEAN_CMD_ALIAS1: &str = "average";
+const MEAN_CMD_ALIAS2: &str = "avg";
+
+const GAUSSIAN_CMD_NAME: &str = "gaussian";
+const GAUSSIAN_CMD_ALIAS1: &str = "gauss";
+
 pub fn subcommand() -> Command {
     Command::new(CMD_NAME)
         .arg(input_arg())
         .arg(output_arg())
         .subcommand(
-            Command::new("mean")
-                .alias("average")
-                .alias("avg")
+            Command::new(MEAN_CMD_NAME)
+                .alias(MEAN_CMD_ALIAS1)
+                .alias(MEAN_CMD_ALIAS2)
                 .about("apply mean blur")
                 .arg(
                     arg!(-r --radius <radius> "kernel radius")
@@ -48,8 +55,8 @@ pub fn subcommand() -> Command {
                 ),
         )
         .subcommand(
-            Command::new("gaussian")
-                .alias("gauss")
+            Command::new(GAUSSIAN_CMD_NAME)
+                .alias(GAUSSIAN_CMD_ALIAS1)
                 .about("apply gaussian blur")
                 .arg(
                     arg!(-r --radius <radius> "kernel radius")
@@ -72,8 +79,8 @@ pub fn subcommand() -> Command {
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     let image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
     let image = match matches.subcommand().unwrap() {
-        ("mean" | "average" | "avg", m) => apply_mean(&image, m)?,
-        ("gaussian" | "gauss", m) => apply_gauss(&image, m)?,
+        (MEAN_CMD_NAME | MEAN_CMD_ALIAS1 | MEAN_CMD_ALIAS2, m) => apply_mean(&image, m)?,
+        (GAUSSIAN_CMD_NAME | GAUSSIAN_CMD_ALIAS1, m) => apply_gauss(&image, m)?,
         _ => unreachable!(),
     };
     write_image(&image, matches.get_one::<PathBuf>(OUTPUT_ARG_NAME).unwrap())?;

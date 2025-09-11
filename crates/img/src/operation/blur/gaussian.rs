@@ -15,8 +15,8 @@ use crate::{
         Lens,
     },
     pixel::{
+        ChannelFlags,
         Pixel,
-        PixelFlags,
     },
 };
 
@@ -35,7 +35,7 @@ pub fn gaussian_blur_lens<S>(
     source: S,
     radius: usize,
     sigma: f32,
-    flags: PixelFlags,
+    flags: ChannelFlags,
 ) -> CreationResult<impl Lens<Item = Pixel>>
 where
     S: Lens,
@@ -51,7 +51,7 @@ pub fn gaussian_blur(
     image: &Image,
     radius: usize,
     sigma: f32,
-    flags: PixelFlags,
+    flags: ChannelFlags,
 ) -> CreationResult<Image> {
     let lens = gaussian_blur_lens(image.lens(), radius, sigma, flags)?;
     Ok(Image::from_lens(lens))
@@ -62,7 +62,7 @@ pub fn gaussian_blur_par(
     image: &Image,
     radius: usize,
     sigma: f32,
-    flags: PixelFlags,
+    flags: ChannelFlags,
 ) -> CreationResult<Image> {
     use crate::lens::FromLensPar;
 

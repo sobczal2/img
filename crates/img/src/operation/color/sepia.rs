@@ -5,12 +5,12 @@ use crate::{
         Lens,
     },
     pixel::{
+        ChannelFlags,
         Pixel,
-        PixelFlags,
     },
 };
 
-pub fn sepia_lens<S>(source: S, flags: PixelFlags) -> impl Lens<Item = Pixel>
+pub fn sepia_lens<S>(source: S, flags: ChannelFlags) -> impl Lens<Item = Pixel>
 where
     S: Lens,
     S::Item: AsRef<Pixel>,
@@ -18,20 +18,20 @@ where
     source.map(move |px| map_px(px, flags))
 }
 
-pub fn sepia(image: &Image, flags: PixelFlags) -> Image {
+pub fn sepia(image: &Image, flags: ChannelFlags) -> Image {
     let lens = sepia_lens(image.lens(), flags);
     Image::from_lens(lens)
 }
 
 #[cfg(feature = "parallel")]
-pub fn sepia_par(image: &Image, flags: PixelFlags) -> Image {
+pub fn sepia_par(image: &Image, flags: ChannelFlags) -> Image {
     use crate::lens::FromLensPar;
 
     let lens = sepia_lens(image.lens(), flags);
     Image::from_lens_par(lens)
 }
 
-fn map_px(px: impl AsRef<Pixel>, flags: PixelFlags) -> Pixel {
+fn map_px(px: impl AsRef<Pixel>, flags: ChannelFlags) -> Pixel {
     let px = px.as_ref();
 
     let new_red = 0.393 * px.r() as f32 + 0.769 * px.g() as f32 + 0.189 * px.b() as f32;

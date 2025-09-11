@@ -21,7 +21,7 @@ impl FromStr for Size {
         }
 
         let width = parts[0].parse::<usize>().map_err(|_| anyhow!("invalid width"))?;
-        let height = parts[1].parse::<usize>().map_err(|_| anyhow!("invalid width"))?;
+        let height = parts[1].parse::<usize>().map_err(|_| anyhow!("invalid height"))?;
 
         Ok(Size { width, height })
     }
@@ -32,11 +32,5 @@ impl TryFrom<Size> for img::prelude::Size {
 
     fn try_from(value: Size) -> img::component::primitive::SizeCreationResult<img::prelude::Size> {
         Self::from_usize(value.width, value.height)
-    }
-}
-
-impl From<Size> for (usize, usize) {
-    fn from(value: Size) -> Self {
-        (value.width, value.height)
     }
 }

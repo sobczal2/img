@@ -18,8 +18,8 @@ use crate::{
     },
     lens::Lens,
     pixel::{
+        ChannelFlags,
         Pixel,
-        PixelFlags,
         PixelRgbaf32,
     },
 };
@@ -36,14 +36,14 @@ pub type CreationResult = Result<ConvolutionKernel, CreationError>;
 pub struct ConvolutionKernel {
     size: Size,
     buffer: Box<[f32]>,
-    flags: PixelFlags,
+    flags: ChannelFlags,
 }
 
 impl ConvolutionKernel {
     pub fn new(
         size: Size,
         buffer: impl IntoIterator<Item = f32>,
-        flags: PixelFlags,
+        flags: ChannelFlags,
     ) -> CreationResult {
         let buffer: Box<[_]> = buffer.into_iter().collect();
         if buffer.len() != size.area() {

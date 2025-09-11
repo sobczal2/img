@@ -8,7 +8,7 @@ use img::prelude::*;
 
 mod common;
 
-operation_bench!(grayscale[PixelFlags::RGB]);
+operation_bench!(grayscale[ChannelFlags::RGB]);
 
 criterion_group!(benches, grayscale_benchmark);
 criterion_main!(benches);

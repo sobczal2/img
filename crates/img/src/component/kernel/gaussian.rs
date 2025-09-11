@@ -22,8 +22,8 @@ use crate::{
     error::IndexResult,
     lens::Lens,
     pixel::{
+        ChannelFlags,
         Pixel,
-        PixelFlags,
     },
 };
 
@@ -43,7 +43,7 @@ pub struct GaussianKernel {
 }
 
 impl GaussianKernel {
-    pub fn new(size: Size, sigma: f32, flags: PixelFlags) -> CreationResult {
+    pub fn new(size: Size, sigma: f32, flags: ChannelFlags) -> CreationResult {
         if !sigma.is_finite() || sigma <= 0f32 {
             return Err(CreationError::InvalidSigma);
         }

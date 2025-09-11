@@ -16,8 +16,8 @@ use crate::{
     error::IndexResult,
     lens::Lens,
     pixel::{
+        ChannelFlags,
         Pixel,
-        PixelFlags,
     },
 };
 
@@ -35,7 +35,7 @@ pub struct MeanKernel {
 }
 
 impl MeanKernel {
-    pub fn new(size: Size, flags: PixelFlags) -> CreationResult {
+    pub fn new(size: Size, flags: ChannelFlags) -> CreationResult {
         Ok(Self {
             inner: ConvolutionKernel::new(
                 size,

@@ -1,3 +1,6 @@
+#[cfg(feature = "parallel")]
+use std::num::NonZeroUsize;
+
 use crate::{
     image::Image,
     lens::{
@@ -24,11 +27,11 @@ pub fn sepia(image: &Image, flags: ChannelFlags) -> Image {
 }
 
 #[cfg(feature = "parallel")]
-pub fn sepia_par(image: &Image, flags: ChannelFlags) -> Image {
+pub fn sepia_par(image: &Image, threads: NonZeroUsize, flags: ChannelFlags) -> Image {
     use crate::lens::FromLensPar;
 
     let lens = sepia_lens(image.lens(), flags);
-    Image::from_lens_par(lens)
+    Image::from_lens_par(lens, threads)
 }
 
 fn map_px(px: impl AsRef<Pixel>, flags: ChannelFlags) -> Pixel {

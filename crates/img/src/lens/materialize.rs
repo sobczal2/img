@@ -1,3 +1,5 @@
+#[cfg(feature = "parallel")]
+use std::num::NonZeroUsize;
 use std::{
     iter::from_fn,
     sync::Arc,
@@ -33,7 +35,7 @@ impl<T> MaterializeLens<T> {
     }
 
     #[cfg(feature = "parallel")]
-    pub fn new_par<S>(source: S) -> Self
+    pub fn new_par<S>(source: S, threads: NonZeroUsize) -> Self
     where
         S: Lens<Item = T> + Send + Sync,
         T: Send,
@@ -41,8 +43,7 @@ impl<T> MaterializeLens<T> {
         use std::thread;
 
         let size = source.size();
-        let cpus = num_cpus::get();
-        let chunk_size = (size.area() as f32 / cpus as f32).ceil() as usize;
+        let chunk_size = (size.area() as f32 / threads.get() as f32).ceil() as usize;
 
         let mut values = Box::from_iter(from_fn(|| Some(None)).take(size.area()));
 
@@ -98,11 +99,11 @@ impl<T> FromLens<T> for MaterializeLens<T> {
 
 #[cfg(feature = "parallel")]
 impl<T> FromLensPar<T> for MaterializeLens<T> {
-    fn from_lens_par<S>(source: S) -> Self
+    fn from_lens_par<S>(source: S, threads: NonZeroUsize) -> Self
     where
         S: Lens<Item = T> + Send + Sync,
         S::Item: Send,
     {
-        MaterializeLens::new_par(source)
+        MaterializeLens::new_par(source, threads)
     }
 }

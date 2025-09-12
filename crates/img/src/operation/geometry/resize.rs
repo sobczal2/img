@@ -1,3 +1,6 @@
+#[cfg(feature = "parallel")]
+use std::num::NonZeroUsize;
+
 use thiserror::Error;
 
 use crate::{
@@ -37,9 +40,13 @@ pub fn resize(image: &Image, scale: Scale) -> Result<Image, CreationError> {
 }
 
 #[cfg(feature = "parallel")]
-pub fn resize_par(image: &Image, scale: Scale) -> Result<Image, CreationError> {
+pub fn resize_par(
+    image: &Image,
+    threads: NonZeroUsize,
+    scale: Scale,
+) -> Result<Image, CreationError> {
     use crate::lens::FromLensPar;
 
     let lens = resize_lens(image.lens().cloned(), scale)?;
-    Ok(Image::from_lens_par(lens))
+    Ok(Image::from_lens_par(lens, threads))
 }

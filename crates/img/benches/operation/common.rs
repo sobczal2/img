@@ -15,7 +15,7 @@ macro_rules! add_bench_for_size {
                 );
                 group.bench_function(
                     "parallel",
-                    |b| b.iter(|| [<$operation_name _par>](&[<image $size>], $($args),*))
+                    |b| b.iter(|| [<$operation_name _par>](&[<image $size>], std::num::NonZero::new(num_cpus::get()).unwrap(), $($args),*))
                 );
                 group.finish();
             }

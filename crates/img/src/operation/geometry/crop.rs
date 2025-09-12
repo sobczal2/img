@@ -1,3 +1,6 @@
+#[cfg(feature = "parallel")]
+use std::num::NonZeroUsize;
+
 use crate::{
     component::primitive::{
         Margin,
@@ -40,9 +43,13 @@ pub fn crop(image: &Image, margin: Margin) -> Result<Image, SizeCreationError> {
 }
 
 #[cfg(feature = "parallel")]
-pub fn crop_par(image: &Image, margin: Margin) -> Result<Image, SizeCreationError> {
+pub fn crop_par(
+    image: &Image,
+    threads: NonZeroUsize,
+    margin: Margin,
+) -> Result<Image, SizeCreationError> {
     let lens = crop_lens(image.lens().cloned(), margin)?;
-    let image = Image::from_lens_par(lens);
+    let image = Image::from_lens_par(lens, threads);
 
     Ok(image)
 }

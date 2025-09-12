@@ -1,6 +1,4 @@
-use std::{
-    path::PathBuf,
-};
+use std::path::PathBuf;
 
 use clap::{
     ArgMatches,

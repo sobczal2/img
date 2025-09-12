@@ -8,7 +8,8 @@ img.workspace = true
 colored.workspace = true
 clap.workspace = true
 anyhow.workspace = true
+num_cpus = { workspace = true, optional = true }
 
 [features]
-default = []
-parallel = ["img/parallel"]
+default = ["parallel"]
+parallel = ["img/parallel", "dep:num_cpus"]

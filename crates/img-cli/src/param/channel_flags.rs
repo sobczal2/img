@@ -1,6 +1,17 @@
 use std::str::FromStr;
 
 use anyhow::bail;
+use clap::{
+    Arg,
+    arg,
+};
+
+pub const ARG_NAME: &str = "flags";
+pub fn arg() -> Arg {
+    arg!(-f --flags <flags> "channel flags in format [R][G][B][A]")
+        .default_value("RGB")
+        .value_parser(ChannelFlags::from_str)
+}
 
 #[derive(Default, Debug, Clone, Copy)]
 pub struct ChannelFlags {

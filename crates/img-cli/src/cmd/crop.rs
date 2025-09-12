@@ -15,20 +15,17 @@ use crate::{
         read_image,
         write_image,
     },
-    param::size_offset::SizeOffset,
-};
-
-use super::common::{
-    INPUT_ARG_NAME,
-    OUTPUT_ARG_NAME,
-    input_arg,
-    output_arg,
+    param::{
+        input,
+        output,
+        size_offset::SizeOffset,
+    },
 };
 
 pub const CMD_NAME: &str = "crop";
 
 pub fn subcommand() -> Command {
-    Command::new(CMD_NAME).arg(input_arg()).arg(output_arg()).arg(
+    Command::new(CMD_NAME).arg(input::arg()).arg(output::arg()).arg(
         arg!(-s --size <size_offset> "target size with offset")
             .required(true)
             .value_parser(SizeOffset::from_str),
@@ -36,7 +33,7 @@ pub fn subcommand() -> Command {
 }
 
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
-    let image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
+    let image = read_image(matches.get_one::<PathBuf>(input::ARG_NAME).unwrap())?;
     let target_size_offset = matches.get_one::<SizeOffset>("size").unwrap();
 
     let old_size = image.size();
@@ -51,6 +48,6 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     );
 
     let image = crop(&image, margin)?;
-    write_image(&image, matches.get_one::<PathBuf>(OUTPUT_ARG_NAME).unwrap())?;
+    write_image(&image, matches.get_one::<PathBuf>(output::ARG_NAME).unwrap())?;
     Ok(())
 }

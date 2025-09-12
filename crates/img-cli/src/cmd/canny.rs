@@ -6,27 +6,26 @@ use clap::{
 };
 use img::prelude::*;
 
-use crate::io::{
-    read_image,
-    write_image,
-};
-
-use super::common::{
-    INPUT_ARG_NAME,
-    OUTPUT_ARG_NAME,
-    input_arg,
-    output_arg,
+use crate::{
+    io::{
+        read_image,
+        write_image,
+    },
+    param::{
+        input,
+        output,
+    },
 };
 
 pub const CMD_NAME: &str = "canny";
 
 pub fn subcommand() -> Command {
-    Command::new(CMD_NAME).arg(input_arg()).arg(output_arg())
+    Command::new(CMD_NAME).arg(input::arg()).arg(output::arg())
 }
 
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
-    let image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
+    let image = read_image(matches.get_one::<PathBuf>(input::ARG_NAME).unwrap())?;
     let image = canny(&image);
-    write_image(&image, matches.get_one::<PathBuf>(OUTPUT_ARG_NAME).unwrap())?;
+    write_image(&image, matches.get_one::<PathBuf>(output::ARG_NAME).unwrap())?;
     Ok(())
 }

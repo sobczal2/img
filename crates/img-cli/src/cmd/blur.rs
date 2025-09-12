@@ -1,7 +1,4 @@
-use std::{
-    path::PathBuf,
-    str::FromStr,
-};
+use std::path::PathBuf;
 
 use clap::{
     ArgMatches,
@@ -16,13 +13,13 @@ use crate::io::{
     write_image,
 };
 
-use crate::param::channel_flags::ChannelFlags;
-
-use super::common::{
-    INPUT_ARG_NAME,
-    OUTPUT_ARG_NAME,
-    input_arg,
-    output_arg,
+use crate::param::{
+    channel_flags::{
+        self,
+        ChannelFlags,
+    },
+    input,
+    output,
 };
 
 pub const CMD_NAME: &str = "blur";
@@ -36,8 +33,8 @@ const GAUSSIAN_CMD_ALIAS1: &str = "gauss";
 
 pub fn subcommand() -> Command {
     Command::new(CMD_NAME)
-        .arg(input_arg())
-        .arg(output_arg())
+        .arg(input::arg())
+        .arg(output::arg())
         .subcommand(
             Command::new(MEAN_CMD_NAME)
                 .alias(MEAN_CMD_ALIAS1)
@@ -48,11 +45,7 @@ pub fn subcommand() -> Command {
                         .default_value("2")
                         .value_parser(value_parser!(usize)),
                 )
-                .arg(
-                    arg!(-f --flags <flags> "channel flags in format [R][G][B][A]")
-                        .default_value("RGB")
-                        .value_parser(ChannelFlags::from_str),
-                ),
+                .arg(channel_flags::arg()),
         )
         .subcommand(
             Command::new(GAUSSIAN_CMD_NAME)
@@ -68,28 +61,24 @@ pub fn subcommand() -> Command {
                         .default_value("3")
                         .value_parser(value_parser!(f32)),
                 )
-                .arg(
-                    arg!(-f --flags <flags> "channel flags in format [R][G][B][A]")
-                        .default_value("RGB")
-                        .value_parser(ChannelFlags::from_str),
-                ),
+                .arg(channel_flags::arg()),
         )
 }
 
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
-    let image = read_image(matches.get_one::<PathBuf>(INPUT_ARG_NAME).unwrap())?;
+    let image = read_image(matches.get_one::<PathBuf>(input::ARG_NAME).unwrap())?;
     let image = match matches.subcommand().unwrap() {
         (MEAN_CMD_NAME | MEAN_CMD_ALIAS1 | MEAN_CMD_ALIAS2, m) => apply_mean(&image, m)?,
         (GAUSSIAN_CMD_NAME | GAUSSIAN_CMD_ALIAS1, m) => apply_gauss(&image, m)?,
         _ => unreachable!(),
     };
-    write_image(&image, matches.get_one::<PathBuf>(OUTPUT_ARG_NAME).unwrap())?;
+    write_image(&image, matches.get_one::<PathBuf>(output::ARG_NAME).unwrap())?;
     Ok(())
 }
 
 fn apply_mean(image: &Image, matches: &ArgMatches) -> anyhow::Result<Image> {
     let target_radius = matches.get_one::<usize>("radius").unwrap();
-    let channel_flags = *matches.get_one::<ChannelFlags>("flags").unwrap();
+    let channel_flags = *matches.get_one::<ChannelFlags>(channel_flags::ARG_NAME).unwrap();
     Ok(mean_blur(image, *target_radius, channel_flags.into())?)
 }
 

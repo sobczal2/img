@@ -90,13 +90,13 @@ impl Size {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let small = Size::from_radius(0);
-    /// assert_eq!((small.width(), small.height()), (1, 1));
+    /// assert_eq!((small.width().get(), small.height().get()), (1, 1));
     ///
     /// let medium = Size::from_radius(15);
-    /// assert_eq!((medium.width(), medium.height()), (31, 31));
+    /// assert_eq!((medium.width().get(), medium.height().get()), (31, 31));
     ///
     /// let large = Size::from_radius(10_000);
-    /// assert_eq!((large.width(), large.height()), (20_001, 20_001));
+    /// assert_eq!((large.width().get(), large.height().get()), (20_001, 20_001));
     ///
     /// # Ok(())
     /// # }
@@ -205,8 +205,8 @@ impl Size {
     /// // Reduce size by 2 from the top, 3 from the right, 4 from the bottom, 5 from the left.
     /// let reduced_size = size.apply_margin(Margin::new(2, 3, 4, 5))?;
     ///
-    /// assert_eq!(reduced_size.width(), 2);
-    /// assert_eq!(reduced_size.height(), 14);
+    /// assert_eq!(reduced_size.width().get(), 2);
+    /// assert_eq!(reduced_size.height().get(), 14);
     ///
     /// let invalid_width_size = size.apply_margin(Margin::new(0, 4, 0, 6));
     /// assert_eq!(invalid_width_size, SizeCreationResult::Err(SizeCreationError::WidthZero));

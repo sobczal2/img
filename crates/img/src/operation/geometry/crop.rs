@@ -26,7 +26,7 @@ where
     Ok(source.remap(
         move |lens, point| {
             let original_point = point
-                .translate(Offset::new(margin.left() as isize, margin.right() as isize))
+                .translate(Offset::new(margin.left() as isize, margin.top() as isize))
                 .unwrap();
 
             lens.look(original_point)

@@ -25,11 +25,29 @@ use crate::{
 pub const CMD_NAME: &str = "crop";
 
 pub fn subcommand() -> Command {
-    Command::new(CMD_NAME).arg(input::arg()).arg(output::arg()).arg(
-        arg!(-s --size <size_offset> "target size with offset")
-            .required(true)
-            .value_parser(SizeOffset::from_str),
-    )
+    #[cfg(not(feature = "parallel"))]
+    {
+        Command::new(CMD_NAME).arg(input::arg()).arg(output::arg()).arg(
+            arg!(-s --size <size_offset> "target size with offset")
+                .required(true)
+                .value_parser(SizeOffset::from_str),
+        )
+    }
+
+    #[cfg(feature = "parallel")]
+    {
+        use crate::param::threads;
+
+        Command::new(CMD_NAME)
+            .arg(input::arg())
+            .arg(output::arg())
+            .arg(
+                arg!(-s --size <size_offset> "target size with offset")
+                    .required(true)
+                    .value_parser(SizeOffset::from_str),
+            )
+            .arg(threads::arg())
+    }
 }
 
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
@@ -47,7 +65,19 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
         offset.width,
     );
 
+    #[cfg(not(feature = "parallel"))]
     let image = crop(&image, margin)?;
+
+    #[cfg(feature = "parallel")]
+    let image = {
+        use crate::param::threads::{
+            self,
+            Threads,
+        };
+
+        let threads = matches.get_one::<Threads>(threads::ARG_NAME).unwrap();
+        crop_par(&image, threads.number(), margin)?
+    };
     write_image(&image, matches.get_one::<PathBuf>(output::ARG_NAME).unwrap())?;
     Ok(())
 }

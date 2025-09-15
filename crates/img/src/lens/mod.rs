@@ -52,6 +52,8 @@ pub mod value;
 pub trait Lens {
     /// Type of individual items within underlying 2D structure. This can be
     /// [`Pixel`], but this is not a requirement.
+    ///
+    /// [`Pixel`]: crate::prelude::Pixel
     type Item;
 
     /// Look at value for given [`Point`].
@@ -64,6 +66,8 @@ pub trait Lens {
     /// Most implementations will not perform any costly calculations until
     /// this method is called. Also this method should invoke only calculations
     /// directly related to requested [`Point`].
+    ///
+    /// [`OutOfBoundsError`]: crate::error::OutOfBoundsError
     ///
     /// # Examples
     ///

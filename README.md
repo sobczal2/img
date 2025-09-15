@@ -13,6 +13,7 @@ img is a very young tool so support for different types of filters is limited to
 - sepia filter
 - gamma correction filter
 - canny edge detection
+- kuwahara filter
 
 it also allows for simple image manipulation:
 
@@ -41,7 +42,11 @@ cargo install --path crates/img-cli
 
 ```
 
-to install the tool
+to install the tool.
+
+By default `parallel` feature is enabled which allows each operation to specify `-t <thread_count>` parameter
+where thread_count is either a positive number or `auto` (which is the default and uses number equal to logical
+cores available).
 
 # Cli Usage
 
@@ -54,12 +59,12 @@ img --help
 ## Blur:
 
 ```bash
-img blur -i input.png -o output.png -r <radius> -a <algorithm> -s <sigma>
+img blur -i input.png -o output.png [algorithm] -r <radius> -s <sigma>
 ```
 
+- algorithm - either "mean" or "gaussian"
 - radius - non-negative integer describing range of the
   blur kernel. Passing value of 0 results in 1x1 kernel, value 1 - 3x3, etc.
-- algorithm - either "mean" or "gaussian"
 - sigma - sigma value used in gaussian blur algorithm
 
 ## Grayscale
@@ -114,18 +119,30 @@ img resize -i input.png -o output.png -s [width]x[height]
 img canny -i input.png -o output.png
 ```
 
+## Canny
+
+```bash
+img canny -i input.png -o output.png
+```
+
+## Kuwahara
+
+```bash
+img kuwahara -i input.png -o output.png
+```
+
 # Library usage
 
 Image struct is the main struct holding image data. It holds RGBA images where each pixel value ranges from 0 to 255.
 
-All filters use lens api (see [Lens trait](https://github.com/sobczal2/img/blob/ef0af266f4bd8e0adc1c3839cb2a0fb92e61881e/crates/img/src/lens/mod.rs#L37).
+All filters use lens api (see [Lens trait](https://github.com/sobczal2/img/blob/189db3ba2c98e30223362a5ffcdfda4ab53fb9e3/crates/img/src/lens/mod.rs#L52).
 This is a main way of interacting with image, each `Lens` transforms each point of an `Image` (or a different 2d
 representation). This api is lazy, inspired by `Iterator` so it does not perform any expensive calculations
-unless [`Lens::look`](https://github.com/sobczal2/img/blob/ef0af266f4bd8e0adc1c3839cb2a0fb92e61881e/crates/img/src/lens/mod.rs#L79) method is called.
+unless [`Lens::look`](https://github.com/sobczal2/img/blob/189db3ba2c98e30223362a5ffcdfda4ab53fb9e3/crates/img/src/lens/mod.rs#L90) method is called.
 
 From there, you can follow code documentation.
 
 # Parallelism
 
-This project can be compiled with "parallel" feature flag which adds corresponding functions utilizing parallelism, all
-based on [`FromLensPar::from_lens_par` method](https://github.com/sobczal2/img/blob/ef0af266f4bd8e0adc1c3839cb2a0fb92e61881e/crates/img/src/lens/mod.rs#L179).
+This project can be compiled with "parallel" feature flag which adds corresponding functions utilizing parallelism, most important being
+[`FromLensPar::from_lens_par` method](https://github.com/sobczal2/img/blob/189db3ba2c98e30223362a5ffcdfda4ab53fb9e3/crates/img/src/lens/mod.rs#L307).

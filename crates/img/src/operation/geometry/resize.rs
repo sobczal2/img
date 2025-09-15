@@ -29,7 +29,10 @@ where
     let size = scale.apply(source.size())?;
     let inverse_scale = scale.inverse();
 
-    let lens = source.remap(move |lens, point| lens.look(inverse_scale.translate(point)), size);
+    let lens = source.remap(move |lens, point|
+        lens.look(inverse_scale.translate(point)),
+        size
+    );
 
     Ok(lens)
 }

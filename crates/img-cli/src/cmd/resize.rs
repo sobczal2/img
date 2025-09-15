@@ -25,10 +25,24 @@ use crate::{
 pub const CMD_NAME: &str = "resize";
 
 pub fn subcommand() -> Command {
-    Command::new(CMD_NAME)
-        .arg(input::arg())
-        .arg(output::arg())
-        .arg(arg!(-s --size <size> "target size").required(true).value_parser(Size::from_str))
+    #[cfg(not(feature = "parallel"))]
+    {
+        Command::new(CMD_NAME)
+            .arg(input::arg())
+            .arg(output::arg())
+            .arg(arg!(-s --size <size> "target size").required(true).value_parser(Size::from_str))
+    }
+
+    #[cfg(feature = "parallel")]
+    {
+        use crate::param::threads;
+
+        Command::new(CMD_NAME)
+            .arg(input::arg())
+            .arg(output::arg())
+            .arg(arg!(-s --size <size> "target size").required(true).value_parser(Size::from_str))
+            .arg(threads::arg())
+    }
 }
 
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
@@ -38,7 +52,21 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
         target_size.width as f32 / image.size().width().get() as f32,
         target_size.height as f32 / image.size().height().get() as f32,
     )?;
+
+    #[cfg(not(feature = "parallel"))]
     let image = resize(&image, scale)?;
+
+    #[cfg(feature = "parallel")]
+    let image = {
+        use crate::param::threads::{
+            self,
+            Threads,
+        };
+
+        let threads = matches.get_one::<Threads>(threads::ARG_NAME).unwrap();
+        resize_par(&image, threads.number(), scale)?
+    };
+
     write_image(&image, matches.get_one::<PathBuf>(output::ARG_NAME).unwrap())?;
     Ok(())
 }

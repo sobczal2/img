@@ -108,12 +108,12 @@ impl Size {
         Self::from_usize(diameter, diameter).unwrap()
     }
 
-    /// Returns [`Size`]'s width.
+    /// Get [`Size`]'s width.
     pub fn width(&self) -> NonZeroUsize {
         self.width
     }
 
-    /// Returns [`Size`]'s height.
+    /// Get [`Size`]'s height.
     pub fn height(&self) -> NonZeroUsize {
         self.height
     }

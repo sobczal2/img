@@ -84,27 +84,27 @@ impl Area {
         Ok(Self { size, top_left })
     }
 
-    /// Returns [`Area`]'s size.
+    /// Get [`Area`]'s size.
     pub fn size(&self) -> Size {
         self.size
     }
 
-    /// Returns [`Area`]'s top left point
+    /// Get [`Area`]'s top left point.
     pub fn top_left(&self) -> Point {
         self.top_left
     }
 
-    /// Returns [`Area`]'s top left point
+    /// Get [`Area`]'s top left point.
     pub fn top_right(&self) -> Point {
         self.top_left.translate(Offset::new(self.size.width().get() as isize, 0)).unwrap()
     }
 
-    /// Returns [`Area`]'s top left point
+    /// Get [`Area`]'s top left point.
     pub fn bottom_left(&self) -> Point {
         self.top_left.translate(Offset::new(0, self.size.height().get() as isize)).unwrap()
     }
 
-    /// Returns [`Area`]'s top left point
+    /// Get [`Area`]'s top left point.
     pub fn bottom_right(&self) -> Point {
         self.top_left
             .translate(Offset::new(

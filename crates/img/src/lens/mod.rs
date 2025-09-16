@@ -125,7 +125,7 @@ pub trait Lens {
     /// ```
     fn size(&self) -> Size;
 
-    /// Return [`Rows`] iterator for going through rows of underlying structure.
+    /// Get [`Rows`] iterator for going through rows of underlying structure.
     ///
     /// See [`Rows`] for more details.
     fn rows(&self) -> Rows<'_, Self>
@@ -135,7 +135,7 @@ pub trait Lens {
         Rows::new(self)
     }
 
-    /// Returns [`Elements`] iterator for going through all elements of underlying structure.
+    /// Get [`Elements`] iterator for going through all elements of underlying structure.
     ///
     /// See [`Elements`] for more details.
     fn elements(&self) -> Elements<'_, Self>
@@ -145,7 +145,7 @@ pub trait Lens {
         Elements::new(self)
     }
 
-    /// Returns [`MapLens`] which applies `f` to every [`Lens::Item`].
+    /// Get [`MapLens`] which applies `f` to every [`Lens::Item`].
     ///
     /// See [`MapLens`] for more details.
     fn map<T, F>(self, f: F) -> MapLens<Self, F>
@@ -156,7 +156,7 @@ pub trait Lens {
         MapLens::new(self, f)
     }
 
-    /// Returns [`RemapLens`] which resizes [`Lens`] and remaps each [`Lens::Item`] using `f`.
+    /// Get [`RemapLens`] which resizes [`Lens`] and remaps each [`Lens::Item`] using `f`.
     ///
     /// See [`RemapLens`] for more details.
     fn remap<T, F>(self, f: F, size: Size) -> RemapLens<Self, F>
@@ -167,7 +167,7 @@ pub trait Lens {
         RemapLens::new(self, f, size)
     }
 
-    /// Returns [`ClonedLens`] which clones every [`Lens::Item`].
+    /// Get [`ClonedLens`] which clones every [`Lens::Item`].
     ///
     /// See [`ClonedLens`] for more details.
     fn cloned<'a>(self) -> ClonedLens<Self>
@@ -178,7 +178,7 @@ pub trait Lens {
         ClonedLens::new(self)
     }
 
-    /// Returns [`KernelLens`] which applies `kernel` to every [`Lens::Item`].
+    /// Get [`KernelLens`] which applies `kernel` to every [`Lens::Item`].
     ///
     /// See [`KernelLens`] and [`Kernel`] for more details.
     fn kernel<K, T>(self, kernel: K) -> Result<KernelLens<Self, K, T>, kernel::CreationError>
@@ -189,7 +189,7 @@ pub trait Lens {
         KernelLens::new(self, kernel)
     }
 
-    /// Returns [`MaterializeLens`] which evaluates [`Lens::look`] for every [`Lens::Item`], saves
+    /// Get [`MaterializeLens`] which evaluates [`Lens::look`] for every [`Lens::Item`], saves
     /// results and provides those values using [`Lens`] interface.
     ///
     /// WARNING: this evaluates all calculations from preceding [`Lens`]. This is desirable in some
@@ -203,7 +203,7 @@ pub trait Lens {
         MaterializeLens::from_lens(self)
     }
 
-    /// Returns [`MaterializeLens`] which evaluates [`Lens::look`] for every [`Lens::Item`], saves
+    /// Get [`MaterializeLens`] which evaluates [`Lens::look`] for every [`Lens::Item`], saves
     /// results and provides those values using [`Lens`] interface. Unlike [`Lens::materialize`],
     /// this uses parallel processing.
     ///
@@ -219,7 +219,7 @@ pub trait Lens {
         MaterializeLens::from_lens_par(self, threads)
     }
 
-    /// Returns [`SplitLens2`] which splits lens into two seperate lens and returns [`Lens`]
+    /// Get [`SplitLens2`] which splits lens into two seperate lens and returns [`Lens`]
     /// with `(D1, D2)` [`Lens::Item`].
     ///
     /// See [`SplitLens2`] for more details.
@@ -234,7 +234,7 @@ pub trait Lens {
         SplitLens2::new(self, factory1, factory2)
     }
 
-    /// Returns [`SplitLens3`] which splits lens into three seperate lens and returns [`Lens`]
+    /// Get [`SplitLens3`] which splits lens into three seperate lens and returns [`Lens`]
     /// with `(D1, D2, D3)` [`Lens::Item`].
     ///
     /// See [`SplitLens3`] for more details.
@@ -256,7 +256,7 @@ pub trait Lens {
         SplitLens3::new(self, factory1, factory2, factory3)
     }
 
-    /// Returns [`SplitLens4`] which splits lens into four seperate lens and returns [`Lens`]
+    /// Get [`SplitLens4`] which splits lens into four seperate lens and returns [`Lens`]
     /// with `(D1, D2, D3, D4)` [`Lens::Item`].
     ///
     /// See [`SplitLens4`] for more details.
@@ -281,7 +281,7 @@ pub trait Lens {
         SplitLens4::new(self, factory1, factory2, factory3, factory4)
     }
 
-    /// Returns [`OverlayLens`] which combines two [`Lens`] by overlaying `overlay` on top of
+    /// Get [`OverlayLens`] which combines two [`Lens`] by overlaying `overlay` on top of
     /// `self` at given `overlay_start` point (which is top left point of `overlay` [`Lens`].
     /// with `(D1, D2, D3, D4)` [`Lens::Item`].
     ///

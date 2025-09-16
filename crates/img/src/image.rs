@@ -20,19 +20,42 @@ use crate::{
     pixel::Pixel,
 };
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 #[error("size does not match pixels size")]
 pub struct SizePixelsMismatch;
 
-/// Image representation
+/// A `struct` representing in-memory image.
+#[derive(Debug, Clone)]
 pub struct Image {
     size: Size,
     pixels: Box<[Pixel]>,
 }
 
 impl Image {
-    /// create an image with the given size and buffer
-    /// fails if pixels' length is not width * length * PIXEL_SIZE
+    /// Create an [`Image`] with the given size and buffer.
+    ///
+    /// Returns [`Image`] if `pixels` length is equal to `size.area()`, [`SizePixelsMismatch`]
+    /// otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::{
+    ///     image::SizePixelsMismatch,
+    ///     prelude::*,
+    /// };
+    /// use std::iter::from_fn;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let pixels: Box<[_]> = from_fn(|| Some(Pixel::zero())).take(4).collect();
+    /// let image = Image::new(Size::from_usize(2, 2).unwrap(), pixels.clone())?;
+    ///
+    /// let mismatch = Image::new(Size::from_usize(2, 3).unwrap(), pixels);
+    /// assert_eq!(mismatch.unwrap_err(), SizePixelsMismatch);
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn new(size: Size, pixels: Box<[Pixel]>) -> Result<Self, SizePixelsMismatch> {
         if pixels.len() != size.area() {
             return Err(SizePixelsMismatch);
@@ -41,11 +64,40 @@ impl Image {
         Ok(Image { size, pixels })
     }
 
-    /// create empty image with specified size
+    /// Create an empty [`Image`] with the given size. Uses [`Pixel::zero()`] to create all pixels.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let image = Image::empty(Size::from_usize(2, 2).unwrap());
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn empty(size: Size) -> Self {
         Self { size, pixels: vec![Pixel::zero(); size.area()].into_boxed_slice() }
     }
 
+    /// Create a random [`Image`] with the given size. Uses [`Pixel::random()`] to create all
+    /// pixels.
+    ///
+    /// Mainly useful for test scenarios.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let mut rng = rand::rng();
+    /// let image = Image::random(Size::from_usize(2, 2).unwrap(), &mut rng);
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn random<R>(size: Size, rng: &mut R) -> Self
     where
         R: Rng,
@@ -54,11 +106,16 @@ impl Image {
         Self { size, pixels }
     }
 
+    /// Get [`Image`]'s [`Size`].
     pub fn size(&self) -> Size {
         self.size
     }
 
-    /// get immutable pixel at selected point
+    /// Get immutable [`Pixel`] at given `point`.
+    ///
+    /// Returns [`Pixel`] if point is within image bounds, [`OutOfBoundsError`] otherwise.
+    ///
+    /// [`OutOfBoundsError`]: crate::error::OutOfBoundsError
     pub fn pixel(&self, point: Point) -> IndexResult<&Pixel> {
         let index = point.index(self.size())?;
 
@@ -66,7 +123,11 @@ impl Image {
         Ok(&self.pixels[index])
     }
 
-    /// get mutable pixel at selected coordinates
+    /// Get mutable [`Pixel`] at given `point`.
+    ///
+    /// Returns [`Pixel`] if point is within image bounds, [`OutOfBoundsError`] otherwise.
+    ///
+    /// [`OutOfBoundsError`]: crate::error::OutOfBoundsError
     pub fn pixel_mut(&mut self, point: Point) -> IndexResult<&mut Pixel> {
         let index = point.index(self.size())?;
 
@@ -74,10 +135,12 @@ impl Image {
         Ok(&mut self.pixels[index])
     }
 
+    /// Get raw `u8` buffer of underlying image data. It uses RGBA layout.
     pub fn buffer(&self) -> Box<[u8]> {
         self.pixels.iter().flat_map(|px| px.buffer()).cloned().collect()
     }
 
+    /// Get [`ImageLens`] which borrows the [`Image`] to use with [`Lens`] API.
     pub fn lens(&self) -> ImageLens<'_> {
         ImageLens::new(self)
     }

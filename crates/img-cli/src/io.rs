@@ -5,8 +5,7 @@ use std::{
 
 use img::{
     io::{
-        ReadPng,
-        WritePng,
+        png::{ReadPng, WritePng},
     },
     prelude::Image,
 };

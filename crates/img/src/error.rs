@@ -1,3 +1,5 @@
+use std::io;
+
 use thiserror::Error;
 
 /// Out of bounds error, may occur when trying
@@ -13,7 +15,11 @@ pub type IndexResult<T> = std::result::Result<T, OutOfBoundsError>;
 #[derive(Debug, Error)]
 pub enum IoError {
     #[error("png decoding error: {0}")]
-    PngDecodingError(#[from] png::DecodingError),
+    PngDecoding(#[from] png::DecodingError),
+    #[error("jpeg decoding error: {0}")]
+    JpegDecoding(#[from] zune_jpeg::errors::DecodeErrors),
+    #[error("io error: {0}")]
+    Io(#[from] io::Error),
     #[error("unsupported: {0}")]
     Unsupported(String),
 }

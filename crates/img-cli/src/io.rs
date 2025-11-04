@@ -15,7 +15,7 @@ use img::io::png::{
     WritePng,
 };
 
-/// Read an image from png file specified in path
+/// Read an image from a file specified in path (supports png or/and jpeg based on enabled features)
 #[cfg(any(feature = "png", feature = "jpeg"))]
 pub fn read_image(path: impl AsRef<Path>) -> anyhow::Result<Image> {
     use std::fs::File;
@@ -39,7 +39,7 @@ pub fn read_image(_path: impl AsRef<Path>) -> anyhow::Result<Image> {
     bail!("No image format support compiled in (enable the `png` or `jpeg` feature)")
 }
 
-/// Write an image to png file specified in path
+/// Write an image to a file specified in path (supports png or/and jpeg based on enabled features)
 #[cfg(any(feature = "png", feature = "jpeg"))]
 pub fn write_image(image: &Image, path: impl AsRef<Path>) -> anyhow::Result<()> {
     use std::fs::File;

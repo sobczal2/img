@@ -96,7 +96,7 @@ impl HsvPixel {
     ///
     /// This clamps the result if it is not in 0-1 range.
     pub fn set_alpha_f32(&mut self, value: f32) {
-        self.alpha = (value * 255f32).round().clamp(0f32, 2550f32) as u8;
+        self.alpha = (value * 255f32).round().clamp(0f32, 255f32) as u8;
     }
 }
 

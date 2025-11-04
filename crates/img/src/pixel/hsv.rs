@@ -46,47 +46,47 @@ impl HsvPixel {
 
         Ok(HsvPixel { hue, saturation, value, alpha })
     }
-    
+
     /// Get hue component.
     pub fn hue(&self) -> f32 {
         self.hue
     }
-    
+
     /// Get saturation component.
     pub fn saturation(&self) -> f32 {
         self.saturation
     }
-    
+
     /// Get value component.
     pub fn value(&self) -> f32 {
         self.value
     }
-    
+
     /// Get alpha component.
     pub fn alpha(&self) -> u8 {
         self.alpha
     }
-    
+
     /// Get 0-1 normalized alpha component.
     pub fn alpha_f32(&self) -> f32 {
         self.alpha as f32 / 255f32
     }
-    
+
     /// Set hue component.
     pub fn set_hue(&mut self, value: f32) {
         self.hue = value;
     }
-    
+
     /// Set saturation component.
     pub fn set_saturation(&mut self, value: f32) {
         self.saturation = value;
     }
-    
+
     /// Set value component.
     pub fn set_value(&mut self, value: f32) {
         self.value = value;
     }
-    
+
     /// Set alpha component.
     pub fn set_alpha(&mut self, value: u8) {
         self.alpha = value;
@@ -112,14 +112,31 @@ impl From<Pixel> for HsvPixel {
     /// };
     /// macro_rules! assert_hsv_pixel_eq {
     ///     ($left:expr, $right:expr) => {
-    ///         assert!(($left.hue() - $right.hue()).abs() < 1e-2,
-    ///             "hue: expected {}, got {}", $right.hue(), $left.hue());
-    ///         assert!(($left.saturation() - $right.saturation()).abs() < 1e-2,
-    ///             "saturation: expected {}, got {}", $right.saturation(), $left.saturation());
-    ///         assert!(($left.value() - $right.value()).abs() < 1e-2,
-    ///             "value: expected {}, got {}", $right.value(), $left.value());
-    ///         assert_eq!($left.alpha(), $right.alpha(),
-    ///             "alpha: expected {}, got {}", $right.alpha(), $left.alpha());
+    ///         assert!(
+    ///             ($left.hue() - $right.hue()).abs() < 1e-2,
+    ///             "hue: expected {}, got {}",
+    ///             $right.hue(),
+    ///             $left.hue()
+    ///         );
+    ///         assert!(
+    ///             ($left.saturation() - $right.saturation()).abs() < 1e-2,
+    ///             "saturation: expected {}, got {}",
+    ///             $right.saturation(),
+    ///             $left.saturation()
+    ///         );
+    ///         assert!(
+    ///             ($left.value() - $right.value()).abs() < 1e-2,
+    ///             "value: expected {}, got {}",
+    ///             $right.value(),
+    ///             $left.value()
+    ///         );
+    ///         assert_eq!(
+    ///             $left.alpha(),
+    ///             $right.alpha(),
+    ///             "alpha: expected {}, got {}",
+    ///             $right.alpha(),
+    ///             $left.alpha()
+    ///         );
     ///     };
     /// }
     ///

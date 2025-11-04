@@ -146,13 +146,13 @@ pub trait PixelRgbaf32 {
 
     /// Set 0-1 normalized red component.
     fn set_r_f32(&mut self, value: f32);
-    
+
     /// Set 0-1 normalized green component.
     fn set_g_f32(&mut self, value: f32);
-    
+
     /// Set 0-1 normalized blue component.
     fn set_b_f32(&mut self, value: f32);
-    
+
     /// Set 0-1 normalized alpha component.
     fn set_a_f32(&mut self, value: f32);
 
@@ -165,17 +165,17 @@ impl PixelRgbaf32 for Pixel {
     fn r_f32(&self) -> f32 {
         self.r() as f32 / 255.0
     }
-    
+
     /// Get 0-1 normalized green component.
     fn g_f32(&self) -> f32 {
         self.g() as f32 / 255.0
     }
-    
+
     /// Get 0-1 normalized blue component.
     fn b_f32(&self) -> f32 {
         self.b() as f32 / 255.0
     }
-    
+
     /// Get 0-1 normalized alpha component.
     fn a_f32(&self) -> f32 {
         self.a() as f32 / 255.0

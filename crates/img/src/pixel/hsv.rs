@@ -27,6 +27,10 @@ pub struct HsvPixel {
 impl Eq for HsvPixel {}
 
 impl HsvPixel {
+    /// Create a [`HsvPixel`] from given hue, saturation, value and alpha.
+    ///
+    /// Returns [`HsvPixel`] if hue, saturation and value are valid, [`CreationError`]
+    /// otherwise.
     pub fn new(hue: f32, saturation: f32, value: f32, alpha: u8) -> CreationResult {
         if !(0f32..=360f32).contains(&hue) {
             return Err(CreationError::HueInvalid);
@@ -42,41 +46,55 @@ impl HsvPixel {
 
         Ok(HsvPixel { hue, saturation, value, alpha })
     }
-
+    
+    /// Get hue component.
     pub fn hue(&self) -> f32 {
         self.hue
     }
-
+    
+    /// Get saturation component.
     pub fn saturation(&self) -> f32 {
         self.saturation
     }
-
+    
+    /// Get value component.
     pub fn value(&self) -> f32 {
         self.value
     }
-
+    
+    /// Get alpha component.
     pub fn alpha(&self) -> u8 {
         self.alpha
     }
-
+    
+    /// Get 0-1 normalized alpha component.
     pub fn alpha_f32(&self) -> f32 {
         self.alpha as f32 / 255f32
     }
-
+    
+    /// Set hue component.
     pub fn set_hue(&mut self, value: f32) {
         self.hue = value;
     }
+    
+    /// Set saturation component.
     pub fn set_saturation(&mut self, value: f32) {
         self.saturation = value;
     }
+    
+    /// Set value component.
     pub fn set_value(&mut self, value: f32) {
         self.value = value;
     }
-
+    
+    /// Set alpha component.
     pub fn set_alpha(&mut self, value: u8) {
         self.alpha = value;
     }
 
+    /// Set 0-1 normalized alpha component.
+    ///
+    /// This clamps the result if it is not in 0-1 range.
     pub fn set_alpha_f32(&mut self, value: f32) {
         self.alpha = (value * 255f32).round().clamp(0f32, 2550f32) as u8;
     }
@@ -188,7 +206,7 @@ mod tests {
     #[test]
     fn test_hsv_pixel_from_pixel() {
         let cases = vec![
-            //    r,   g,   b,   a,    expected_h, expected_s, expected_v, expected_a
+            // r, g, b, a, expected_h, expected_s, expected_v, expected_a
             (0, 0, 0, 255, 0.0f32, 0.0f32, 0.0f32, 255),
             (0, 0, 0, 128, 0.0f32, 0.0f32, 0.0f32, 128),
             (0, 0, 0, 0, 0.0f32, 0.0f32, 0.0f32, 0),

@@ -5,12 +5,12 @@ edition = "2024"
 
 [dependencies]
 png.workspace = true
-zune-jpeg.workspace = true
 thiserror.workspace = true
 itertools.workspace = true
 bitflags.workspace = true
 paste.workspace = true
 rand.workspace = true
+turbojpeg.workspace = true
 
 [features]
 default = ["parallel"]

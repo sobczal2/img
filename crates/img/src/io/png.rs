@@ -112,11 +112,11 @@ impl ReadPng for Image {
 
 /// Trait for writing png image used in Image struct
 pub trait WritePng {
-    fn write_png(&self, write: impl std::io::Write) -> Result<(), IoError>;
+    fn write_png(&self, write: impl std::io::Write) -> IoResult<()>;
 }
 
 impl WritePng for Image {
-    fn write_png(&self, write: impl std::io::Write) -> Result<(), IoError> {
+    fn write_png(&self, write: impl std::io::Write) -> IoResult<()> {
         let width = self.size().width().get();
         let height = self.size().height().get();
         let mut encoder =

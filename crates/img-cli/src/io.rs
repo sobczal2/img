@@ -6,7 +6,14 @@ use std::{
 use anyhow::bail;
 use img::{
     io::{
-        jpeg::ReadJpeg, png::{ReadPng, WritePng}
+        jpeg::{
+            ReadJpeg,
+            WriteJpeg,
+        },
+        png::{
+            ReadPng,
+            WritePng,
+        },
     },
     prelude::Image,
 };
@@ -20,7 +27,7 @@ pub fn read_image(path: impl AsRef<Path>) -> anyhow::Result<Image> {
     let image = match extension.to_string_lossy().as_ref() {
         "png" => Image::read_png(file)?,
         "jpg" | "jpeg" => Image::read_jpeg(file)?,
-        _ => bail!("Invalid file - supported files are png and jpeg")
+        _ => bail!("Invalid file - supported files are png and jpeg"),
     };
 
     Ok(image)
@@ -35,8 +42,12 @@ pub fn write_image(image: &Image, path: impl AsRef<Path>) -> anyhow::Result<()> 
         "png" => {
             let file = File::create(path)?;
             image.write_png(file)?;
-        },
-        _ => bail!("Invalid file - supported files are png and jpeg")
+        }
+        "jpg" | "jpeg" => {
+            let file = File::create(path)?;
+            image.write_jpeg(file, Default::default(), Default::default())?;
+        }
+        _ => bail!("Invalid file - supported files are png and jpeg"),
     };
 
     Ok(())

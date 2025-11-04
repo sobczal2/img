@@ -1,8 +1,19 @@
 use std::io;
 
-use zune_jpeg::{zune_core::{colorspace::ColorSpace, options::DecoderOptions}, JpegDecoder};
+use thiserror::Error;
 
-use crate::{error::IoResult, image::Image, pixel::Pixel, prelude::Size};
+use crate::{
+    error::{
+        IoError,
+        IoResult,
+    },
+    image::Image,
+    pixel::{
+        PIXEL_SIZE,
+        Pixel,
+    },
+    prelude::Size,
+};
 
 pub trait ReadJpeg
 where
@@ -13,30 +24,110 @@ where
 
 impl ReadJpeg for Image {
     fn read_jpeg(mut read: impl io::Read) -> IoResult<Self> {
-        let mut data = Vec::new();
-        let _ = read.read_to_end(&mut data)?;
-        let options = DecoderOptions::default().jpeg_set_out_colorspace(ColorSpace::RGB);
-        let mut decoder = JpegDecoder::new_with_options(&data, options);
-        let bytes = decoder.decode()?;
-        let image_info = decoder.info().unwrap();
+        let mut jpeg_data = Vec::new();
+        read.read_to_end(&mut jpeg_data)?;
+        let turbojpeg_image = turbojpeg::decompress(&jpeg_data, turbojpeg::PixelFormat::RGBA)
+            .map_err(IoError::JpegDecoding)?;
 
-        let width: usize = image_info.width.into();
-        let height: usize = image_info.height.into();
+        let size =
+            Size::from_usize(turbojpeg_image.width, turbojpeg_image.height).map_err(|_| {
+                IoError::Unsupported(
+                    "Images with width or height zero are not supported".to_string(),
+                )
+            })?;
+        let image = Image::new(
+            size,
+            turbojpeg_image
+                .pixels
+                .chunks(PIXEL_SIZE)
+                .map(|c| Pixel::new(c.try_into().unwrap()))
+                .collect(),
+        )
+        .map_err(|_| IoError::Unexpected("Unexpected value received from turbojpeg".to_string()))?;
 
-        let mut pixels = vec![Pixel::zero(); width * height].into_boxed_slice();
+        Ok(image)
+    }
+}
 
-        for (target_px, source_px) in
-            pixels.iter_mut().zip(bytes.chunks(3))
-        {
-            target_px.set_r(source_px[0]);
-            target_px.set_g(source_px[1]);
-            target_px.set_b(source_px[2]);
-            target_px.set_a(255);
+#[derive(Debug)]
+pub struct JpegQuality(i32);
+
+#[derive(Debug, Error)]
+pub enum JpegQualityCreationError {
+    #[error("Invalid jpeg quality value")]
+    InvalidValue,
+}
+
+pub type JpegQualityCreationResult<T> = std::result::Result<T, JpegQualityCreationError>;
+
+impl JpegQuality {
+    pub fn new(value: i32) -> JpegQualityCreationResult<Self> {
+        if !(0..=100).contains(&value) {
+            return Err(JpegQualityCreationError::InvalidValue);
         }
 
-        let width = width.try_into().expect("invalid width");
-        let height = height.try_into().expect("invalid height");
+        Ok(Self(value))
+    }
+}
 
-        Ok(Image::new(Size::new(width, height), pixels).unwrap())
+impl Default for JpegQuality {
+    fn default() -> Self {
+        Self(75)
+    }
+}
+
+#[derive(Debug, Default)]
+pub enum JpegSubsampling {
+    None,
+    Sub2x1,
+    #[default]
+    Sub2x2,
+    Sub1x2,
+    Sub4x1,
+    Sub1x4,
+}
+
+impl From<JpegSubsampling> for turbojpeg::Subsamp {
+    fn from(value: JpegSubsampling) -> Self {
+        match value {
+            JpegSubsampling::None => turbojpeg::Subsamp::None,
+            JpegSubsampling::Sub2x1 => turbojpeg::Subsamp::Sub2x1,
+            JpegSubsampling::Sub2x2 => turbojpeg::Subsamp::Sub2x2,
+            JpegSubsampling::Sub1x2 => turbojpeg::Subsamp::Sub1x2,
+            JpegSubsampling::Sub4x1 => turbojpeg::Subsamp::Sub4x1,
+            JpegSubsampling::Sub1x4 => turbojpeg::Subsamp::Sub1x4,
+        }
+    }
+}
+
+pub trait WriteJpeg {
+    fn write_jpeg(
+        &self,
+        write: impl io::Write,
+        quality: JpegQuality,
+        subsampling: JpegSubsampling,
+    ) -> IoResult<()>;
+}
+
+impl WriteJpeg for Image {
+    fn write_jpeg(
+        &self,
+        mut write: impl io::Write,
+        quality: JpegQuality,
+        subsampling: JpegSubsampling,
+    ) -> IoResult<()> {
+        let buffer = self.buffer();
+        let turbojpeg_image = turbojpeg::Image::<&[u8]> {
+            pixels: buffer.as_ref(),
+            width: self.size().width().get(),
+            pitch: self.size().width().get() * PIXEL_SIZE,
+            height: self.size().height().get(),
+            format: turbojpeg::PixelFormat::RGBA,
+        };
+
+        let buf = turbojpeg::compress(turbojpeg_image, quality.0, subsampling.into())
+            .map_err(IoError::JpegEncoding)?;
+        write.write_all(buf.as_ref())?;
+        Ok(())
     }
 }

@@ -14,10 +14,13 @@ pub type IndexResult<T> = std::result::Result<T, OutOfBoundsError>;
 /// when reading or writing images
 #[derive(Debug, Error)]
 pub enum IoError {
+    #[cfg(feature = "png")]
     #[error("png decoding error: {0}")]
     PngDecoding(#[from] png::DecodingError),
+    #[cfg(feature = "jpeg")]
     #[error("jpeg decoding error: {0}")]
     JpegDecoding(turbojpeg::Error),
+    #[cfg(feature = "jpeg")]
     #[error("jpeg decoding error: {0}")]
     JpegEncoding(turbojpeg::Error),
     #[error("io error: {0}")]

@@ -4,17 +4,19 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-png.workspace = true
+png = { workspace = true, optional = true }
 thiserror.workspace = true
 itertools.workspace = true
 bitflags.workspace = true
 paste.workspace = true
 rand.workspace = true
-turbojpeg.workspace = true
+turbojpeg = { workspace = true, optional = true }
 
 [features]
-default = ["parallel"]
+default = ["parallel", "jpeg", "png"]
 parallel = []
+jpeg = ["dep:turbojpeg"]
+png = ["dep:png"]
 
 [dev-dependencies]
 criterion.workspace = true

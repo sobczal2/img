@@ -17,6 +17,7 @@ pub use crate::{
         color::{
             gamma_correction,
             grayscale,
+            negative,
             sepia,
         },
         detection::edge::canny,
@@ -43,6 +44,7 @@ pub use crate::operation::{
     color::{
         gamma_correction_par,
         grayscale_par,
+        negative_par,
         sepia_par,
     },
     detection::edge::canny_par,

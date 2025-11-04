@@ -6,6 +6,12 @@ use img::{
         Lens,
         value::ValueLens,
     },
+    operation::color::{
+        gamma_correction_lens,
+        grayscale_lens,
+        negative_lens,
+        sepia_lens,
+    },
     prelude::*,
 };
 use paste::paste;
@@ -143,3 +149,27 @@ fn prepare_overlay_lens(width: usize, height: usize) -> impl Lens<Item = Pixel> 
 }
 
 test_lens!(overlay_lens, prepare_overlay_lens(50, 100), 100);
+
+fn prepare_negative_lens(width: usize, height: usize) -> impl Lens<Item = Pixel> {
+    negative_lens(prepare_test_image(width, height).lens(), ChannelFlags::RGBA)
+}
+
+test_lens!(negative_lens, prepare_negative_lens(50, 100), 100);
+
+fn prepare_sepia_lens(width: usize, height: usize) -> impl Lens<Item = Pixel> {
+    sepia_lens(prepare_test_image(width, height).lens(), ChannelFlags::RGBA)
+}
+
+test_lens!(sepia_lens, prepare_sepia_lens(50, 100), 100);
+
+fn prepare_grayscale_lens(width: usize, height: usize) -> impl Lens<Item = Pixel> {
+    grayscale_lens(prepare_test_image(width, height).lens(), ChannelFlags::RGBA)
+}
+
+test_lens!(grayscale_lens, prepare_grayscale_lens(50, 100), 100);
+
+fn prepare_gamma_correction_lens(width: usize, height: usize) -> impl Lens<Item = Pixel> {
+    gamma_correction_lens(prepare_test_image(width, height).lens(), 1.0, ChannelFlags::RGBA)
+}
+
+test_lens!(gamma_correction_lens, prepare_gamma_correction_lens(50, 100), 100);

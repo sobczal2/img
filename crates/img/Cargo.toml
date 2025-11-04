@@ -67,3 +67,9 @@ harness = false
 name = "kuwahara"
 path = "benches/operation/kuwahara.rs"
 harness = false
+
+[[bench]]
+name = "negative"
+path = "benches/operation/negative.rs"
+harness = false
+

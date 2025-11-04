@@ -139,7 +139,7 @@ mod test {
 
     #[test]
     fn read_png_success() {
-        let data = include_bytes!("../../../assets/sunflower.png");
+        let data = include_bytes!("../../../../assets/sunflower.png");
         Image::read_png(&data[..]).unwrap();
     }
 

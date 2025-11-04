@@ -10,6 +10,7 @@ itertools.workspace = true
 bitflags.workspace = true
 paste.workspace = true
 rand.workspace = true
+turbojpeg.workspace = true
 
 [features]
 default = ["parallel"]

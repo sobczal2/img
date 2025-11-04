@@ -5,10 +5,17 @@ use crate::pixel::hsv::HsvPixel;
 
 pub mod hsv;
 
-// pixel size of an image in bytes
+/// Pixel size of an image in bytes
+///
+/// Currently image is always represented as RGBA image with 8 bits per pixel.
+/// This constant is left here in case this changes in the future.
 pub const PIXEL_SIZE: usize = 4;
 
 bitflags! {
+    /// A `struct` representing image channels.
+    ///
+    /// Some operations suppport this as a parameter to specify which channel should be
+    /// affected.
     #[derive(Clone, Copy, Debug)]
     pub struct ChannelFlags: u8 {
         const RED = 0b1000;
@@ -21,18 +28,24 @@ bitflags! {
     }
 }
 
+/// A `struct` representing RGBA pixel.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Pixel([u8; PIXEL_SIZE]);
 
 impl Pixel {
+    /// Create a [`Pixel`] from given array.
+    ///
+    /// It uses RGBA layout.
     pub const fn new(value: [u8; PIXEL_SIZE]) -> Self {
         Self(value)
     }
 
+    /// Create a [`Pixel`] with zeroed channels.
     pub const fn zero() -> Self {
         Self([0; PIXEL_SIZE])
     }
 
+    /// Create a [`Pixel`] with random channel values.
     pub fn random<R>(rng: &mut R) -> Self
     where
         R: Rng,
@@ -40,50 +53,65 @@ impl Pixel {
         Pixel(rng.random())
     }
 
-    /// get red value
+    /// Get red value.
     pub fn r(&self) -> u8 {
         self.0[0]
     }
 
-    /// get green value
+    /// Get green value.
     pub fn g(&self) -> u8 {
         self.0[1]
     }
 
-    /// get blue value
+    /// Get blue value.
     pub fn b(&self) -> u8 {
         self.0[2]
     }
 
-    /// get alpha value
+    /// Get alpha value.
     pub fn a(&self) -> u8 {
         self.0[3]
     }
 
-    /// set red value
+    /// Set red value.
     pub fn set_r(&mut self, value: u8) {
         self.0[0] = value;
     }
 
-    /// set green value
+    /// Set green value.
     pub fn set_g(&mut self, value: u8) {
         self.0[1] = value;
     }
 
-    /// set blue value
+    /// Set blue value.
     pub fn set_b(&mut self, value: u8) {
         self.0[2] = value;
     }
 
-    /// set alpha value
+    /// Set alpha value.
     pub fn set_a(&mut self, value: u8) {
         self.0[3] = value;
     }
 
-    pub fn buffer(&self) -> &[u8] {
+    /// Get underlying array.
+    pub fn buffer(&self) -> &[u8; PIXEL_SIZE] {
         &self.0
     }
 
+    /// Set [`Pixel`] values ignoring channels not specified in `flags`.
+    ///
+    /// # Examples
+    /// ```
+    /// use img::prelude::*;
+    /// let mut pixel = Pixel::zero();
+    ///
+    /// pixel.set_with_flags(1, 2, 3, 4, ChannelFlags::RED | ChannelFlags::BLUE);
+    ///
+    /// assert_eq!(1, pixel.r());
+    /// assert_eq!(0, pixel.g());
+    /// assert_eq!(3, pixel.b());
+    /// assert_eq!(0, pixel.a());
+    /// ```
     pub fn set_with_flags(&mut self, r: u8, g: u8, b: u8, a: u8, flags: ChannelFlags) {
         if flags.contains(ChannelFlags::RED) {
             self.set_r(r);
@@ -182,91 +210,19 @@ impl From<HsvPixel> for Pixel {
     ///     Pixel,
     ///     hsv::HsvPixel,
     /// };
-    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
-    /// // Black
-    /// assert_eq!(Pixel::from(HsvPixel::new(0.0, 0.0, 0.0, 255).unwrap()), Pixel::new([0, 0, 0, 255]));
-    ///
-    /// // White
-    /// assert_eq!(
-    ///     Pixel::from(HsvPixel::new(0.0, 0.0, 1.0, 255).unwrap()),
-    ///     Pixel::new([255, 255, 255, 255])
-    /// );
-    ///
-    /// // Red
     /// assert_eq!(
     ///     Pixel::from(HsvPixel::new(0.0, 1.0, 1.0, 255).unwrap()),
     ///     Pixel::new([255, 0, 0, 255])
     /// );
-    ///
-    /// // Green
     /// assert_eq!(
     ///     Pixel::from(HsvPixel::new(120.0, 1.0, 1.0, 255).unwrap()),
     ///     Pixel::new([0, 255, 0, 255])
     /// );
-    ///
-    /// // Blue
     /// assert_eq!(
     ///     Pixel::from(HsvPixel::new(240.0, 1.0, 1.0, 255).unwrap()),
     ///     Pixel::new([0, 0, 255, 255])
     /// );
-    ///
-    /// // Yellow
-    /// assert_eq!(
-    ///     Pixel::from(HsvPixel::new(60.0, 1.0, 1.0, 255).unwrap()),
-    ///     Pixel::new([255, 255, 0, 255])
-    /// );
-    ///
-    /// // Cyan
-    /// assert_eq!(
-    ///     Pixel::from(HsvPixel::new(180.0, 1.0, 1.0, 255).unwrap()),
-    ///     Pixel::new([0, 255, 255, 255])
-    /// );
-    ///
-    /// // Magenta
-    /// assert_eq!(
-    ///     Pixel::from(HsvPixel::new(300.0, 1.0, 1.0, 255).unwrap()),
-    ///     Pixel::new([255, 0, 255, 255])
-    /// );
-    ///
-    /// // Gray (50%)
-    /// assert_eq!(
-    ///     Pixel::from(HsvPixel::new(0.0, 0.0, 0.5, 255).unwrap()),
-    ///     Pixel::new([128, 128, 128, 255])
-    /// );
-    ///
-    /// // Dark Red (50% value)
-    /// assert_eq!(
-    ///     Pixel::from(HsvPixel::new(0.0, 1.0, 0.5, 255).unwrap()),
-    ///     Pixel::new([128, 0, 0, 255])
-    /// );
-    ///
-    /// // Light Pink (low saturation red)
-    /// assert_eq!(
-    ///     Pixel::from(HsvPixel::new(0.0, 0.25, 1.0, 255).unwrap()),
-    ///     Pixel::new([255, 191, 191, 255])
-    /// );
-    ///
-    /// // Olive (yellow-green, 50% brightness)
-    /// assert_eq!(
-    ///     Pixel::from(HsvPixel::new(60.0, 1.0, 0.5, 255).unwrap()),
-    ///     Pixel::new([128, 128, 0, 255])
-    /// );
-    ///
-    /// // Teal (cyan-green, 50% brightness)
-    /// assert_eq!(
-    ///     Pixel::from(HsvPixel::new(180.0, 1.0, 0.5, 255).unwrap()),
-    ///     Pixel::new([0, 128, 128, 255])
-    /// );
-    ///
-    /// // Purple (magenta-blue, 50% brightness)
-    /// assert_eq!(
-    ///     Pixel::from(HsvPixel::new(300.0, 1.0, 0.5, 255).unwrap()),
-    ///     Pixel::new([128, 0, 128, 255])
-    /// );
-    ///
-    /// # Ok(())
-    /// # }
     /// ```
     fn from(value: HsvPixel) -> Self {
         let c = value.value() * value.saturation();
@@ -294,5 +250,39 @@ impl From<HsvPixel> for Pixel {
         pixel.set_a(value.alpha());
 
         pixel
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_pixel_from_hsv_pixel() {
+        let cases = vec![
+            // hue, sat, val, alpha, expected [r, g, b, a]
+            (0.0, 0.0, 0.0, 255, [0, 0, 0, 255]),
+            (0.0, 0.0, 0.0, 128, [0, 0, 0, 128]),
+            (0.0, 0.0, 0.0, 0, [0, 0, 0, 0]),
+            (0.0, 0.0, 1.0, 255, [255, 255, 255, 255]),
+            (0.0, 1.0, 1.0, 255, [255, 0, 0, 255]),
+            (120.0, 1.0, 1.0, 255, [0, 255, 0, 255]),
+            (240.0, 1.0, 1.0, 255, [0, 0, 255, 255]),
+            (60.0, 1.0, 1.0, 255, [255, 255, 0, 255]),
+            (180.0, 1.0, 1.0, 255, [0, 255, 255, 255]),
+            (300.0, 1.0, 1.0, 255, [255, 0, 255, 255]),
+            (0.0, 0.0, 0.5, 255, [128, 128, 128, 255]),
+            (0.0, 1.0, 0.5, 255, [128, 0, 0, 255]),
+            (0.0, 0.25, 1.0, 255, [255, 191, 191, 255]),
+            (60.0, 1.0, 0.5, 255, [128, 128, 0, 255]),
+            (180.0, 1.0, 0.5, 255, [0, 128, 128, 255]),
+            (300.0, 1.0, 0.5, 255, [128, 0, 128, 255]),
+        ];
+
+        for (h, s, v, a, expected) in cases {
+            let hsv = HsvPixel::new(h, s, v, a).unwrap();
+            let pixel = Pixel::from(hsv);
+            assert_eq!(pixel, Pixel::new(expected), "Failed for HSV({}, {}, {}, {})", h, s, v, a);
+        }
     }
 }

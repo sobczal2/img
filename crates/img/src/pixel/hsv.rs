@@ -33,11 +33,11 @@ impl HsvPixel {
         }
 
         if !(0f32..=1f32).contains(&saturation) {
-            return Err(CreationError::HueInvalid);
+            return Err(CreationError::SaturationInvalid);
         }
 
         if !(0f32..=1f32).contains(&value) {
-            return Err(CreationError::HueInvalid);
+            return Err(CreationError::ValueInvalid);
         }
 
         Ok(HsvPixel { hue, saturation, value, alpha })
@@ -92,104 +92,31 @@ impl From<Pixel> for HsvPixel {
     ///     Pixel,
     ///     hsv::HsvPixel,
     /// };
-    ///
     /// macro_rules! assert_hsv_pixel_eq {
     ///     ($left:expr, $right:expr) => {
-    ///         assert!(($left.hue() - $right.hue()).abs() < 1e-2);
-    ///         assert!(($left.saturation() - $right.saturation()).abs() < 1e-2);
-    ///         assert!(($left.value() - $right.value()).abs() < 1e-2);
-    ///         assert_eq!($left.alpha(), $right.alpha());
+    ///         assert!(($left.hue() - $right.hue()).abs() < 1e-2,
+    ///             "hue: expected {}, got {}", $right.hue(), $left.hue());
+    ///         assert!(($left.saturation() - $right.saturation()).abs() < 1e-2,
+    ///             "saturation: expected {}, got {}", $right.saturation(), $left.saturation());
+    ///         assert!(($left.value() - $right.value()).abs() < 1e-2,
+    ///             "value: expected {}, got {}", $right.value(), $left.value());
+    ///         assert_eq!($left.alpha(), $right.alpha(),
+    ///             "alpha: expected {}, got {}", $right.alpha(), $left.alpha());
     ///     };
     /// }
     ///
-    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///
-    /// // Black
     /// assert_hsv_pixel_eq!(
-    ///     HsvPixel::new(0.0, 0.0, 0.0, 255).unwrap(),
-    ///     HsvPixel::from(Pixel::new([0, 0, 0, 255]))
+    ///     HsvPixel::from(Pixel::new([255, 0, 0, 255])),
+    ///     HsvPixel::new(0.0, 1.0, 1.0, 255).unwrap()
     /// );
-    ///
-    /// // White
     /// assert_hsv_pixel_eq!(
-    ///     HsvPixel::new(0.0, 0.0, 1.0, 255).unwrap(),
-    ///     HsvPixel::from(Pixel::new([255, 255, 255, 255]))
+    ///     HsvPixel::from(Pixel::new([0, 255, 0, 255])),
+    ///     HsvPixel::new(120.0, 1.0, 1.0, 255).unwrap()
     /// );
-    ///
-    /// // Red
     /// assert_hsv_pixel_eq!(
-    ///     HsvPixel::new(0.0, 1.0, 1.0, 255).unwrap(),
-    ///     HsvPixel::from(Pixel::new([255, 0, 0, 255]))
+    ///     HsvPixel::from(Pixel::new([0, 0, 255, 255])),
+    ///     HsvPixel::new(240.0, 1.0, 1.0, 255).unwrap()
     /// );
-    ///
-    /// // Green
-    /// assert_hsv_pixel_eq!(
-    ///     HsvPixel::new(120.0, 1.0, 1.0, 255).unwrap(),
-    ///     HsvPixel::from(Pixel::new([0, 255, 0, 255]))
-    /// );
-    ///
-    /// // Blue
-    /// assert_hsv_pixel_eq!(
-    ///     HsvPixel::new(240.0, 1.0, 1.0, 255).unwrap(),
-    ///     HsvPixel::from(Pixel::new([0, 0, 255, 255]))
-    /// );
-    ///
-    /// // Yellow
-    /// assert_hsv_pixel_eq!(
-    ///     HsvPixel::new(60.0, 1.0, 1.0, 255).unwrap(),
-    ///     HsvPixel::from(Pixel::new([255, 255, 0, 255]))
-    /// );
-    ///
-    /// // Cyan
-    /// assert_hsv_pixel_eq!(
-    ///     HsvPixel::new(180.0, 1.0, 1.0, 255).unwrap(),
-    ///     HsvPixel::from(Pixel::new([0, 255, 255, 255]))
-    /// );
-    ///
-    /// // Magenta
-    /// assert_hsv_pixel_eq!(
-    ///     HsvPixel::new(300.0, 1.0, 1.0, 255).unwrap(),
-    ///     HsvPixel::from(Pixel::new([255, 0, 255, 255]))
-    /// );
-    ///
-    /// // Gray (50%)
-    /// assert_hsv_pixel_eq!(
-    ///     HsvPixel::new(0.0, 0.0, 0.5, 255).unwrap(),
-    ///     HsvPixel::from(Pixel::new([128, 128, 128, 255]))
-    /// );
-    ///
-    /// // Dark Red (50% value)
-    /// assert_hsv_pixel_eq!(
-    ///     HsvPixel::new(0.0, 1.0, 0.5, 255).unwrap(),
-    ///     HsvPixel::from(Pixel::new([128, 0, 0, 255]))
-    /// );
-    ///
-    /// // Light Pink (low saturation red)
-    /// assert_hsv_pixel_eq!(
-    ///     HsvPixel::new(0.0, 0.25, 1.0, 255).unwrap(),
-    ///     HsvPixel::from(Pixel::new([255, 191, 191, 255]))
-    /// );
-    ///
-    /// // Olive (yellow-green, 50% brightness)
-    /// assert_hsv_pixel_eq!(
-    ///     HsvPixel::new(60.0, 1.0, 0.5, 255).unwrap(),
-    ///     HsvPixel::from(Pixel::new([128, 128, 0, 255]))
-    /// );
-    ///
-    /// // Teal (cyan-green, 50% brightness)
-    /// assert_hsv_pixel_eq!(
-    ///     HsvPixel::new(180.0, 1.0, 0.5, 255).unwrap(),
-    ///     HsvPixel::from(Pixel::new([0, 128, 128, 255]))
-    /// );
-    ///
-    /// // Purple (magenta-blue, 50% brightness)
-    /// assert_hsv_pixel_eq!(
-    ///     HsvPixel::new(300.0, 1.0, 0.5, 255).unwrap(),
-    ///     HsvPixel::from(Pixel::new([128, 0, 128, 255]))
-    /// );
-    ///
-    /// # Ok(())
-    /// # }
     /// ```
     fn from(value: Pixel) -> Self {
         let r = value.r_f32();
@@ -220,5 +147,71 @@ impl From<Pixel> for HsvPixel {
         let value = cmax;
 
         Self { hue, saturation, value, alpha: a }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::pixel::Pixel;
+
+    macro_rules! assert_hsv_pixel_eq {
+        ($left:expr, $right:expr) => {
+            assert!(
+                ($left.hue() - $right.hue()).abs() < 1e-2,
+                "hue: expected {}, got {}",
+                $right.hue(),
+                $left.hue()
+            );
+            assert!(
+                ($left.saturation() - $right.saturation()).abs() < 1e-2,
+                "saturation: expected {}, got {}",
+                $right.saturation(),
+                $left.saturation()
+            );
+            assert!(
+                ($left.value() - $right.value()).abs() < 1e-2,
+                "value: expected {}, got {}",
+                $right.value(),
+                $left.value()
+            );
+            assert_eq!(
+                $left.alpha(),
+                $right.alpha(),
+                "alpha: expected {}, got {}",
+                $right.alpha(),
+                $left.alpha()
+            );
+        };
+    }
+
+    #[test]
+    fn test_hsv_pixel_from_pixel() {
+        let cases = vec![
+            //    r,   g,   b,   a,    expected_h, expected_s, expected_v, expected_a
+            (0, 0, 0, 255, 0.0f32, 0.0f32, 0.0f32, 255),
+            (0, 0, 0, 128, 0.0f32, 0.0f32, 0.0f32, 128),
+            (0, 0, 0, 0, 0.0f32, 0.0f32, 0.0f32, 0),
+            (255, 255, 255, 255, 0.0f32, 0.0f32, 1.0f32, 255),
+            (255, 0, 0, 255, 0.0f32, 1.0f32, 1.0f32, 255),
+            (0, 255, 0, 255, 120.0f32, 1.0f32, 1.0f32, 255),
+            (0, 0, 255, 255, 240.0f32, 1.0f32, 1.0f32, 255),
+            (255, 255, 0, 255, 60.0f32, 1.0f32, 1.0f32, 255),
+            (0, 255, 255, 255, 180.0f32, 1.0f32, 1.0f32, 255),
+            (255, 0, 255, 255, 300.0f32, 1.0f32, 1.0f32, 255),
+            (128, 128, 128, 255, 0.0f32, 0.0f32, 0.5f32, 255),
+            (128, 0, 0, 255, 0.0f32, 1.0f32, 0.5f32, 255),
+            (255, 191, 191, 255, 0.0f32, 0.25f32, 1.0f32, 255),
+            (128, 128, 0, 255, 60.0f32, 1.0f32, 0.5f32, 255),
+            (0, 128, 128, 255, 180.0f32, 1.0f32, 0.5f32, 255),
+            (128, 0, 128, 255, 300.0f32, 1.0f32, 0.5f32, 255),
+        ];
+
+        for (r, g, b, a, exp_h, exp_s, exp_v, exp_a) in cases {
+            let pixel = Pixel::new([r, g, b, a]);
+            let hsv = HsvPixel::from(pixel);
+            let expected_hsv = HsvPixel::new(exp_h, exp_s, exp_v, exp_a).unwrap();
+            assert_hsv_pixel_eq!(hsv, expected_hsv);
+        }
     }
 }

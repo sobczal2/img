@@ -13,6 +13,7 @@ use crate::{
     },
 };
 
+/// Create a [`Lens`] that applies negative filter.
 pub fn negative_lens<S>(source: S, flags: ChannelFlags) -> impl Lens<Item = Pixel>
 where
     S: Lens,
@@ -21,11 +22,13 @@ where
     source.map(move |px| map_px(px, flags))
 }
 
+/// Apply negative filter to an image.
 pub fn negative(image: &Image, flags: ChannelFlags) -> Image {
     let lens = negative_lens(image.lens(), flags);
     Image::from_lens(lens)
 }
 
+/// Apply negative filter to an image in parallel.
 #[cfg(feature = "parallel")]
 pub fn negative_par(image: &Image, threads: NonZeroUsize, flags: ChannelFlags) -> Image {
     use crate::lens::FromLensPar;

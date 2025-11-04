@@ -22,6 +22,7 @@ use crate::cmd::{
     blur,
     canny,
     kuwahara,
+    negative,
 };
 
 fn main() {
@@ -34,7 +35,8 @@ fn main() {
         .subcommand(blur::subcommand())
         .subcommand(gamma_correction::subcommand())
         .subcommand(canny::subcommand())
-        .subcommand(kuwahara::subcommand());
+        .subcommand(kuwahara::subcommand())
+        .subcommand(negative::subcommand());
 
     if let Err(e) = execute_command(command) {
         print_error(e.to_string());
@@ -53,6 +55,7 @@ fn execute_command(command: Command) -> anyhow::Result<()> {
         (gamma_correction::CMD_NAME, m) => gamma_correction::action(m),
         (canny::CMD_NAME, m) => canny::action(m),
         (kuwahara::CMD_NAME, m) => kuwahara::action(m),
+        (negative::CMD_NAME, m) => negative::action(m),
         _ => unreachable!(),
     }
 }

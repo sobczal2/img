@@ -4,5 +4,6 @@ pub mod crop;
 pub mod gamma_correction;
 pub mod grayscale;
 pub mod kuwahara;
+pub mod negative;
 pub mod resize;
 pub mod sepia;

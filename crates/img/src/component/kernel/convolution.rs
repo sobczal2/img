@@ -113,13 +113,13 @@ where
     }
 
     fn margin(&self) -> Margin {
-        let (left, right) = if self.size.width().get() % 2 == 0 {
+        let (left, right) = if self.size.width().get().is_multiple_of(2) {
             (self.size.width().get() / 2, self.size.width().get() / 2 - 1)
         } else {
             (self.size.width().get() / 2, self.size.width().get() / 2)
         };
 
-        let (top, bottom) = if self.size.height().get() % 2 == 0 {
+        let (top, bottom) = if self.size.height().get().is_multiple_of(2) {
             (self.size.height().get() / 2, self.size.height().get() / 2 - 1)
         } else {
             (self.size.height().get() / 2, self.size.height().get() / 2)

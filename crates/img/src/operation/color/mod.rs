@@ -1,5 +1,6 @@
 mod gamma_correction;
 mod grayscale;
+mod negative;
 mod sepia;
 
 pub use gamma_correction::{
@@ -10,6 +11,10 @@ pub use grayscale::{
     grayscale,
     grayscale_lens,
 };
+pub use negative::{
+    negative,
+    negative_lens,
+};
 pub use sepia::{
     sepia,
     sepia_lens,
@@ -19,5 +24,6 @@ pub use sepia::{
 pub use self::{
     gamma_correction::gamma_correction_par,
     grayscale::grayscale_par,
+    negative::negative_par,
     sepia::sepia_par,
 };

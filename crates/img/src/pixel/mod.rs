@@ -53,42 +53,42 @@ impl Pixel {
         Pixel(rng.random())
     }
 
-    /// Get red value.
+    /// Get red component.
     pub fn r(&self) -> u8 {
         self.0[0]
     }
 
-    /// Get green value.
+    /// Get green component.
     pub fn g(&self) -> u8 {
         self.0[1]
     }
 
-    /// Get blue value.
+    /// Get blue component.
     pub fn b(&self) -> u8 {
         self.0[2]
     }
 
-    /// Get alpha value.
+    /// Get alpha component.
     pub fn a(&self) -> u8 {
         self.0[3]
     }
 
-    /// Set red value.
+    /// Set red component.
     pub fn set_r(&mut self, value: u8) {
         self.0[0] = value;
     }
 
-    /// Set green value.
+    /// Set green component.
     pub fn set_g(&mut self, value: u8) {
         self.0[1] = value;
     }
 
-    /// Set blue value.
+    /// Set blue component.
     pub fn set_b(&mut self, value: u8) {
         self.0[2] = value;
     }
 
-    /// Set alpha value.
+    /// Set alpha component.
     pub fn set_a(&mut self, value: u8) {
         self.0[3] = value;
     }
@@ -132,10 +132,19 @@ impl Pixel {
 }
 
 pub trait PixelRgbaf32 {
+    /// Get 0-1 normalized red component.
     fn r_f32(&self) -> f32;
+
+    /// Get 0-1 normalized green component.
     fn g_f32(&self) -> f32;
+
+    /// Get 0-1 normalized blue component.
     fn b_f32(&self) -> f32;
+
+    /// Get 0-1 normalized alpha component.
     fn a_f32(&self) -> f32;
+
+
     fn set_r_f32(&mut self, value: f32);
     fn set_g_f32(&mut self, value: f32);
     fn set_b_f32(&mut self, value: f32);
@@ -144,37 +153,68 @@ pub trait PixelRgbaf32 {
 }
 
 impl PixelRgbaf32 for Pixel {
+    /// Get 0-1 normalized red component.
     fn r_f32(&self) -> f32 {
         self.r() as f32 / 255.0
     }
-
+    
+    /// Get 0-1 normalized green component.
     fn g_f32(&self) -> f32 {
         self.g() as f32 / 255.0
     }
-
+    
+    /// Get 0-1 normalized blue component.
     fn b_f32(&self) -> f32 {
         self.b() as f32 / 255.0
     }
-
+    
+    /// Get 0-1 normalized alpha component.
     fn a_f32(&self) -> f32 {
         self.a() as f32 / 255.0
     }
+
+    /// Set 0-1 normalized red component.
+    ///
+    /// This clamps the result if it is not in 0-1 range.
     fn set_r_f32(&mut self, value: f32) {
         self.set_r((value * 255.0).round().clamp(0f32, 255f32) as u8);
     }
 
+    /// Set 0-1 normalized green component.
+    ///
+    /// This clamps the result if it is not in 0-1 range.
     fn set_g_f32(&mut self, value: f32) {
         self.set_g((value * 255.0).round().clamp(0f32, 255f32) as u8);
     }
 
+    /// Set 0-1 normalized alpha component.
+    ///
+    /// This clamps the result if it is not in 0-1 range.
     fn set_b_f32(&mut self, value: f32) {
         self.set_b((value * 255.0).round().clamp(0f32, 255f32) as u8);
     }
 
+    /// Set 0-1 normalized alpha component.
+    ///
+    /// This clamps the result if it is not in 0-1 range.
     fn set_a_f32(&mut self, value: f32) {
         self.set_a((value * 255.0).round().clamp(0f32, 255f32) as u8);
     }
 
+    /// Set [`Pixel`] values ignoring channels not specified in `flags`.
+    ///
+    /// # Examples
+    /// ```
+    /// use img::prelude::*;
+    /// let mut pixel = Pixel::zero();
+    ///
+    /// pixel.set_with_flags_f32(0.1, 0.2, 0.3, 0.4, ChannelFlags::RED | ChannelFlags::BLUE);
+    ///
+    /// assert_eq!(0.1f32, pixel.r_f32());
+    /// assert_eq!(0f32, pixel.g_f32());
+    /// assert_eq!(0.3f32, pixel.b_f32());
+    /// assert_eq!(0f32, pixel.a_f32());
+    /// ```
     fn set_with_flags_f32(&mut self, r: f32, g: f32, b: f32, a: f32, flags: ChannelFlags) {
         if flags.contains(ChannelFlags::RED) {
             self.set_r_f32(r);

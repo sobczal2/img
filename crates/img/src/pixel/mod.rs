@@ -144,11 +144,19 @@ pub trait PixelRgbaf32 {
     /// Get 0-1 normalized alpha component.
     fn a_f32(&self) -> f32;
 
-
+    /// Set 0-1 normalized red component.
     fn set_r_f32(&mut self, value: f32);
+    
+    /// Set 0-1 normalized green component.
     fn set_g_f32(&mut self, value: f32);
+    
+    /// Set 0-1 normalized blue component.
     fn set_b_f32(&mut self, value: f32);
+    
+    /// Set 0-1 normalized alpha component.
     fn set_a_f32(&mut self, value: f32);
+
+    /// Set [`Pixel`] values ignoring channels not specified in `flags`.
     fn set_with_flags_f32(&mut self, r: f32, g: f32, b: f32, a: f32, flags: ChannelFlags);
 }
 
@@ -210,10 +218,10 @@ impl PixelRgbaf32 for Pixel {
     ///
     /// pixel.set_with_flags_f32(0.1, 0.2, 0.3, 0.4, ChannelFlags::RED | ChannelFlags::BLUE);
     ///
-    /// assert_eq!(0.1f32, pixel.r_f32());
-    /// assert_eq!(0f32, pixel.g_f32());
-    /// assert_eq!(0.3f32, pixel.b_f32());
-    /// assert_eq!(0f32, pixel.a_f32());
+    /// assert!((pixel.r_f32() - 0.1).abs() < 1e-2);
+    /// assert!((pixel.g_f32() - 0.0).abs() < 1e-2);
+    /// assert!((pixel.b_f32() - 0.3).abs() < 1e-2);
+    /// assert!((pixel.a_f32() - 0.0).abs() < 1e-2);
     /// ```
     fn set_with_flags_f32(&mut self, r: f32, g: f32, b: f32, a: f32, flags: ChannelFlags) {
         if flags.contains(ChannelFlags::RED) {

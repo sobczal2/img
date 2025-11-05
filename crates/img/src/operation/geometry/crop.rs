@@ -63,7 +63,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn successful() {
+    fn test_crop_with_valid_margins() {
         let image = Image::random(Size::from_usize(10, 20).unwrap(), &mut StdRng::from_seed([7u8; 32]));
 
         let equal = crop(&image, Margin::new(0, 0, 0, 0));
@@ -80,7 +80,7 @@ mod tests {
     }
 
     #[test]
-    fn fail() {
+    fn test_crop_with_invalid_margins() {
         let image = Image::random(Size::from_usize(10, 20).unwrap(), &mut StdRng::from_seed([7u8; 32]));
 
         let shrinked_horizontal = crop(&image, Margin::new(0, 5, 0, 5));

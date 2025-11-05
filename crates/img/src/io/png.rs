@@ -138,19 +138,19 @@ mod test {
     };
 
     #[test]
-    fn read_png_success() {
+    fn test_read_png_success() {
         let data = include_bytes!("../../../../assets/sunflower.png");
         Image::read_png(&data[..]).unwrap();
     }
 
     #[test]
-    fn write_png_success() {
+    fn test_write_png_success() {
         let data = Vec::new();
         Image::empty(Size::from_usize(10, 10).unwrap()).write_png(data).unwrap();
     }
 
     #[test]
-    fn write_read_same_image() {
+    fn test_write_read_same_image() {
         let mut image = Image::empty(Size::from_usize(2, 2).unwrap());
         image.pixel_mut(Point::new(0, 0)).unwrap().set_r(1);
         image.pixel_mut(Point::new(0, 1)).unwrap().set_r(1);

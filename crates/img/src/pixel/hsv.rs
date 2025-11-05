@@ -221,7 +221,7 @@ mod tests {
     }
 
     #[test]
-    fn hsv_pixel_from_pixel() {
+    fn test_hsv_pixel_from_pixel() {
         let cases = vec![
             // r, g, b, a, expected_h, expected_s, expected_v, expected_a
             (0, 0, 0, 255, 0.0f32, 0.0f32, 0.0f32, 255),

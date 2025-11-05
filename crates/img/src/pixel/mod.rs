@@ -306,7 +306,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn pixel_from_hsv_pixel() {
+    fn test_pixel_from_hsv_pixel() {
         let cases = vec![
             // hue, sat, val, alpha, expected [r, g, b, a]
             (0.0, 0.0, 0.0, 255, [0, 0, 0, 255]),

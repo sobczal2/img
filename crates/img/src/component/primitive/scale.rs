@@ -173,7 +173,7 @@ impl Scale {
         let new_x = point.x() as f32 * self.0;
         let new_y = point.y() as f32 * self.1;
 
-        Point::new(new_x.round() as usize, new_y.round() as usize)
+        Point::new(new_x.floor() as usize, new_y.floor() as usize)
     }
 }
 

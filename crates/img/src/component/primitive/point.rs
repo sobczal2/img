@@ -10,8 +10,7 @@ use super::{
     Size,
 };
 use crate::error::{
-    IndexResult,
-    OutOfBoundsError,
+    IndexError, IndexResult
 };
 
 #[derive(Debug, Error, PartialEq, Eq)]
@@ -95,7 +94,7 @@ impl Point {
     pub fn from_index(index: usize, size: Size) -> IndexResult<Self> {
         let point = Point::new(index % size.width(), index / size.width());
         if !size.contains(&point) {
-            return Err(OutOfBoundsError);
+            return Err(IndexError::OutOfBounds);
         }
 
         Ok(Point::new(index % size.width(), index / size.width()))
@@ -142,7 +141,7 @@ impl Point {
     /// ```
     pub fn index(&self, size: Size) -> IndexResult<usize> {
         if !size.contains(self) {
-            return Err(OutOfBoundsError);
+            return Err(IndexError::OutOfBounds);
         }
         Ok(self.y * size.width().get() + self.x)
     }

@@ -9,8 +9,7 @@ use crate::{
         },
     },
     error::{
-        IndexResult,
-        OutOfBoundsError,
+        IndexError, IndexResult
     },
     lens::Lens,
 };
@@ -50,7 +49,7 @@ impl Kernel<u8, Gradient> for SobelKernel {
         P: Lens<Item = u8>,
     {
         if !in_bounds(lens.size(), point) {
-            return Err(OutOfBoundsError);
+            return Err(IndexError::OutOfBounds);
         }
 
         // SAFETY: iterator is never empty so reduce always returns `Some`.

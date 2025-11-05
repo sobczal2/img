@@ -5,10 +5,12 @@ use thiserror::Error;
 /// Out of bounds error, may occur when trying
 /// to access image pixel by index
 #[derive(Debug, Error, PartialEq, Eq)]
-#[error("out of bounds")]
-pub struct OutOfBoundsError;
+pub enum IndexError {
+    #[error("out of bounds")]
+    OutOfBounds,
+}
 
-pub type IndexResult<T> = std::result::Result<T, OutOfBoundsError>;
+pub type IndexResult<T> = std::result::Result<T, IndexError>;
 
 /// Enum to facilitate different kinds of errors that may occur
 /// when reading or writing images

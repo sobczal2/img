@@ -53,7 +53,7 @@ pub fn resize_par(
 
 #[cfg(test)]
 mod tests {
-    use rand::{rngs::StdRng, SeedableRng};
+    use rand::{rngs::SmallRng, SeedableRng};
 
     use crate::prelude::Size;
 
@@ -61,7 +61,7 @@ mod tests {
 
     #[test]
     fn test_resize_with_different_scales() {
-        let image = Image::random(Size::from_usize(10, 20).unwrap(), &mut StdRng::from_seed([7u8; 32]));
+        let image = Image::random(Size::from_usize(10, 20).unwrap(), &mut SmallRng::seed_from_u64(0));
 
         let smaller = resize(&image, Scale::new(0.5, 0.5).unwrap());
         assert!(smaller.is_ok());

@@ -13,8 +13,7 @@ use crate::{
         },
     },
     error::{
-        IndexResult,
-        OutOfBoundsError,
+        IndexError, IndexResult
     },
     lens::Lens,
     pixel::{
@@ -80,7 +79,7 @@ where
         .expect("failed to create working area, this is either lens or kernel bug");
 
         if !working_area.contains(&point) {
-            return Err(OutOfBoundsError);
+            return Err(IndexError::OutOfBounds);
         }
 
         let center = self.size.middle();

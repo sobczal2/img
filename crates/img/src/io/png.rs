@@ -89,10 +89,8 @@ impl ReadPng for Image {
 
         let bytes = &buf[..info.buffer_size()];
 
-        // SAFETY: width is never negative.
+        // TODO: Fix after introducing DIMENSION_MAX
         let width: usize = info.width.try_into().unwrap();
-
-        // SAFETY: height is never negative.
         let height: usize = info.height.try_into().unwrap();
 
         let mut pixels = vec![Pixel::zero(); width * height].into_boxed_slice();

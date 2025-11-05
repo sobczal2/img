@@ -53,6 +53,7 @@ impl Kernel<u8, Gradient> for SobelKernel {
             return Err(OutOfBoundsError);
         }
 
+        // SAFETY: iterator is never empty so reduce always returns `Some`.
         let (g_x, g_y) = SOBEL_X
             .iter()
             .zip(SOBEL_Y)

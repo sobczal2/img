@@ -88,6 +88,9 @@ impl From<ChannelFlags> for img::prelude::ChannelFlags {
             img::prelude::ChannelFlags::empty()
         };
 
+        // SAFETY: `ChannelFlags::from_bits` only returns `Err` if the bits value
+        // can't be represented, but here all values that it is constructed from
+        // are valid.
         img::prelude::ChannelFlags::from_bits(
             red.bits() + green.bits() + blue.bits() + alpha.bits(),
         )

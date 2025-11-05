@@ -48,6 +48,7 @@ where
             return Err(CreationError::KernelTooBigY);
         }
 
+        // SAFETY: margin is guaranted to be valid thanks to above checks.
         let size = source.size().apply_margin(kernel.margin()).unwrap();
 
         Ok(Self { source, kernel, size, margin, _phantom_data: Default::default() })

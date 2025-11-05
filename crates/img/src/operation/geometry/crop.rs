@@ -25,6 +25,9 @@ where
 
     Ok(source.remap(
         move |lens, point| {
+            // SAFETY: translate returns Err only if resulting offset is negative,
+            // here offset we apply has always positive values, so the resulting
+            // offset will also always be positive.
             let original_point = point
                 .translate(Offset::new(margin.left() as isize, margin.top() as isize))
                 .unwrap();

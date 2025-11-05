@@ -53,6 +53,8 @@ impl GaussianKernel {
         values
             .iter_mut()
             .enumerate()
+            // SAFETY: we construct the index from the area of size passed to the
+            // index creation, so it is always in bounds.
             .map(|(index, value)| (Point::from_index(index, size).unwrap(), value))
             .for_each(|(point, value)| *value = gaussian_fn(point - center, sigma));
 

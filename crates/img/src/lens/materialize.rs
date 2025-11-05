@@ -55,7 +55,11 @@ impl<T> MaterializeLens<T> {
                 scope.spawn(move || {
                     let starting_index = index * chunk_size;
                     chunk.iter_mut().enumerate().for_each(|(index, value)| {
+                        // SAFETY: all starting_index + index will be in bounds since it enumerates
+                        // over the lens that it is indexing.
                         let point = Point::from_index(starting_index + index, size).unwrap();
+                        // SAFETY: `Lens::look` is guaranteed to return Ok if point is in bounds,
+                        // and point is guaranted to be in bounds because of the check above.
                         *value = Some(source.look(point).unwrap());
                     });
                 });
@@ -80,6 +84,9 @@ where
 
     fn look(&self, point: Point) -> IndexResult<Self::Item> {
         let index = point.index(self.size)?;
+
+        // SAFETY: index is guaranteed to be valid thanks to the check above, and value
+        // has to be initialized since it went through constructor.
         Ok(self.values[index].clone().unwrap())
     }
 

@@ -60,7 +60,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn succesful() {
+    fn successful() {
         let image = Image::random(Size::from_usize(10, 20).unwrap(), &mut StdRng::from_seed([7u8; 32]));
 
         let smaller = resize(&image, Scale::new(0.5, 0.5).unwrap());

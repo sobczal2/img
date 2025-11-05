@@ -112,8 +112,7 @@ impl Scale {
     }
 
     /// Applies the scale transformation to a [`Size`], returning a new scaled [`Size`].
-    /// Rounds results to the nearest integer or further from zero if value is in the
-    /// middle.
+    /// Rounds results to value closer to zero.
     ///
     /// Returns scaled [`Size`] or [`CreationError`] if resulting Size would not
     /// be valid.
@@ -141,12 +140,11 @@ impl Scale {
         let new_width: f32 = size.width().get() as f32 * self.0;
         let new_height: f32 = size.height().get() as f32 * self.1;
 
-        Size::from_usize(new_width.round() as usize, new_height.round() as usize)
+        Size::from_usize(new_width.floor() as usize, new_height.floor() as usize)
     }
 
     /// Transform the point to scaled coordinate space.
-    /// Rounds results to the nearest integer or further from zero if value is in the
-    /// middle.
+    /// Rounds results to value closer to zero.
     ///
     /// Returns scaled [`Point`].
     ///

@@ -4,8 +4,7 @@ use crate::{
         Size,
     },
     error::{
-        IndexResult,
-        OutOfBoundsError,
+        IndexError, IndexResult
     },
     lens::Lens,
 };
@@ -32,7 +31,7 @@ where
             return Ok(self.value.clone());
         }
 
-        Err(OutOfBoundsError)
+        Err(IndexError::OutOfBounds)
     }
 
     fn size(&self) -> Size {

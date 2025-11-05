@@ -89,7 +89,10 @@ impl ReadPng for Image {
 
         let bytes = &buf[..info.buffer_size()];
 
+        // SAFETY: width is never negative.
         let width: usize = info.width.try_into().unwrap();
+
+        // SAFETY: height is never negative.
         let height: usize = info.height.try_into().unwrap();
 
         let mut pixels = vec![Pixel::zero(); width * height].into_boxed_slice();
@@ -103,10 +106,18 @@ impl ReadPng for Image {
             target_px.set_a(get_alpha(source_px, info.color_type));
         }
 
-        let width = width.try_into().expect("invalid width");
-        let height = height.try_into().expect("invalid height");
+        let width = width.try_into().map_err(|_|
+                IoError::Unsupported(
+                    "Images with width or height zero are not supported".to_string(),
+                )
+        )?;
+        let height = height.try_into().map_err(|_|
+                IoError::Unsupported(
+                    "Images with width or height zero are not supported".to_string(),
+                )
+        )?;
 
-        Ok(Image::new(Size::new(width, height), pixels).unwrap())
+        Image::new(Size::new(width, height), pixels).map_err(|_| IoError::Unexpected("png returned not valid data".to_string()))
     }
 }
 
@@ -119,12 +130,13 @@ impl WritePng for Image {
     fn write_png(&self, write: impl std::io::Write) -> IoResult<()> {
         let width = self.size().width().get();
         let height = self.size().height().get();
+        // TODO: Fix after introducing DIMENSION_MAX
         let mut encoder =
             png::Encoder::new(write, width.try_into().unwrap(), height.try_into().unwrap());
         encoder.set_color(png::ColorType::Rgba);
         encoder.set_depth(png::BitDepth::Eight);
-        let mut writer = encoder.write_header().unwrap();
-        writer.write_image_data(self.buffer().as_ref()).unwrap();
+        let mut writer = encoder.write_header().map_err(|_| IoError::Unexpected("failed to write png header".to_string()))?;
+        writer.write_image_data(self.buffer().as_ref()).map_err(|_| IoError::Unexpected("failed to write png image data".to_string()))?;
         Ok(())
     }
 }

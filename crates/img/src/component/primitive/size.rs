@@ -235,6 +235,8 @@ impl Size {
         let width = self.width().get() - margin.left() - margin.right();
         let height = self.height().get() - margin.top() - margin.bottom();
 
+        // SAFETY: width and height are guaranted to be positive after checks
+        // above.
         Ok(Size::from_usize(width, height).unwrap())
     }
 }
@@ -307,7 +309,8 @@ impl Add<Margin> for Size {
     type Output = Size;
 
     fn add(self, rhs: Margin) -> Self::Output {
-        // UNWRAP: `Size::from_usize` fails only if either dimension is 0
+        // SAFETY: `Size::from_usize` fails only if either dimension is 0, which can't be the
+        // case for already existing `Size`.
         Size::from_usize(
             self.width().get() + rhs.left() + rhs.right(),
             self.height().get() + rhs.top() + rhs.bottom(),

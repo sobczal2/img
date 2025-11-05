@@ -96,16 +96,25 @@ impl Area {
 
     /// Get [`Area`]'s top left point.
     pub fn top_right(&self) -> Point {
+        // SAFETY: translate returns Err only if resulting offset is negative,
+        // here offset we apply has always positive values, so the resulting
+        // offset will also always be positive.
         self.top_left.translate(Offset::new(self.size.width().get() as isize, 0)).unwrap()
     }
 
     /// Get [`Area`]'s top left point.
     pub fn bottom_left(&self) -> Point {
+        // SAFETY: translate returns Err only if resulting offset is negative,
+        // here offset we apply has always positive values, so the resulting
+        // offset will also always be positive.
         self.top_left.translate(Offset::new(0, self.size.height().get() as isize)).unwrap()
     }
 
     /// Get [`Area`]'s top left point.
     pub fn bottom_right(&self) -> Point {
+        // SAFETY: translate returns Err only if resulting offset is negative,
+        // here offset we apply has always positive values, so the resulting
+        // offset will also always be positive.
         self.top_left
             .translate(Offset::new(
                 self.size.width().get() as isize,

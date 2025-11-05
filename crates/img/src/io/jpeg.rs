@@ -40,6 +40,8 @@ impl ReadJpeg for Image {
             turbojpeg_image
                 .pixels
                 .chunks(PIXEL_SIZE)
+                // SAFETY: chunks are of size PIXEL_SIZE, which is the same
+                // as Pixel::new expects.
                 .map(|c| Pixel::new(c.try_into().unwrap()))
                 .collect(),
         )

@@ -64,7 +64,7 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     }
 
     if old_size.height() < new_size.height() + offset.height {
-        bail!("offset too big for given width")
+        bail!("offset too big for given height")
     }
 
     let margin = Margin::new(

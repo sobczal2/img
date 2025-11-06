@@ -11,7 +11,7 @@ pub struct Margin {
     left: usize,
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 #[allow(clippy::enum_variant_names)]
 pub enum MarginCreationError {
     #[error("top too big")]
@@ -109,5 +109,35 @@ mod tests {
         assert!(Margin::new(0, DIMENSION_MAX, 0, 0).is_ok());
         assert!(Margin::new(0, 0, DIMENSION_MAX, 0).is_ok());
         assert!(Margin::new(0, 0, 0, DIMENSION_MAX).is_ok());
+    }
+
+
+    #[test]
+    fn test_new_err() {
+        assert_eq!(Margin::new(DIMENSION_MAX + 1, 0, 0, 0).unwrap_err(), MarginCreationError::TopTooBig);
+        assert_eq!(Margin::new(0, DIMENSION_MAX + 1, 0, 0).unwrap_err(), MarginCreationError::RightTooBig);
+        assert_eq!(Margin::new(0, 0, DIMENSION_MAX + 1, 0).unwrap_err(), MarginCreationError::BottomTooBig);
+        assert_eq!(Margin::new(0, 0, 0, DIMENSION_MAX + 1).unwrap_err(), MarginCreationError::LeftTooBig);
+    }
+
+
+    #[test]
+    fn test_top() {
+        assert_eq!(Margin::new(1, 2, 3, 4).unwrap().top(), 1);
+    }
+
+    #[test]
+    fn test_right() {
+        assert_eq!(Margin::new(1, 2, 3, 4).unwrap().right(), 2);
+    }
+
+    #[test]
+    fn test_bottom() {
+        assert_eq!(Margin::new(1, 2, 3, 4).unwrap().bottom(), 3);
+    }
+
+    #[test]
+    fn test_left() {
+        assert_eq!(Margin::new(1, 2, 3, 4).unwrap().left(), 4);
     }
 }

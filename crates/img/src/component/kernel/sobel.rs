@@ -78,7 +78,7 @@ impl Kernel<u8, Gradient> for SobelKernel {
     }
 
     fn margin(&self) -> Margin {
-        Margin::unified(1)
+        Margin::unified(1).expect("unexpected error in Margin::unified")
     }
 }
 

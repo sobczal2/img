@@ -26,6 +26,6 @@ impl<T> Kernel<T, T> for IdentityKernel {
     }
 
     fn margin(&self) -> Margin {
-        Margin::unified(0)
+        Margin::unified(0).expect("unexpected error in Margin::unified")
     }
 }

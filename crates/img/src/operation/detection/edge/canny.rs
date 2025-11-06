@@ -46,11 +46,11 @@ pub fn canny_lens<S>(source: S) -> impl Lens<Item = Pixel>
 where
     S: Lens<Item = Pixel> + Clone,
 {
-    let lens = value_border(source, Margin::unified(2), Pixel::zero()).expect("TODO");
+    let lens = value_border(source, Margin::unified(2).expect("unexpected error in Margin::unified"), Pixel::zero()).expect("TODO");
 
     // SAFETY: `Size::from_radius(2)` is always successful.
     lens.kernel(
-        GaussianKernel::new(Size::from_radius(2).expect("unexpected error from Size::from_radius"), 2f32, ChannelFlags::RGB).expect("TODO"),
+        GaussianKernel::new(Size::from_radius(2).expect("unexpected error in Size::from_radius"), 2f32, ChannelFlags::RGB).expect("TODO"),
     )
     .expect("TODO")
     .materialize()
@@ -68,7 +68,7 @@ pub fn canny_lens_par<S>(source: S, threads: NonZeroUsize) -> impl Lens<Item = P
 where
     S: Lens<Item = Pixel> + Clone + Send + Sync,
 {
-    let lens = value_border(source, Margin::unified(2), Pixel::zero()).expect("TODO");
+    let lens = value_border(source, Margin::unified(2).expect("unexpected error in Margin::unified"), Pixel::zero()).expect("TODO");
 
     // SAFETY: `Size::from_radius(2)` is always successful.
     lens.kernel(
@@ -102,11 +102,11 @@ fn single_channel_lens<S>(source: S) -> impl Lens<Item = u8>
 where
     S: Lens<Item = u8>,
 {
-    let lens = value_border(source, Margin::unified(1), 0u8).expect("TODO");
+    let lens = value_border(source, Margin::unified(1).expect("unexpected error in Margin::unified"), 0u8).expect("TODO");
     let lens = lens.kernel(SobelKernel::new()).expect("TODO");
-    let lens = value_border(lens, Margin::unified(1), Default::default()).expect("TODO");
+    let lens = value_border(lens, Margin::unified(1).expect("unexpected error in Margin::unified"), Default::default()).expect("TODO");
     let lens = non_maximum_suppression_lens(lens);
-    let lens = value_border(lens, Margin::unified(1), 0f32).expect("TODO");
+    let lens = value_border(lens, Margin::unified(1).expect("unexpected error in Margin::unified"), 0f32).expect("TODO");
     hysteresis_thresholding_lens(lens)
 }
 
@@ -130,7 +130,7 @@ fn non_maximum_suppression_lens<S>(source: S) -> impl Lens<Item = f32>
 where
     S: Lens<Item = Gradient>,
 {
-    let size = source.size().shrink_by_margin(Margin::unified(1)).expect("TODO");
+    let size = source.size().shrink_by_margin(Margin::unified(1).expect("unexpected error in Margin::unified")).expect("TODO");
     source.map(|g| (g.magnitude(), g.direction())).remap(
         |s, p| {
             let p = p.translate(Offset::new(1, 1)).expect("TODO");
@@ -188,7 +188,7 @@ impl Kernel<f32, u8> for HysteresisThresholdingKernel {
     }
 
     fn margin(&self) -> Margin {
-        Margin::unified(1)
+        Margin::unified(1).expect("unexpected error in Margin::unified")
     }
 }
 

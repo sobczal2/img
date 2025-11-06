@@ -135,6 +135,8 @@ where
             (self.size.height() / 2, self.size.height() / 2)
         };
 
-        Margin::new(top, right, bottom, left)
+        // SAFETY: all parameters are halves of some size which is guaranted to be
+        // less than or equal to DIMENSION_MAX.
+        Margin::new(top, right, bottom, left).expect("unexpected error in Margin::new")
     }
 }

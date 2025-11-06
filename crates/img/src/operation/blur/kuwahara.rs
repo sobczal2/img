@@ -107,7 +107,7 @@ impl Kernel<HsvPixel, SelectedQuadrant> for QuadrantSelectionKernel {
     }
 
     fn margin(&self) -> Margin {
-        Margin::unified(self.radius)
+        Margin::unified(self.radius).expect("TODO")
     }
 }
 
@@ -176,7 +176,7 @@ impl Kernel<MeanCalculationInput, Pixel> for MeanCalculationKernel {
     }
 
     fn margin(&self) -> Margin {
-        Margin::unified(self.radius)
+        Margin::unified(self.radius).expect("TODO")
     }
 }
 

@@ -60,12 +60,12 @@ impl Area {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// // Create a 5x10 area in with 15x20 offset
-    /// let with_offset = Area::from_cropped_size(Size::new(50, 50)?, Margin::new(20, 30, 20, 15))?;
+    /// let with_offset = Area::from_cropped_size(Size::new(50, 50)?, Margin::new(20, 30, 20, 15)?)?;
     /// assert_eq!(with_offset.size(), Size::new(5, 10)?);
     /// assert_eq!(with_offset.top_left(), Point::new(15, 20));
     ///
     /// // Create a 5x10 area in without offset
-    /// let without_offset = Area::from_cropped_size(Size::new(50, 50)?, Margin::new(0, 45, 40, 0))?;
+    /// let without_offset = Area::from_cropped_size(Size::new(50, 50)?, Margin::new(0, 45, 40, 0)?)?;
     /// assert_eq!(without_offset.size(), Size::new(5, 10)?);
     /// assert_eq!(without_offset.top_left(), Point::new(0, 0));
     ///

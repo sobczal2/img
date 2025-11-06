@@ -109,9 +109,6 @@ impl Area {
 
     /// Get [`Area`]'s top left point.
     pub fn bottom_right(&self) -> Point {
-        debug_assert!(self.size.width() <= isize::MAX as usize);
-        debug_assert!(self.size.height() <= isize::MAX as usize);
-
         // SAFETY: translate returns Err only if resulting offset is negative,
         // here offset we apply has always positive values, so the resulting
         // offset will also always be positive. Also cast from usize to isize of

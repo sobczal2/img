@@ -2,6 +2,7 @@ use crate::{
     component::primitive::{
         Margin,
         Point,
+        SizeCreationError,
     },
     lens::{
         Lens,
@@ -22,7 +23,11 @@ where
     S: Lens<Item = T>,
     T: Clone,
 {
-    let overlay_size = source.size() + margin;
+    let overlay_size = source.size().extend_by_margin(margin).map_err(|e| match e {
+        SizeCreationError::WidthTooBig => overlay::CreationError::OverlayTooBig,
+        SizeCreationError::HeightTooBig => overlay::CreationError::OverlayTooBig,
+        _ => unreachable!("unexpected error returned from extend_by_margin"),
+    })?;
     OverlayLens::new(
         ValueLens::new(value, overlay_size),
         source,

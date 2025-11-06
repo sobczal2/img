@@ -27,10 +27,13 @@ where
         let lens1 = (factory1)(source.clone());
         let lens2 = (factory2)(source.clone());
 
+        // SAFETY: taking minimum of `Lens` `Size`'s each dimension produces
+        // a valid `Size`.
         let size = Size::new(
             lens1.size().width().min(lens2.size().width()),
             lens1.size().height().min(lens2.size().height()),
-        );
+        )
+        .expect("unexpected error from Size::new");
 
         Self { lens1, lens2, size }
     }
@@ -76,10 +79,13 @@ where
         let lens2 = (factory2)(source.clone());
         let lens3 = (factory3)(source.clone());
 
+        // SAFETY: taking minimum of `Lens` `Size`'s each dimension produces
+        // a valid `Size`.
         let size = Size::new(
             lens1.size().width().min(lens2.size().width()).min(lens3.size().width()),
             lens1.size().height().min(lens2.size().height()).min(lens3.size().height()),
-        );
+        )
+        .expect("unexpected error from Size::new");
 
         Self { lens1, lens2, lens3, size }
     }
@@ -136,6 +142,8 @@ where
         let lens3 = (factory3)(source.clone());
         let lens4 = (factory4)(source.clone());
 
+        // SAFETY: taking minimum of `Lens` `Size`'s each dimension produces
+        // a valid `Size`.
         let size = Size::new(
             lens1
                 .size()
@@ -149,7 +157,8 @@ where
                 .min(lens2.size().height())
                 .min(lens3.size().height())
                 .min(lens4.size().height()),
-        );
+        )
+        .expect("unexpected error from Size::new");
 
         Self { lens1, lens2, lens3, lens4, size }
     }

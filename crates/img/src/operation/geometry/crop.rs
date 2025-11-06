@@ -21,7 +21,7 @@ where
     S: Lens<Item = Pixel>,
 {
     let size = source.size();
-    let new_size = size.apply_margin(margin)?;
+    let new_size = size.shrink_by_margin(margin)?;
 
     Ok(source.remap(
         move |lens, point| {
@@ -30,7 +30,7 @@ where
             // offset will also always be positive.
             let original_point = point
                 .translate(Offset::new(margin.left() as isize, margin.top() as isize))
-                .unwrap();
+                .expect("unexpected value returned from translate");
 
             lens.look(original_point)
         },
@@ -59,7 +59,10 @@ pub fn crop_par(
 
 #[cfg(test)]
 mod tests {
-    use rand::{rngs::StdRng, SeedableRng};
+    use rand::{
+        SeedableRng,
+        rngs::StdRng,
+    };
 
     use crate::prelude::Size;
 
@@ -67,24 +70,24 @@ mod tests {
 
     #[test]
     fn test_crop_with_valid_margins() {
-        let image = Image::random(Size::from_usize(10, 20).unwrap(), &mut StdRng::from_seed([7u8; 32]));
+        let image = Image::random(Size::new(10, 20).unwrap(), &mut StdRng::from_seed([7u8; 32]));
 
         let equal = crop(&image, Margin::new(0, 0, 0, 0));
         assert!(equal.is_ok());
-        assert_eq!(equal.unwrap().size(), Size::from_usize(10, 20).unwrap());
+        assert_eq!(equal.unwrap().size(), Size::new(10, 20).unwrap());
 
         let top_right = crop(&image, Margin::new(5, 5, 0, 0));
         assert!(top_right.is_ok());
-        assert_eq!(top_right.unwrap().size(), Size::from_usize(5, 15).unwrap());
+        assert_eq!(top_right.unwrap().size(), Size::new(5, 15).unwrap());
 
         let bottom_left = crop(&image, Margin::new(0, 0, 5, 5));
         assert!(bottom_left.is_ok());
-        assert_eq!(bottom_left.unwrap().size(), Size::from_usize(5, 15).unwrap());
+        assert_eq!(bottom_left.unwrap().size(), Size::new(5, 15).unwrap());
     }
 
     #[test]
     fn test_crop_with_invalid_margins() {
-        let image = Image::random(Size::from_usize(10, 20).unwrap(), &mut StdRng::from_seed([7u8; 32]));
+        let image = Image::random(Size::new(10, 20).unwrap(), &mut StdRng::from_seed([7u8; 32]));
 
         let shrinked_horizontal = crop(&image, Margin::new(0, 5, 0, 5));
         assert_eq!(shrinked_horizontal.unwrap_err(), SizeCreationError::WidthZero);

@@ -23,7 +23,7 @@ where
     type Item = RowElements<'a, S>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.current == self.source.size().height().get() {
+        if self.current == self.source.size().height() {
             return None;
         }
 
@@ -52,7 +52,7 @@ where
     type Item = S::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.current.x() == self.source.size().width().get() {
+        if self.current.x() == self.source.size().width() {
             return None;
         }
 

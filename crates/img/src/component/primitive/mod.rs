@@ -7,14 +7,14 @@ mod size;
 
 pub use area::{
     Area,
-    CreationError as AreaCreationError,
-    CreationResult as AreaCreationResult,
+    AreaCreationError as AreaCreationError,
+    AreaCreationResult as AreaCreationResult,
 };
 pub use margin::Margin;
 pub use offset::Offset;
 pub use point::{
-    CreationError as PointCreationError,
-    CreationResult as PointCreationResult,
+    OffsetCreationError as PointCreationError,
+    OffsetCreationResult as PointCreationResult,
     Point,
 };
 pub use scale::{

@@ -4,7 +4,8 @@ use crate::{
         Size,
     },
     error::{
-        IndexError, IndexResult
+        IndexError,
+        IndexResult,
     },
     lens::Lens,
 };

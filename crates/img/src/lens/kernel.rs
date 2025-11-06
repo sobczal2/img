@@ -9,6 +9,7 @@ use crate::{
             Margin,
             Point,
             Size,
+            SizeCreationError,
         },
     },
     error::IndexResult,
@@ -40,16 +41,11 @@ where
     pub fn new(source: S, kernel: K) -> Result<Self, CreationError> {
         let margin = kernel.margin();
 
-        if source.size().width().get() < margin.left() + margin.right() + 1 {
-            return Err(CreationError::KernelTooBigX);
-        }
-
-        if source.size().height().get() < margin.top() + margin.bottom() + 1 {
-            return Err(CreationError::KernelTooBigY);
-        }
-
-        // SAFETY: margin is guaranted to be valid thanks to above checks.
-        let size = source.size().apply_margin(kernel.margin()).unwrap();
+        let size = source.size().shrink_by_margin(kernel.margin()).map_err(|e| match e {
+            SizeCreationError::WidthZero => CreationError::KernelTooBigX,
+            SizeCreationError::HeightZero => CreationError::KernelTooBigY,
+            _ => unreachable!("unexpected error returned from shrink_by_margin"),
+        })?;
 
         Ok(Self { source, kernel, size, margin, _phantom_data: Default::default() })
     }

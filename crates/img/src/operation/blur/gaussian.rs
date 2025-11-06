@@ -9,7 +9,10 @@ use crate::{
             self,
             gaussian::GaussianKernel,
         },
-        primitive::Size,
+        primitive::{
+            Size,
+            SizeCreationError,
+        },
     },
     image::Image,
     lens::{
@@ -25,26 +28,28 @@ use crate::{
 
 /// Error returned by mean_blur function
 #[derive(Debug, Error)]
-pub enum CreationError {
+pub enum GaussianBlurCreationError {
     #[error("failed to create gaussian kernel: {0}")]
-    KernelCreation(#[from] kernel::gaussian::CreationError),
+    Kernel(#[from] kernel::gaussian::CreationError),
     #[error("failed to create kernel lens: {0}")]
-    KernelLensCreation(#[from] lens::kernel::CreationError),
+    KernelLens(#[from] lens::kernel::CreationError),
+    #[error("failed to create size: {0}")]
+    Size(#[from] SizeCreationError),
 }
 
-pub type CreationResult<T> = std::result::Result<T, CreationError>;
+pub type GaussianBlurCreationResult<T> = std::result::Result<T, GaussianBlurCreationError>;
 
 pub fn gaussian_blur_lens<S>(
     source: S,
     radius: usize,
     sigma: f32,
     flags: ChannelFlags,
-) -> CreationResult<impl Lens<Item = Pixel>>
+) -> GaussianBlurCreationResult<impl Lens<Item = Pixel>>
 where
     S: Lens,
     S::Item: AsRef<Pixel>,
 {
-    let kernel = GaussianKernel::new(Size::from_radius(radius), sigma, flags)?;
+    let kernel = GaussianKernel::new(Size::from_radius(radius)?, sigma, flags)?;
     let lens = source.kernel(kernel)?;
 
     Ok(lens)
@@ -55,7 +60,7 @@ pub fn gaussian_blur(
     radius: usize,
     sigma: f32,
     flags: ChannelFlags,
-) -> CreationResult<Image> {
+) -> GaussianBlurCreationResult<Image> {
     let lens = gaussian_blur_lens(image.lens(), radius, sigma, flags)?;
     Ok(Image::from_lens(lens))
 }
@@ -67,7 +72,7 @@ pub fn gaussian_blur_par(
     radius: usize,
     sigma: f32,
     flags: ChannelFlags,
-) -> CreationResult<Image> {
+) -> GaussianBlurCreationResult<Image> {
     use crate::lens::FromLensPar;
 
     let lens = gaussian_blur_lens(image.lens(), radius, sigma, flags)?;

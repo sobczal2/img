@@ -2,7 +2,13 @@ use std::cmp::Ordering;
 
 use thiserror::Error;
 
-use crate::component::primitive::SizeCreationResult;
+use crate::{
+    component::primitive::{
+        SizeCreationError,
+        SizeCreationResult,
+    },
+    image::DIMENSION_MAX,
+};
 
 use super::{
     Point,
@@ -127,20 +133,29 @@ impl Scale {
     /// let half = Scale::new(0.5, 0.5)?;
     /// let uneven = Scale::new(2.0, 1.5)?;
     ///
-    /// let size = Size::from_usize(100, 100)?;
+    /// let size = Size::new(100, 100)?;
     ///
-    /// assert_eq!(identity.apply(size)?, Size::from_usize(100, 100)?);
-    /// assert_eq!(half.apply(size)?, Size::from_usize(50, 50)?);
-    /// assert_eq!(uneven.apply(size)?, Size::from_usize(200, 150)?);
+    /// assert_eq!(identity.apply(size)?, Size::new(100, 100)?);
+    /// assert_eq!(half.apply(size)?, Size::new(50, 50)?);
+    /// assert_eq!(uneven.apply(size)?, Size::new(200, 150)?);
     ///
     /// # Ok(())
     /// # }
     /// ```
     pub fn apply(&self, size: Size) -> SizeCreationResult<Size> {
-        let new_width: f32 = size.width().get() as f32 * self.0;
-        let new_height: f32 = size.height().get() as f32 * self.1;
+        // TODO: test
+        if size.width() as f32 > DIMENSION_MAX as f32 / self.0 {
+            return Err(SizeCreationError::WidthTooBig);
+        }
 
-        Size::from_usize(new_width.floor() as usize, new_height.floor() as usize)
+        if size.height() as f32 > DIMENSION_MAX as f32 / self.1 {
+            return Err(SizeCreationError::HeightTooBig);
+        }
+
+        let new_width: f32 = size.width() as f32 * self.0;
+        let new_height: f32 = size.height() as f32 * self.1;
+
+        Size::new(new_width.floor() as usize, new_height.floor() as usize)
     }
 
     /// Transform the point to scaled coordinate space.

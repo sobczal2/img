@@ -3,6 +3,7 @@ use std::{
     str::FromStr,
 };
 
+use anyhow::bail;
 use clap::{
     ArgMatches,
     Command,
@@ -58,10 +59,18 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     let new_size: Size = target_size_offset.size.try_into()?;
     let offset = target_size_offset.offset;
 
+    if old_size.width() < new_size.width() + offset.width {
+        bail!("offset too big for given width")
+    }
+
+    if old_size.height() < new_size.height() + offset.height {
+        bail!("offset too big for given height")
+    }
+
     let margin = Margin::new(
         offset.height,
-        old_size.width().get() - new_size.width().get() - offset.width,
-        old_size.height().get() - new_size.height().get() - offset.height,
+        old_size.width() - new_size.width() - offset.width,
+        old_size.height() - new_size.height() - offset.height,
         offset.width,
     );
 

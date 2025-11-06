@@ -31,6 +31,6 @@ impl TryFrom<Size> for img::prelude::Size {
     type Error = img::component::primitive::SizeCreationError;
 
     fn try_from(value: Size) -> img::component::primitive::SizeCreationResult<img::prelude::Size> {
-        Self::from_usize(value.width, value.height)
+        Self::new(value.width, value.height)
     }
 }

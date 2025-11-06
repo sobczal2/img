@@ -9,7 +9,10 @@ use crate::{
             self,
             gaussian::GaussianKernel,
         },
-        primitive::Size,
+        primitive::{
+            Size,
+            SizeCreationError,
+        },
     },
     image::Image,
     lens::{
@@ -30,6 +33,8 @@ pub enum CreationError {
     KernelCreation(#[from] kernel::gaussian::CreationError),
     #[error("failed to create kernel lens: {0}")]
     KernelLensCreation(#[from] lens::kernel::CreationError),
+    #[error("failed to create size: {0}")]
+    SizeCreation(#[from] SizeCreationError),
 }
 
 pub type CreationResult<T> = std::result::Result<T, CreationError>;
@@ -44,7 +49,7 @@ where
     S: Lens,
     S::Item: AsRef<Pixel>,
 {
-    let kernel = GaussianKernel::new(Size::from_radius(radius), sigma, flags)?;
+    let kernel = GaussianKernel::new(Size::from_radius(radius)?, sigma, flags)?;
     let lens = source.kernel(kernel)?;
 
     Ok(lens)

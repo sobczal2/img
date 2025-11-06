@@ -13,7 +13,8 @@ use crate::{
         },
     },
     error::{
-        IndexError, IndexResult
+        IndexError,
+        IndexResult,
     },
     lens::Lens,
     pixel::{
@@ -112,16 +113,16 @@ where
     }
 
     fn margin(&self) -> Margin {
-        let (left, right) = if self.size.width().get().is_multiple_of(2) {
-            (self.size.width().get() / 2, self.size.width().get() / 2 - 1)
+        let (left, right) = if self.size.width().is_multiple_of(2) {
+            (self.size.width() / 2, self.size.width() / 2 - 1)
         } else {
-            (self.size.width().get() / 2, self.size.width().get() / 2)
+            (self.size.width() / 2, self.size.width() / 2)
         };
 
-        let (top, bottom) = if self.size.height().get().is_multiple_of(2) {
-            (self.size.height().get() / 2, self.size.height().get() / 2 - 1)
+        let (top, bottom) = if self.size.height().is_multiple_of(2) {
+            (self.size.height() / 2, self.size.height() / 2 - 1)
         } else {
-            (self.size.height().get() / 2, self.size.height().get() / 2)
+            (self.size.height() / 2, self.size.height() / 2)
         };
 
         Margin::new(top, right, bottom, left)

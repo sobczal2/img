@@ -29,12 +29,8 @@ impl ReadJpeg for Image {
         let turbojpeg_image = turbojpeg::decompress(&jpeg_data, turbojpeg::PixelFormat::RGBA)
             .map_err(IoError::JpegDecoding)?;
 
-        let size =
-            Size::from_usize(turbojpeg_image.width, turbojpeg_image.height).map_err(|_| {
-                IoError::Unsupported(
-                    "Images with width or height zero are not supported".to_string(),
-                )
-            })?;
+        let size = Size::new(turbojpeg_image.width, turbojpeg_image.height)
+            .map_err(|e| IoError::Unsupported(format!("unsupported: {e}")))?;
         let image = Image::new(
             size,
             turbojpeg_image
@@ -121,9 +117,9 @@ impl WriteJpeg for Image {
         let buffer = self.buffer();
         let turbojpeg_image = turbojpeg::Image::<&[u8]> {
             pixels: buffer.as_ref(),
-            width: self.size().width().get(),
-            pitch: self.size().width().get() * PIXEL_SIZE,
-            height: self.size().height().get(),
+            width: self.size().width(),
+            pitch: self.size().width() * PIXEL_SIZE,
+            height: self.size().height(),
             format: turbojpeg::PixelFormat::RGBA,
         };
 

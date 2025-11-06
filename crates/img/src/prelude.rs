@@ -7,7 +7,10 @@ pub use crate::{
         Scale,
         Size,
     },
-    image::Image,
+    image::{
+        DIMENSION_MAX,
+        Image,
+    },
     operation::{
         blur::{
             gaussian_blur,

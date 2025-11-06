@@ -12,7 +12,10 @@ use crate::{
     },
     error::IndexResult,
     lens::{
-        image::ImageLens, FromLens, FromLensPar, Lens
+        FromLens,
+        FromLensPar,
+        Lens,
+        image::ImageLens,
     },
     pixel::Pixel,
 };
@@ -24,6 +27,12 @@ pub enum CreationError {
 }
 
 pub type ResultError<T> = Result<T, CreationError>;
+
+#[cfg(target_pointer_width = "64")]
+pub const DIMENSION_MAX: usize = (1u64 << 32) as usize - 1;
+
+#[cfg(target_pointer_width = "32")]
+pub const DIMENSION_MAX: usize = (1u32 << 16) as usize - 1;
 
 /// A `struct` representing in-memory image.
 #[derive(Debug, Clone)]
@@ -48,9 +57,9 @@ impl Image {
     /// use std::iter::from_fn;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
-    /// let size = Size::from_usize(2, 2).unwrap();
-    /// let bad_size = Size::from_usize(2, 3).unwrap();
-    /// let pixels = vec![Pixel::zero(); size.area()].into_boxed_slice(); 
+    /// let size = Size::new(2, 2)?;
+    /// let bad_size = Size::new(2, 3)?;
+    /// let pixels = vec![Pixel::zero(); size.area()].into_boxed_slice();
     /// let image = Image::new(size, pixels.clone())?;
     ///
     /// let mismatch = Image::new(bad_size, pixels);
@@ -75,7 +84,7 @@ impl Image {
     /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
-    /// let image = Image::empty(Size::from_usize(2, 2).unwrap());
+    /// let image = Image::empty(Size::new(2, 2)?);
     ///
     /// # Ok(())
     /// # }
@@ -96,7 +105,7 @@ impl Image {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let mut rng = rand::rng();
-    /// let image = Image::random(Size::from_usize(2, 2).unwrap(), &mut rng);
+    /// let image = Image::random(Size::new(2, 2)?, &mut rng);
     ///
     /// # Ok(())
     /// # }
@@ -150,21 +159,24 @@ impl Image {
 }
 
 impl<T: Into<Pixel>> FromLens<T> for Image {
-
     /// Collect [`Lens`] into an [`Image`].
     ///
     /// # Examples
     ///
     /// ```
-    /// use img::prelude::*;
-    /// use img::lens::value::ValueLens;
-    /// use img::lens::FromLens;
+    /// use img::{
+    ///     lens::{
+    ///         FromLens,
+    ///         value::ValueLens,
+    ///     },
+    ///     prelude::*,
+    /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
-    /// let lens = ValueLens::new(Pixel::zero(), Size::from_usize(2, 2).unwrap());
+    /// let lens = ValueLens::new(Pixel::zero(), Size::new(2, 2)?);
     /// let image = Image::from_lens(lens);
     ///
-    /// assert_eq!(image.size(), Size::from_usize(2, 2).unwrap());
+    /// assert_eq!(image.size(), Size::new(2, 2)?);
     ///
     /// # Ok(())
     /// # }
@@ -184,22 +196,25 @@ impl<T: Into<Pixel>> FromLens<T> for Image {
 
 #[cfg(feature = "parallel")]
 impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
-
     /// Collect [`Lens`] into an [`Image`].
     ///
     /// # Examples
     ///
     /// ```
-    /// use img::prelude::*;
-    /// use img::lens::value::ValueLens;
-    /// use img::lens::FromLensPar;
+    /// use img::{
+    ///     lens::{
+    ///         FromLensPar,
+    ///         value::ValueLens,
+    ///     },
+    ///     prelude::*,
+    /// };
     /// use std::num::NonZero;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
-    /// let lens = ValueLens::new(Pixel::zero(), Size::from_usize(2, 2).unwrap());
+    /// let lens = ValueLens::new(Pixel::zero(), Size::new(2, 2).unwrap());
     /// let image = Image::from_lens_par(lens, NonZero::new(3).unwrap());
     ///
-    /// assert_eq!(image.size(), Size::from_usize(2, 2).unwrap());
+    /// assert_eq!(image.size(), Size::new(2, 2).unwrap());
     ///
     /// # Ok(())
     /// # }
@@ -243,7 +258,10 @@ impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
 #[cfg(test)]
 mod tests {
     use itertools::Itertools;
-    use rand::{rngs::SmallRng, SeedableRng};
+    use rand::{
+        SeedableRng,
+        rngs::SmallRng,
+    };
 
     use crate::error::IndexError;
 
@@ -251,8 +269,8 @@ mod tests {
 
     #[test]
     fn test_new_err() {
-        let size = Size::from_usize(2, 2).unwrap();
-        let bad_size = Size::from_usize(2, 3).unwrap();
+        let size = Size::new(2, 2).unwrap();
+        let bad_size = Size::new(2, 3).unwrap();
         let pixels = vec![Pixel::zero(); size.area()].into_boxed_slice();
         let image = Image::new(bad_size, pixels.clone());
         assert_eq!(image.unwrap_err(), CreationError::SizePixelsMismatch);
@@ -260,7 +278,7 @@ mod tests {
 
     #[test]
     fn test_empty() {
-        let size = Size::from_usize(2, 2).unwrap();
+        let size = Size::new(2, 2).unwrap();
         let image = Image::empty(size);
         assert_eq!(size, image.size());
         for p in image.pixels.iter() {
@@ -270,7 +288,7 @@ mod tests {
 
     #[test]
     fn test_random() {
-        let size = Size::from_usize(2, 2).unwrap();
+        let size = Size::new(2, 2).unwrap();
         let image = Image::random(size, &mut SmallRng::seed_from_u64(0));
         assert_eq!(size, image.size());
         assert_eq!(image.pixels.len(), size.area());
@@ -278,7 +296,7 @@ mod tests {
 
     #[test]
     fn test_pixel_ok() {
-        let size = Size::from_usize(2, 2).unwrap();
+        let size = Size::new(2, 2).unwrap();
         let image = Image::empty(size);
         let point = Point::new(1, 1);
         assert_eq!(image.pixel(point).unwrap(), &Pixel::zero());
@@ -286,7 +304,7 @@ mod tests {
 
     #[test]
     fn test_pixel_oob() {
-        let size = Size::from_usize(2, 2).unwrap();
+        let size = Size::new(2, 2).unwrap();
         let image = Image::empty(size);
         let point = Point::new(2, 1);
         assert_eq!(image.pixel(point).unwrap_err(), IndexError::OutOfBounds);
@@ -294,7 +312,7 @@ mod tests {
 
     #[test]
     fn test_pixel_mut_ok() {
-        let size = Size::from_usize(2, 2).unwrap();
+        let size = Size::new(2, 2).unwrap();
         let mut image = Image::empty(size);
         let point = Point::new(1, 1);
         assert_eq!(image.pixel_mut(point).unwrap(), &Pixel::zero());
@@ -302,7 +320,7 @@ mod tests {
 
     #[test]
     fn test_pixel_mut_oob() {
-        let size = Size::from_usize(2, 2).unwrap();
+        let size = Size::new(2, 2).unwrap();
         let mut image = Image::empty(size);
         let point = Point::new(2, 1);
         assert_eq!(image.pixel_mut(point).unwrap_err(), IndexError::OutOfBounds);
@@ -310,11 +328,8 @@ mod tests {
 
     #[test]
     fn test_buffer_consistency() {
-        let size = Size::from_usize(2, 1).unwrap();
-        let pixels = vec![
-            Pixel::new([1, 2, 3, 4]),
-            Pixel::new([5, 6, 7, 8]),
-        ].into_boxed_slice();
+        let size = Size::new(2, 1).unwrap();
+        let pixels = vec![Pixel::new([1, 2, 3, 4]), Pixel::new([5, 6, 7, 8])].into_boxed_slice();
 
         let image = Image::new(size, pixels).unwrap();
         let buffer = image.buffer();
@@ -324,7 +339,7 @@ mod tests {
 
     #[test]
     fn test_lens() {
-        let size = Size::from_usize(2, 2).unwrap();
+        let size = Size::new(2, 2).unwrap();
         let image = Image::random(size, &mut SmallRng::seed_from_u64(0));
         let lens = image.lens();
 
@@ -337,7 +352,7 @@ mod tests {
 
     #[test]
     fn test_from_lens() {
-        let size = Size::from_usize(2, 2).unwrap();
+        let size = Size::new(2, 2).unwrap();
         let image1 = Image::random(size, &mut SmallRng::seed_from_u64(0));
         let image2 = Image::from_lens(image1.lens().cloned());
 
@@ -352,7 +367,7 @@ mod tests {
     #[test]
     fn test_from_lens_par() {
         use std::num::NonZero;
-        let size = Size::from_usize(2, 2).unwrap();
+        let size = Size::new(2, 2).unwrap();
         let image1 = Image::random(size, &mut SmallRng::seed_from_u64(0));
         let image2 = Image::from_lens_par(image1.lens().cloned(), NonZero::new(4).unwrap());
 
@@ -363,4 +378,3 @@ mod tests {
         }
     }
 }
-

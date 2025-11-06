@@ -47,16 +47,20 @@ where
     S: Lens<Item = Pixel> + Clone,
 {
     let lens = value_border(source, Margin::unified(2), Pixel::zero()).unwrap();
-    lens.kernel(GaussianKernel::new(Size::from_radius(2), 2f32, ChannelFlags::RGB).unwrap())
-        .unwrap()
-        .materialize()
-        .split4(
-            |s| single_channel_lens(s.map(|p| p.r())),
-            |s| single_channel_lens(s.map(|p| p.g())),
-            |s| single_channel_lens(s.map(|p| p.b())),
-            |s| s.map(|p| p.a()),
-        )
-        .map(|(r, g, b, a)| Pixel::new([r, g, b, a]))
+
+    // SAFETY: `Size::from_radius(2)` is always successful.
+    lens.kernel(
+        GaussianKernel::new(Size::from_radius(2).unwrap(), 2f32, ChannelFlags::RGB).unwrap(),
+    )
+    .unwrap()
+    .materialize()
+    .split4(
+        |s| single_channel_lens(s.map(|p| p.r())),
+        |s| single_channel_lens(s.map(|p| p.g())),
+        |s| single_channel_lens(s.map(|p| p.b())),
+        |s| s.map(|p| p.a()),
+    )
+    .map(|(r, g, b, a)| Pixel::new([r, g, b, a]))
 }
 
 #[cfg(feature = "parallel")]
@@ -65,16 +69,20 @@ where
     S: Lens<Item = Pixel> + Clone + Send + Sync,
 {
     let lens = value_border(source, Margin::unified(2), Pixel::zero()).unwrap();
-    lens.kernel(GaussianKernel::new(Size::from_radius(2), 2f32, ChannelFlags::RGB).unwrap())
-        .unwrap()
-        .materialize_par(threads)
-        .split4(
-            |s| single_channel_lens(s.map(|p| p.r())),
-            |s| single_channel_lens(s.map(|p| p.g())),
-            |s| single_channel_lens(s.map(|p| p.b())),
-            |s| s.map(|p| p.a()),
-        )
-        .map(|(r, g, b, a)| Pixel::new([r, g, b, a]))
+
+    // SAFETY: `Size::from_radius(2)` is always successful.
+    lens.kernel(
+        GaussianKernel::new(Size::from_radius(2).unwrap(), 2f32, ChannelFlags::RGB).unwrap(),
+    )
+    .unwrap()
+    .materialize_par(threads)
+    .split4(
+        |s| single_channel_lens(s.map(|p| p.r())),
+        |s| single_channel_lens(s.map(|p| p.g())),
+        |s| single_channel_lens(s.map(|p| p.b())),
+        |s| s.map(|p| p.a()),
+    )
+    .map(|(r, g, b, a)| Pixel::new([r, g, b, a]))
 }
 
 pub fn canny(image: &Image) -> Image {
@@ -122,7 +130,7 @@ fn non_maximum_suppression_lens<S>(source: S) -> impl Lens<Item = f32>
 where
     S: Lens<Item = Gradient>,
 {
-    let size = source.size().apply_margin(Margin::unified(1)).unwrap();
+    let size = source.size().shrink_by_margin(Margin::unified(1)).unwrap();
     source.map(|g| (g.magnitude(), g.direction())).remap(
         |s, p| {
             let p = p.translate(Offset::new(1, 1)).unwrap();

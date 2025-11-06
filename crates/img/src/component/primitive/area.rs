@@ -11,7 +11,7 @@ use super::{
 #[derive(Debug, Error)]
 pub enum CreationError {
     #[error("resulting size invalid: {0}")]
-    SizeInvalid(SizeCreationError),
+    SizeInvalid(#[from] SizeCreationError),
 }
 
 pub type CreationResult<T> = Result<T, CreationError>;
@@ -33,10 +33,10 @@ impl Area {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// // Create a 1x1 area in without any offset
-    /// let without_offset = Area::new(Size::from_usize(1, 1)?, Point::new(0, 0));
+    /// let without_offset = Area::new(Size::new(1, 1)?, Point::new(0, 0));
     ///
     /// // Create a 500x1000 area in with 100x50 offset
-    /// let with_offset = Area::new(Size::from_usize(500, 1000)?, Point::new(100, 50));
+    /// let with_offset = Area::new(Size::new(500, 1000)?, Point::new(100, 50));
     ///
     /// # Ok(())
     /// # }
@@ -60,25 +60,20 @@ impl Area {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// // Create a 5x10 area in with 15x20 offset
-    /// let with_offset =
-    ///     Area::from_cropped_size(Size::from_usize(50, 50)?, Margin::new(20, 30, 20, 15))?;
-    /// assert_eq!(with_offset.size(), Size::from_usize(5, 10)?);
+    /// let with_offset = Area::from_cropped_size(Size::new(50, 50)?, Margin::new(20, 30, 20, 15))?;
+    /// assert_eq!(with_offset.size(), Size::new(5, 10)?);
     /// assert_eq!(with_offset.top_left(), Point::new(15, 20));
     ///
     /// // Create a 5x10 area in without offset
-    /// let without_offset =
-    ///     Area::from_cropped_size(Size::from_usize(50, 50)?, Margin::new(0, 45, 40, 0))?;
-    /// assert_eq!(without_offset.size(), Size::from_usize(5, 10)?);
+    /// let without_offset = Area::from_cropped_size(Size::new(50, 50)?, Margin::new(0, 45, 40, 0))?;
+    /// assert_eq!(without_offset.size(), Size::new(5, 10)?);
     /// assert_eq!(without_offset.top_left(), Point::new(0, 0));
     ///
     /// # Ok(())
     /// # }
     /// ```
     pub fn from_cropped_size(size: Size, margin: Margin) -> CreationResult<Self> {
-        let width = size.width().get() - margin.left() - margin.right();
-        let height = size.height().get() - margin.top() - margin.bottom();
-
-        let size = Size::from_usize(width, height).unwrap();
+        let size = size.shrink_by_margin(margin)?;
         let top_left = Point::new(margin.left(), margin.top());
 
         Ok(Self { size, top_left })
@@ -98,27 +93,30 @@ impl Area {
     pub fn top_right(&self) -> Point {
         // SAFETY: translate returns Err only if resulting offset is negative,
         // here offset we apply has always positive values, so the resulting
-        // offset will also always be positive.
-        self.top_left.translate(Offset::new(self.size.width().get() as isize, 0)).unwrap()
+        // offset will also always be positive. Also cast from usize to isize of
+        // width is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
+        self.top_left.translate(Offset::new(self.size.width().try_into().unwrap(), 0)).unwrap()
     }
 
     /// Get [`Area`]'s top left point.
     pub fn bottom_left(&self) -> Point {
         // SAFETY: translate returns Err only if resulting offset is negative,
         // here offset we apply has always positive values, so the resulting
-        // offset will also always be positive.
-        self.top_left.translate(Offset::new(0, self.size.height().get() as isize)).unwrap()
+        // offset will also always be positive. Also cast from usize to isize of
+        // height is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
+        self.top_left.translate(Offset::new(0, self.size.height().try_into().unwrap())).unwrap()
     }
 
     /// Get [`Area`]'s top left point.
     pub fn bottom_right(&self) -> Point {
         // SAFETY: translate returns Err only if resulting offset is negative,
         // here offset we apply has always positive values, so the resulting
-        // offset will also always be positive.
+        // offset will also always be positive. Also cast from usize to isize of
+        // width and height is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
         self.top_left
             .translate(Offset::new(
-                self.size.width().get() as isize,
-                self.size.height().get() as isize,
+                self.size.width().try_into().unwrap(),
+                self.size.height().try_into().unwrap(),
             ))
             .unwrap()
     }
@@ -132,7 +130,7 @@ impl Area {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// // Create a 1x1 area in without any offset
-    /// let without_offset = Area::new(Size::from_usize(1, 1)?, Point::new(0, 0));
+    /// let without_offset = Area::new(Size::new(1, 1)?, Point::new(0, 0));
     ///
     /// assert!(without_offset.contains(&Point::new(0, 0)));
     /// assert!(!without_offset.contains(&Point::new(0, 1)));
@@ -140,7 +138,7 @@ impl Area {
     /// assert!(!without_offset.contains(&Point::new(1, 1)));
     ///
     /// // Create a 500x1000 area in with 100x50 offset
-    /// let with_offset = Area::new(Size::from_usize(500, 1000)?, Point::new(100, 50));
+    /// let with_offset = Area::new(Size::new(500, 1000)?, Point::new(100, 50));
     ///
     /// assert!(!with_offset.contains(&Point::new(0, 0)));
     /// assert!(!with_offset.contains(&Point::new(99, 50)));

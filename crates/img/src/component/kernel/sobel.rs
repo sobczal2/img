@@ -9,7 +9,8 @@ use crate::{
         },
     },
     error::{
-        IndexError, IndexResult
+        IndexError,
+        IndexResult,
     },
     lens::Lens,
 };
@@ -80,8 +81,5 @@ impl Kernel<u8, Gradient> for SobelKernel {
 }
 
 fn in_bounds(size: Size, point: Point) -> bool {
-    point.x() < size.width().get()
-        && point.x() > 0
-        && point.y() < size.height().get()
-        && point.y() > 0
+    point.x() < size.width() && point.x() > 0 && point.y() < size.height() && point.y() > 0
 }

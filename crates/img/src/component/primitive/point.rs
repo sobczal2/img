@@ -10,18 +10,19 @@ use super::{
     Size,
 };
 use crate::error::{
-    IndexError, IndexResult
+    IndexError,
+    IndexResult,
 };
 
 #[derive(Debug, Error, PartialEq, Eq)]
-pub enum CreationError {
+pub enum OffsetCreationError {
     #[error("invalid x value")]
     InvalidX,
     #[error("invalid y value")]
     InvalidY,
 }
 
-pub type CreationResult<T> = Result<T, CreationError>;
+pub type OffsetCreationResult<T> = Result<T, OffsetCreationError>;
 
 /// Represents point on a 2D structure. Both dimensions are represented as positive integers.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -79,14 +80,14 @@ impl Point {
     /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
-    /// let size = Size::from_usize(2, 2)?;
+    /// let size = Size::new(2, 2)?;
     ///
     /// assert_eq!(Point::from_index(0, size)?, Point::new(0, 0));
     /// assert_eq!(Point::from_index(1, size)?, Point::new(1, 0));
     /// assert_eq!(Point::from_index(2, size)?, Point::new(0, 1));
     /// assert_eq!(Point::from_index(3, size)?, Point::new(1, 1));
     ///
-    /// assert!(Point::from_index(4, Size::from_usize(2, 2)?).is_err());
+    /// assert!(Point::from_index(4, Size::new(2, 2)?).is_err());
     ///
     /// # Ok(())
     /// # }
@@ -127,14 +128,14 @@ impl Point {
     /// let point_bottom_right = Point::new(1, 1);
     ///
     /// let array = vec![0, 1, 2, 3];
-    /// let size = Size::from_usize(2, 2)?;
+    /// let size = Size::new(2, 2)?;
     ///
     /// assert_eq!(array[point_top_left.index(size)?], 0);
     /// assert_eq!(array[point_top_right.index(size)?], 1);
     /// assert_eq!(array[point_bottom_left.index(size)?], 2);
     /// assert_eq!(array[point_bottom_right.index(size)?], 3);
     ///
-    /// assert!(Point::new(2, 2).index(Size::from_usize(2, 2)?).is_err());
+    /// assert!(Point::new(2, 2).index(Size::new(2, 2)?).is_err());
     ///
     /// # Ok(())
     /// # }
@@ -143,7 +144,7 @@ impl Point {
         if !size.contains(self) {
             return Err(IndexError::OutOfBounds);
         }
-        Ok(self.y * size.width().get() + self.x)
+        Ok(self.y * size.width() + self.x)
     }
 
     /// Translate [`Point`] by given [`Offset`].
@@ -191,12 +192,12 @@ impl Point {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn translate(mut self, offset: Offset) -> CreationResult<Self> {
+    pub fn translate(mut self, offset: Offset) -> OffsetCreationResult<Self> {
         let x = self.x as isize + offset.x();
         let y = self.y as isize + offset.y();
 
-        self.x = x.try_into().map_err(|_| CreationError::InvalidX)?;
-        self.y = y.try_into().map_err(|_| CreationError::InvalidY)?;
+        self.x = x.try_into().map_err(|_| OffsetCreationError::InvalidX)?;
+        self.y = y.try_into().map_err(|_| OffsetCreationError::InvalidY)?;
 
         Ok(self)
     }
@@ -272,7 +273,7 @@ impl PartialOrd for Point {
 }
 
 impl TryFrom<Offset> for Point {
-    type Error = CreationError;
+    type Error = OffsetCreationError;
 
     /// Create [`Point`] from [`Offset`].
     ///
@@ -313,9 +314,9 @@ impl TryFrom<Offset> for Point {
     /// # Ok(())
     /// # }
     /// ```
-    fn try_from(value: Offset) -> CreationResult<Self> {
-        let x: usize = value.x().try_into().map_err(|_| CreationError::InvalidX)?;
-        let y: usize = value.y().try_into().map_err(|_| CreationError::InvalidY)?;
+    fn try_from(value: Offset) -> OffsetCreationResult<Self> {
+        let x: usize = value.x().try_into().map_err(|_| OffsetCreationError::InvalidX)?;
+        let y: usize = value.y().try_into().map_err(|_| OffsetCreationError::InvalidY)?;
 
         Ok(Point::new(x, y))
     }

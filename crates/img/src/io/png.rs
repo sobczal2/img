@@ -9,7 +9,10 @@ use crate::{
         IoError,
         IoResult,
     },
-    image::Image,
+    image::{
+        DIMENSION_MAX,
+        Image,
+    },
     pixel::Pixel,
 };
 
@@ -89,11 +92,14 @@ impl ReadPng for Image {
 
         let bytes = &buf[..info.buffer_size()];
 
-        // TODO: Fix after introducing DIMENSION_MAX
-        let width: usize = info.width.try_into().unwrap();
-        let height: usize = info.height.try_into().unwrap();
+        // SAFETY: Platforms with ptr width other than 32 and 64 are unsupported.
+        let size = Size::new(
+            info.width.try_into().expect("unsupported"),
+            info.height.try_into().expect("unsupported"),
+        )
+        .map_err(|e| IoError::Unsupported(format!("unsupported: {e}")))?;
 
-        let mut pixels = vec![Pixel::zero(); width * height].into_boxed_slice();
+        let mut pixels = vec![Pixel::zero(); size.area()].into_boxed_slice();
 
         for (target_px, source_px) in
             pixels.iter_mut().zip(bytes.chunks(pixel_size_by_color_type(info.color_type)))
@@ -104,18 +110,8 @@ impl ReadPng for Image {
             target_px.set_a(get_alpha(source_px, info.color_type));
         }
 
-        let width = width.try_into().map_err(|_|
-                IoError::Unsupported(
-                    "Images with width or height zero are not supported".to_string(),
-                )
-        )?;
-        let height = height.try_into().map_err(|_|
-                IoError::Unsupported(
-                    "Images with width or height zero are not supported".to_string(),
-                )
-        )?;
-
-        Image::new(Size::new(width, height), pixels).map_err(|_| IoError::Unexpected("png returned not valid data".to_string()))
+        Image::new(size, pixels)
+            .map_err(|_| IoError::Unexpected("png returned not valid data".to_string()))
     }
 }
 
@@ -126,15 +122,23 @@ pub trait WritePng {
 
 impl WritePng for Image {
     fn write_png(&self, write: impl std::io::Write) -> IoResult<()> {
-        let width = self.size().width().get();
-        let height = self.size().height().get();
-        // TODO: Fix after introducing DIMENSION_MAX
-        let mut encoder =
-            png::Encoder::new(write, width.try_into().unwrap(), height.try_into().unwrap());
+        let width = self.size().width();
+        let height = self.size().height();
+
+        // SAFETY: Platforms with ptr width other than 32 and 64 are unsupported.
+        let mut encoder = png::Encoder::new(
+            write,
+            width.try_into().expect("unsupported"),
+            height.try_into().expect("unsupported"),
+        );
         encoder.set_color(png::ColorType::Rgba);
         encoder.set_depth(png::BitDepth::Eight);
-        let mut writer = encoder.write_header().map_err(|_| IoError::Unexpected("failed to write png header".to_string()))?;
-        writer.write_image_data(self.buffer().as_ref()).map_err(|_| IoError::Unexpected("failed to write png image data".to_string()))?;
+        let mut writer = encoder
+            .write_header()
+            .map_err(|_| IoError::Unexpected("failed to write png header".to_string()))?;
+        writer
+            .write_image_data(self.buffer().as_ref())
+            .map_err(|_| IoError::Unexpected("failed to write png image data".to_string()))?;
         Ok(())
     }
 }
@@ -156,12 +160,12 @@ mod test {
     #[test]
     fn test_write_png_success() {
         let data = Vec::new();
-        Image::empty(Size::from_usize(10, 10).unwrap()).write_png(data).unwrap();
+        Image::empty(Size::new(10, 10).unwrap()).write_png(data).unwrap();
     }
 
     #[test]
     fn test_write_read_same_image() {
-        let mut image = Image::empty(Size::from_usize(2, 2).unwrap());
+        let mut image = Image::empty(Size::new(2, 2).unwrap());
         image.pixel_mut(Point::new(0, 0)).unwrap().set_r(1);
         image.pixel_mut(Point::new(0, 1)).unwrap().set_r(1);
         image.pixel_mut(Point::new(1, 0)).unwrap().set_r(1);

@@ -47,7 +47,7 @@ where
 fn prepare_test_image(width: usize, height: usize) -> &'static Image {
     let mut rng = SmallRng::seed_from_u64(0);
 
-    Box::leak(Box::new(Image::random(Size::from_usize(width, height).unwrap(), &mut rng)))
+    Box::leak(Box::new(Image::random(Size::new(width, height).unwrap(), &mut rng)))
 }
 
 macro_rules! test_lens {
@@ -106,7 +106,7 @@ fn prepare_split4_lens(
 test_lens!(split4_lens, prepare_split4_lens(50, 100), 100);
 
 fn prepare_value_lens(width: usize, height: usize) -> impl Lens<Item = u8> {
-    ValueLens::new(0u8, Size::from_usize(width, height).unwrap())
+    ValueLens::new(0u8, Size::new(width, height).unwrap())
 }
 
 test_lens!(value_lens, prepare_value_lens(50, 100), 100);
@@ -114,7 +114,7 @@ test_lens!(value_lens, prepare_value_lens(50, 100), 100);
 fn prepare_remap_lens(width: usize, height: usize) -> impl Lens<Item = &'static Pixel> {
     prepare_test_image(width, height)
         .lens()
-        .remap(|s, point| s.look(point), Size::from_usize(width, height).unwrap())
+        .remap(|s, point| s.look(point), Size::new(width, height).unwrap())
 }
 
 test_lens!(remap_lens, prepare_remap_lens(50, 100), 100);
@@ -141,10 +141,7 @@ fn prepare_overlay_lens(width: usize, height: usize) -> impl Lens<Item = Pixel> 
     prepare_test_image(width, height)
         .lens()
         .cloned()
-        .overlay(
-            ValueLens::new(Pixel::zero(), Size::from_usize(20, 30).unwrap()),
-            Point::new(20, 10),
-        )
+        .overlay(ValueLens::new(Pixel::zero(), Size::new(20, 30).unwrap()), Point::new(20, 10))
         .unwrap()
 }
 

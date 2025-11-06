@@ -78,7 +78,7 @@ pub trait Lens {
     /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
-    /// let image = Image::empty(Size::from_usize(10, 20)?);
+    /// let image = Image::empty(Size::new(10, 20)?);
     ///
     /// let lens = image.lens();
     ///
@@ -105,7 +105,7 @@ pub trait Lens {
     /// };
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
-    /// let size = Size::from_usize(10, 20)?;
+    /// let size = Size::new(10, 20)?;
     /// let image = Image::empty(size);
     ///
     /// let lens = image.lens();

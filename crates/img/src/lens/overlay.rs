@@ -61,7 +61,7 @@ where
     fn look(&self, point: Point) -> IndexResult<Self::Item> {
         if self.overlay_area.contains(&point) {
             let offset = Offset::from(self.overlay_area.top_left());
-            return self.overlay.look(point.translate(-offset).unwrap());
+            return self.overlay.look(point.translate(-offset).expect("TODO"));
         }
 
         self.base.look(point)

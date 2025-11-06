@@ -50,12 +50,12 @@ where
 {
     source
         .split2(
-            |s| s.map(HsvPixel::from).kernel(QuadrantSelectionKernel { radius }).unwrap(),
+            |s| s.map(HsvPixel::from).kernel(QuadrantSelectionKernel { radius }).expect("TODO"),
             |s| s,
         )
         .map(|(selected_quadrant, pixel)| MeanCalculationInput { selected_quadrant, pixel })
         .kernel(MeanCalculationKernel { radius })
-        .unwrap()
+        .expect("TODO") 
 }
 
 enum SelectedQuadrant {
@@ -74,7 +74,7 @@ impl Kernel<HsvPixel, SelectedQuadrant> for QuadrantSelectionKernel {
     where
         S: Lens<Item = HsvPixel>,
     {
-        let quadrant_size = Size::new(self.radius + 1, self.radius + 1).unwrap();
+        let quadrant_size = Size::new(self.radius + 1, self.radius + 1).expect("TODO");
         let std_dev_q1 = calculate_std_dev(
             source,
             Point::new(point.x() - self.radius, point.y() - self.radius),
@@ -93,7 +93,7 @@ impl Kernel<HsvPixel, SelectedQuadrant> for QuadrantSelectionKernel {
         let std_dev_q4 = calculate_std_dev(source, Point::new(point.x(), point.y()), quadrant_size);
 
         let std_devs = [std_dev_q1, std_dev_q2, std_dev_q3, std_dev_q4];
-        let min = std_devs.iter().min_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
+        let min = std_devs.iter().min_by(|a, b| a.partial_cmp(b).expect("TODO")).expect("TODO");
 
         if *min == std_dev_q1 {
             Ok(SelectedQuadrant::TopLeft)
@@ -117,14 +117,14 @@ where
 {
     let sum: f32 = (0..size.width() as isize)
         .cartesian_product(0..size.height() as isize)
-        .map(|(x, y)| source.look(top_left.translate(Offset::new(x, y)).unwrap()).unwrap().value())
+        .map(|(x, y)| source.look(top_left.translate(Offset::new(x, y)).expect("TODO")).expect("TODO").value())
         .sum();
 
     let mean = sum / size.area() as f32;
 
     let variance_numerator: f32 = (0..size.width() as isize)
         .cartesian_product(0..size.height() as isize)
-        .map(|(x, y)| source.look(top_left.translate(Offset::new(x, y)).unwrap()).unwrap().value())
+        .map(|(x, y)| source.look(top_left.translate(Offset::new(x, y)).expect("TODO")).expect("TODO").value())
         .map(|v| (v - mean).powi(2))
         .sum();
 
@@ -149,7 +149,7 @@ impl Kernel<MeanCalculationInput, Pixel> for MeanCalculationKernel {
     {
         let input = source.look(point)?;
 
-        let quadrant_size = Size::new(self.radius + 1, self.radius + 1).unwrap();
+        let quadrant_size = Size::new(self.radius + 1, self.radius + 1).expect("TODO");
 
         let result = match input.selected_quadrant {
             SelectedQuadrant::TopLeft => calculate_mean(
@@ -212,10 +212,10 @@ where
 {
     let sum: IntermediatePixel = (0..size.width() as isize)
         .cartesian_product(0..size.height() as isize)
-        .map(|(x, y)| source.look(top_left.translate(Offset::new(x, y)).unwrap()).unwrap().pixel)
+        .map(|(x, y)| source.look(top_left.translate(Offset::new(x, y)).expect("TODO")).expect("TODO").pixel)
         .map(|p| IntermediatePixel { red: p.r() as u16, green: p.g() as u16, blue: p.b() as u16 })
         .reduce(|l, r| l + r)
-        .unwrap();
+        .expect("TODO");
 
     sum / size.area() as u16
 }

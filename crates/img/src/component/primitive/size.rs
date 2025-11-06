@@ -1,8 +1,4 @@
-use std::{
-    cmp::Ordering,
-    num::NonZeroUsize,
-    ops::Add,
-};
+use std::cmp::Ordering;
 use thiserror::Error;
 
 use crate::image::DIMENSION_MAX;

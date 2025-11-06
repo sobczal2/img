@@ -33,7 +33,7 @@ where
             lens1.size().width().min(lens2.size().width()),
             lens1.size().height().min(lens2.size().height()),
         )
-        .unwrap();
+        .expect("unexpected error from Size::new");
 
         Self { lens1, lens2, size }
     }
@@ -85,7 +85,7 @@ where
             lens1.size().width().min(lens2.size().width()).min(lens3.size().width()),
             lens1.size().height().min(lens2.size().height()).min(lens3.size().height()),
         )
-        .unwrap();
+        .expect("unexpected error from Size::new");
 
         Self { lens1, lens2, lens3, size }
     }
@@ -158,7 +158,7 @@ where
                 .min(lens3.size().height())
                 .min(lens4.size().height()),
         )
-        .unwrap();
+        .expect("unexpected error from Size::new");
 
         Self { lens1, lens2, lens3, lens4, size }
     }

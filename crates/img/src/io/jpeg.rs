@@ -38,7 +38,7 @@ impl ReadJpeg for Image {
                 .chunks(PIXEL_SIZE)
                 // SAFETY: chunks are of size PIXEL_SIZE, which is the same
                 // as Pixel::new expects.
-                .map(|c| Pixel::new(c.try_into().unwrap()))
+                .map(|c| Pixel::new(c.try_into().expect("unexpected chunk returned from chunks")))
                 .collect(),
         )
         .map_err(|_| IoError::Unexpected("Unexpected value received from turbojpeg".to_string()))?;

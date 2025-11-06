@@ -30,7 +30,7 @@ where
             // offset will also always be positive.
             let original_point = point
                 .translate(Offset::new(margin.left() as isize, margin.top() as isize))
-                .unwrap();
+                .expect("unexpected value returned from translate");
 
             lens.look(original_point)
         },

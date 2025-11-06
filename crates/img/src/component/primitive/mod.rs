@@ -7,8 +7,8 @@ mod size;
 
 pub use area::{
     Area,
-    CreationError as AreaCreationError,
-    CreationResult as AreaCreationResult,
+    AreaCreationError as AreaCreationError,
+    AreaCreationResult as AreaCreationResult,
 };
 pub use margin::Margin;
 pub use offset::Offset;

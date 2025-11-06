@@ -9,10 +9,7 @@ use crate::{
         IoError,
         IoResult,
     },
-    image::{
-        DIMENSION_MAX,
-        Image,
-    },
+    image::Image,
     pixel::Pixel,
 };
 

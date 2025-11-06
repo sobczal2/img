@@ -85,15 +85,24 @@ where
 
         let center = self.size.middle();
 
-        let original = lens.look(point).unwrap();
+        // SAFETY: `Lens::look` always returns a value when in bounds.
+        let original = lens.look(point).expect("unexpected error in Lens::look");
         let sum = self
             .buffer
             .iter()
             .enumerate()
-            .map(|(index, value)| (Point::from_index(index, self.size).unwrap(), value))
+            .map(|(index, value)| (
+                // SAFETY: index comes from the buffer of size used, so it is always in bounds.
+                Point::from_index(index, self.size).expect("unexpected error in Point::from_index"),
+                value
+            )
+            )
             .map(|(kernel_point, value)| {
                 let offset = center - kernel_point;
-                let current = lens.look(point.translate(offset).unwrap()).unwrap();
+                // SAFETY: translated point always in bounds after previous checks.
+                let translated = point.translate(offset).expect("unexpected error in Point::translate");
+                // SAFETY: `Lens::look` always returns a value when in bounds.
+                let current = lens.look(translated).expect("unexpected error in Lens::look");
                 let pixel = current.as_ref();
 
                 IntermediatePixel(
@@ -104,7 +113,8 @@ where
                 )
             })
             .reduce(|l, r| l + r)
-            .unwrap();
+            // SAFETY: iterator is never empty so reduce always returns `Some`.
+            .expect("unexpected error in reduce");
 
         let mut px = *original.as_ref();
         px.set_with_flags_f32(sum.0, sum.1, sum.2, sum.3, self.flags);

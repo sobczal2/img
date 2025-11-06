@@ -46,13 +46,13 @@ pub fn canny_lens<S>(source: S) -> impl Lens<Item = Pixel>
 where
     S: Lens<Item = Pixel> + Clone,
 {
-    let lens = value_border(source, Margin::unified(2), Pixel::zero()).unwrap();
+    let lens = value_border(source, Margin::unified(2), Pixel::zero()).expect("TODO");
 
     // SAFETY: `Size::from_radius(2)` is always successful.
     lens.kernel(
-        GaussianKernel::new(Size::from_radius(2).unwrap(), 2f32, ChannelFlags::RGB).unwrap(),
+        GaussianKernel::new(Size::from_radius(2).expect("unexpected error from Size::from_radius"), 2f32, ChannelFlags::RGB).expect("TODO"),
     )
-    .unwrap()
+    .expect("TODO")
     .materialize()
     .split4(
         |s| single_channel_lens(s.map(|p| p.r())),
@@ -68,13 +68,13 @@ pub fn canny_lens_par<S>(source: S, threads: NonZeroUsize) -> impl Lens<Item = P
 where
     S: Lens<Item = Pixel> + Clone + Send + Sync,
 {
-    let lens = value_border(source, Margin::unified(2), Pixel::zero()).unwrap();
+    let lens = value_border(source, Margin::unified(2), Pixel::zero()).expect("TODO");
 
     // SAFETY: `Size::from_radius(2)` is always successful.
     lens.kernel(
-        GaussianKernel::new(Size::from_radius(2).unwrap(), 2f32, ChannelFlags::RGB).unwrap(),
+        GaussianKernel::new(Size::from_radius(2).expect("unexpected error from Size::from_radius"), 2f32, ChannelFlags::RGB).expect("TODO"),
     )
-    .unwrap()
+    .expect("TODO")
     .materialize_par(threads)
     .split4(
         |s| single_channel_lens(s.map(|p| p.r())),
@@ -102,11 +102,11 @@ fn single_channel_lens<S>(source: S) -> impl Lens<Item = u8>
 where
     S: Lens<Item = u8>,
 {
-    let lens = value_border(source, Margin::unified(1), 0u8).unwrap();
-    let lens = lens.kernel(SobelKernel::new()).unwrap();
-    let lens = value_border(lens, Margin::unified(1), Default::default()).unwrap();
+    let lens = value_border(source, Margin::unified(1), 0u8).expect("TODO");
+    let lens = lens.kernel(SobelKernel::new()).expect("TODO");
+    let lens = value_border(lens, Margin::unified(1), Default::default()).expect("TODO");
     let lens = non_maximum_suppression_lens(lens);
-    let lens = value_border(lens, Margin::unified(1), 0f32).unwrap();
+    let lens = value_border(lens, Margin::unified(1), 0f32).expect("TODO");
     hysteresis_thresholding_lens(lens)
 }
 
@@ -130,21 +130,21 @@ fn non_maximum_suppression_lens<S>(source: S) -> impl Lens<Item = f32>
 where
     S: Lens<Item = Gradient>,
 {
-    let size = source.size().shrink_by_margin(Margin::unified(1)).unwrap();
+    let size = source.size().shrink_by_margin(Margin::unified(1)).expect("TODO");
     source.map(|g| (g.magnitude(), g.direction())).remap(
         |s, p| {
-            let p = p.translate(Offset::new(1, 1)).unwrap();
-            let gradient_a = s.look(p).unwrap();
+            let p = p.translate(Offset::new(1, 1)).expect("TODO");
+            let gradient_a = s.look(p).expect("TODO");
             let direction = GradientDirection::from_angle(gradient_a.1);
 
             let gradient_b = match direction {
-                GradientDirection::Horizontal => s.look(Point::new(p.x() + 1, p.y())).unwrap(),
-                GradientDirection::Vertical => s.look(Point::new(p.x(), p.y() + 1)).unwrap(),
+                GradientDirection::Horizontal => s.look(Point::new(p.x() + 1, p.y())).expect("TODO"),
+                GradientDirection::Vertical => s.look(Point::new(p.x(), p.y() + 1)).expect("TODO"),
             };
 
             let gradient_c = match direction {
-                GradientDirection::Horizontal => s.look(Point::new(p.x() - 1, p.y())).unwrap(),
-                GradientDirection::Vertical => s.look(Point::new(p.x(), p.y() - 1)).unwrap(),
+                GradientDirection::Horizontal => s.look(Point::new(p.x() - 1, p.y())).expect("TODO"),
+                GradientDirection::Vertical => s.look(Point::new(p.x(), p.y() - 1)).expect("TODO"),
             };
 
             if gradient_a.0 > gradient_b.0 && gradient_a.0 > gradient_c.0 {
@@ -180,8 +180,8 @@ impl Kernel<f32, u8> for HysteresisThresholdingKernel {
         let neighbor_exists = (-1..=1)
             .cartesian_product(-1..=1)
             .map(|(x, y)| Offset::new(x, y))
-            .map(|offset| point.translate(offset).unwrap())
-            .map(|point| lens.look(point).unwrap())
+            .map(|offset| point.translate(offset).expect("TODO"))
+            .map(|point| lens.look(point).expect("TODO"))
             .any(|value| value > self.max);
 
         if neighbor_exists { Ok(255u8) } else { Ok(0u8) }
@@ -199,5 +199,5 @@ where
     let min = 10f32;
     let max = 20f32;
 
-    source.kernel(HysteresisThresholdingKernel { min, max }).unwrap()
+    source.kernel(HysteresisThresholdingKernel { min, max }).expect("TODO")
 }

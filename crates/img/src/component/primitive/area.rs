@@ -9,12 +9,12 @@ use super::{
 };
 
 #[derive(Debug, Error)]
-pub enum CreationError {
+pub enum AreaCreationError {
     #[error("resulting size invalid: {0}")]
     SizeInvalid(#[from] SizeCreationError),
 }
 
-pub type CreationResult<T> = Result<T, CreationError>;
+pub type AreaCreationResult<T> = Result<T, AreaCreationError>;
 
 /// Represents a 2D area defined by size and top left point.
 #[derive(Debug, Clone, Copy)]
@@ -72,7 +72,7 @@ impl Area {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn from_cropped_size(size: Size, margin: Margin) -> CreationResult<Self> {
+    pub fn from_cropped_size(size: Size, margin: Margin) -> AreaCreationResult<Self> {
         let size = size.shrink_by_margin(margin)?;
         let top_left = Point::new(margin.left(), margin.top());
 
@@ -95,7 +95,7 @@ impl Area {
         // here offset we apply has always positive values, so the resulting
         // offset will also always be positive. Also cast from usize to isize of
         // width is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
-        self.top_left.translate(Offset::new(self.size.width().try_into().unwrap(), 0)).unwrap()
+        self.top_left.translate(Offset::new(self.size.width().try_into().expect("unexpected error when converting usize to isize"), 0)).expect("unexpected error in Point::translate")
     }
 
     /// Get [`Area`]'s top left point.
@@ -104,7 +104,7 @@ impl Area {
         // here offset we apply has always positive values, so the resulting
         // offset will also always be positive. Also cast from usize to isize of
         // height is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
-        self.top_left.translate(Offset::new(0, self.size.height().try_into().unwrap())).unwrap()
+        self.top_left.translate(Offset::new(0, self.size.height().try_into().expect("unexpected error when converting usize to isize"))).expect("unexpected error in Point::translate")
     }
 
     /// Get [`Area`]'s top left point.
@@ -115,10 +115,10 @@ impl Area {
         // width and height is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
         self.top_left
             .translate(Offset::new(
-                self.size.width().try_into().unwrap(),
-                self.size.height().try_into().unwrap(),
+                self.size.width().try_into().expect("unexpected error when converting usize to isize"),
+                self.size.height().try_into().expect("unexpected error when converting usize to isize"),
             ))
-            .unwrap()
+            .expect("unexpected error in Point::translate")
     }
 
     /// Checks if [`Point`] is contained within [`Area`].

@@ -57,10 +57,10 @@ impl<T> MaterializeLens<T> {
                     chunk.iter_mut().enumerate().for_each(|(index, value)| {
                         // SAFETY: all starting_index + index will be in bounds since it enumerates
                         // over the lens that it is indexing.
-                        let point = Point::from_index(starting_index + index, size).unwrap();
+                        let point = Point::from_index(starting_index + index, size).expect("Point::from_index");
                         // SAFETY: `Lens::look` is guaranteed to return Ok if point is in bounds,
                         // and point is guaranted to be in bounds because of the check above.
-                        *value = Some(source.look(point).unwrap());
+                        *value = Some(source.look(point).expect("unexpected error from Lens::look"));
                     });
                 });
             });
@@ -87,7 +87,7 @@ where
 
         // SAFETY: index is guaranteed to be valid thanks to the check above, and value
         // has to be initialized since it went through constructor.
-        Ok(self.values[index].clone().unwrap())
+        Ok(self.values[index].clone().expect("unexpected empty value encountered"))
     }
 
     fn size(&self) -> Size {

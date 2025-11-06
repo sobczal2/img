@@ -53,7 +53,6 @@ impl Kernel<u8, Gradient> for SobelKernel {
             return Err(IndexError::OutOfBounds);
         }
 
-        // SAFETY: iterator is never empty so reduce always returns `Some`.
         let (g_x, g_y) = SOBEL_X
             .iter()
             .zip(SOBEL_Y)
@@ -65,12 +64,15 @@ impl Kernel<u8, Gradient> for SobelKernel {
             })
             .map(|(offset, x_value, y_value)| {
                 let lens_value = lens
-                    .look(point.translate(offset).unwrap())
+                    // SAFETY: bounds check performed before processing
+                    .look(point.translate(offset).expect("unexpected error in translate"))
+                    // SAFETY: bounds check performed before processing
                     .expect("bug in lens implementation") as i16;
                 (x_value * lens_value, y_value * lens_value)
             })
             .reduce(|l, r| (l.0 + r.0, l.1 + r.1))
-            .unwrap();
+            // SAFETY: iterator is never empty so reduce always returns `Some`.
+            .expect("unexpected error in reduce");
 
         Ok(Gradient { x: g_x, y: g_y })
     }

@@ -190,7 +190,7 @@ impl<T: Into<Pixel>> FromLens<T> for Image {
 
         // SAFETY: both size and pixels come from one Lens, which is guaranted
         // to return correct values.
-        Self::new(size, pixels).unwrap()
+        Self::new(size, pixels).expect("bug in lens implementation")
     }
 }
 
@@ -242,10 +242,10 @@ impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
                     chunk.iter_mut().enumerate().for_each(|(index, pixel)| {
                         // SAFETY: all starting_index + index will be in bounds since it enumerates
                         // over the image that it is indexing.
-                        let point = Point::from_index(starting_index + index, size).unwrap();
+                        let point = Point::from_index(starting_index + index, size).expect("unexpected error calculating index");
                         // SAFETY: Lens::look is guaranted to return Ok if point is in bounds,
                         // and point is guaranted to be in bounds because of the check above.
-                        *pixel = lens.look(point).unwrap().into();
+                        *pixel = lens.look(point).expect("unexpected error in Lens::look").into();
                     });
                 });
             });

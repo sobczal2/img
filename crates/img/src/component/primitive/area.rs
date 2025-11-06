@@ -95,7 +95,15 @@ impl Area {
         // here offset we apply has always positive values, so the resulting
         // offset will also always be positive. Also cast from usize to isize of
         // width is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
-        self.top_left.translate(Offset::new(self.size.width().try_into().expect("unexpected error when converting usize to isize"), 0)).expect("unexpected error in Point::translate")
+        self.top_left
+            .translate(Offset::new(
+                self.size
+                    .width()
+                    .try_into()
+                    .expect("unexpected error when converting usize to isize"),
+                0,
+            ))
+            .expect("unexpected error in Point::translate")
     }
 
     /// Get [`Area`]'s top left point.
@@ -104,7 +112,15 @@ impl Area {
         // here offset we apply has always positive values, so the resulting
         // offset will also always be positive. Also cast from usize to isize of
         // height is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
-        self.top_left.translate(Offset::new(0, self.size.height().try_into().expect("unexpected error when converting usize to isize"))).expect("unexpected error in Point::translate")
+        self.top_left
+            .translate(Offset::new(
+                0,
+                self.size
+                    .height()
+                    .try_into()
+                    .expect("unexpected error when converting usize to isize"),
+            ))
+            .expect("unexpected error in Point::translate")
     }
 
     /// Get [`Area`]'s top left point.
@@ -115,8 +131,14 @@ impl Area {
         // width and height is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
         self.top_left
             .translate(Offset::new(
-                self.size.width().try_into().expect("unexpected error when converting usize to isize"),
-                self.size.height().try_into().expect("unexpected error when converting usize to isize"),
+                self.size
+                    .width()
+                    .try_into()
+                    .expect("unexpected error when converting usize to isize"),
+                self.size
+                    .height()
+                    .try_into()
+                    .expect("unexpected error when converting usize to isize"),
             ))
             .expect("unexpected error in Point::translate")
     }

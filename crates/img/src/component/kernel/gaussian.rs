@@ -55,7 +55,12 @@ impl GaussianKernel {
             .enumerate()
             // SAFETY: we construct the index from the area of size passed to the
             // index creation, so it is always in bounds.
-            .map(|(index, value)| (Point::from_index(index, size).expect("unexpected error in Point::from_index"), value))
+            .map(|(index, value)| {
+                (
+                    Point::from_index(index, size).expect("unexpected error in Point::from_index"),
+                    value,
+                )
+            })
             .for_each(|(point, value)| *value = gaussian_fn(point - center, sigma));
 
         let sum: f32 = values.iter().sum();

@@ -55,7 +55,7 @@ where
         )
         .map(|(selected_quadrant, pixel)| MeanCalculationInput { selected_quadrant, pixel })
         .kernel(MeanCalculationKernel { radius })
-        .expect("TODO") 
+        .expect("TODO")
 }
 
 enum SelectedQuadrant {
@@ -117,14 +117,18 @@ where
 {
     let sum: f32 = (0..size.width() as isize)
         .cartesian_product(0..size.height() as isize)
-        .map(|(x, y)| source.look(top_left.translate(Offset::new(x, y)).expect("TODO")).expect("TODO").value())
+        .map(|(x, y)| {
+            source.look(top_left.translate(Offset::new(x, y)).expect("TODO")).expect("TODO").value()
+        })
         .sum();
 
     let mean = sum / size.area() as f32;
 
     let variance_numerator: f32 = (0..size.width() as isize)
         .cartesian_product(0..size.height() as isize)
-        .map(|(x, y)| source.look(top_left.translate(Offset::new(x, y)).expect("TODO")).expect("TODO").value())
+        .map(|(x, y)| {
+            source.look(top_left.translate(Offset::new(x, y)).expect("TODO")).expect("TODO").value()
+        })
         .map(|v| (v - mean).powi(2))
         .sum();
 
@@ -212,7 +216,9 @@ where
 {
     let sum: IntermediatePixel = (0..size.width() as isize)
         .cartesian_product(0..size.height() as isize)
-        .map(|(x, y)| source.look(top_left.translate(Offset::new(x, y)).expect("TODO")).expect("TODO").pixel)
+        .map(|(x, y)| {
+            source.look(top_left.translate(Offset::new(x, y)).expect("TODO")).expect("TODO").pixel
+        })
         .map(|p| IntermediatePixel { red: p.r() as u16, green: p.g() as u16, blue: p.b() as u16 })
         .reduce(|l, r| l + r)
         .expect("TODO");

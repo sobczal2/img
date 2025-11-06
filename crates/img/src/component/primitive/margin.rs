@@ -42,19 +42,19 @@ impl Margin {
     /// ```
     pub fn new(top: usize, right: usize, bottom: usize, left: usize) -> MarginCreationResult<Self> {
         if top > DIMENSION_MAX {
-            return Err(MarginCreationError::TopTooBig)
+            return Err(MarginCreationError::TopTooBig);
         }
 
         if right > DIMENSION_MAX {
-            return Err(MarginCreationError::RightTooBig)
+            return Err(MarginCreationError::RightTooBig);
         }
 
         if bottom > DIMENSION_MAX {
-            return Err(MarginCreationError::BottomTooBig)
+            return Err(MarginCreationError::BottomTooBig);
         }
 
         if left > DIMENSION_MAX {
-            return Err(MarginCreationError::LeftTooBig)
+            return Err(MarginCreationError::LeftTooBig);
         }
 
         Ok(Margin { top, right, bottom, left })
@@ -111,15 +111,25 @@ mod tests {
         assert!(Margin::new(0, 0, 0, DIMENSION_MAX).is_ok());
     }
 
-
     #[test]
     fn test_new_err() {
-        assert_eq!(Margin::new(DIMENSION_MAX + 1, 0, 0, 0).unwrap_err(), MarginCreationError::TopTooBig);
-        assert_eq!(Margin::new(0, DIMENSION_MAX + 1, 0, 0).unwrap_err(), MarginCreationError::RightTooBig);
-        assert_eq!(Margin::new(0, 0, DIMENSION_MAX + 1, 0).unwrap_err(), MarginCreationError::BottomTooBig);
-        assert_eq!(Margin::new(0, 0, 0, DIMENSION_MAX + 1).unwrap_err(), MarginCreationError::LeftTooBig);
+        assert_eq!(
+            Margin::new(DIMENSION_MAX + 1, 0, 0, 0).unwrap_err(),
+            MarginCreationError::TopTooBig
+        );
+        assert_eq!(
+            Margin::new(0, DIMENSION_MAX + 1, 0, 0).unwrap_err(),
+            MarginCreationError::RightTooBig
+        );
+        assert_eq!(
+            Margin::new(0, 0, DIMENSION_MAX + 1, 0).unwrap_err(),
+            MarginCreationError::BottomTooBig
+        );
+        assert_eq!(
+            Margin::new(0, 0, 0, DIMENSION_MAX + 1).unwrap_err(),
+            MarginCreationError::LeftTooBig
+        );
     }
-
 
     #[test]
     fn test_top() {

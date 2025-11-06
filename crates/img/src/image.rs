@@ -244,7 +244,8 @@ impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
                     chunk.iter_mut().enumerate().for_each(|(index, pixel)| {
                         // SAFETY: all starting_index + index will be in bounds since it enumerates
                         // over the image that it is indexing.
-                        let point = Point::from_index(starting_index + index, size).expect("unexpected error calculating index");
+                        let point = Point::from_index(starting_index + index, size)
+                            .expect("unexpected error calculating index");
                         // SAFETY: Lens::look is guaranted to return Ok if point is in bounds,
                         // and point is guaranted to be in bounds because of the check above.
                         *pixel = lens.look(point).expect("unexpected error in Lens::look").into();
@@ -259,7 +260,10 @@ impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
 
 #[cfg(test)]
 mod tests {
-    use std::{isize, u128};
+    use std::{
+        isize,
+        u128,
+    };
 
     use itertools::Itertools;
     use rand::{

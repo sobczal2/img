@@ -70,9 +70,7 @@ impl Kernel<u8, Gradient> for SobelKernel {
                     .expect("bug in lens implementation") as i16;
                 (x_value * lens_value, y_value * lens_value)
             })
-            .reduce(|l, r| (l.0 + r.0, l.1 + r.1))
-            // SAFETY: iterator is never empty so reduce always returns `Some`.
-            .expect("unexpected error in reduce");
+            .fold((0, 0), |acc, item| (acc.0 + item.0, acc.1 + item.1));
 
         Ok(Gradient { x: g_x, y: g_y })
     }

@@ -220,8 +220,7 @@ where
             source.look(top_left.translate(Offset::new(x, y)).expect("TODO")).expect("TODO").pixel
         })
         .map(|p| IntermediatePixel { red: p.r() as u16, green: p.g() as u16, blue: p.b() as u16 })
-        .reduce(|l, r| l + r)
-        .expect("TODO");
+        .fold(IntermediatePixel { red: 0, green: 0, blue: 0 }, |acc, item| acc + item);
 
     sum / size.area() as u16
 }

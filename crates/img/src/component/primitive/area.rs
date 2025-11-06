@@ -60,12 +60,12 @@ impl Area {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// // Create a 5x10 area in with 15x20 offset
-    /// let with_offset = Area::from_cropped_size(Size::new(50, 50)?, Margin::new(20, 30, 20, 15))?;
+    /// let with_offset = Area::from_cropped_size(Size::new(50, 50)?, Margin::new(20, 30, 20, 15)?)?;
     /// assert_eq!(with_offset.size(), Size::new(5, 10)?);
     /// assert_eq!(with_offset.top_left(), Point::new(15, 20));
     ///
     /// // Create a 5x10 area in without offset
-    /// let without_offset = Area::from_cropped_size(Size::new(50, 50)?, Margin::new(0, 45, 40, 0))?;
+    /// let without_offset = Area::from_cropped_size(Size::new(50, 50)?, Margin::new(0, 45, 40, 0)?)?;
     /// assert_eq!(without_offset.size(), Size::new(5, 10)?);
     /// assert_eq!(without_offset.top_left(), Point::new(0, 0));
     ///
@@ -95,7 +95,15 @@ impl Area {
         // here offset we apply has always positive values, so the resulting
         // offset will also always be positive. Also cast from usize to isize of
         // width is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
-        self.top_left.translate(Offset::new(self.size.width().try_into().expect("unexpected error when converting usize to isize"), 0)).expect("unexpected error in Point::translate")
+        self.top_left
+            .translate(Offset::new(
+                self.size
+                    .width()
+                    .try_into()
+                    .expect("unexpected error when converting usize to isize"),
+                0,
+            ))
+            .expect("unexpected error in Point::translate")
     }
 
     /// Get [`Area`]'s top left point.
@@ -104,7 +112,15 @@ impl Area {
         // here offset we apply has always positive values, so the resulting
         // offset will also always be positive. Also cast from usize to isize of
         // height is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
-        self.top_left.translate(Offset::new(0, self.size.height().try_into().expect("unexpected error when converting usize to isize"))).expect("unexpected error in Point::translate")
+        self.top_left
+            .translate(Offset::new(
+                0,
+                self.size
+                    .height()
+                    .try_into()
+                    .expect("unexpected error when converting usize to isize"),
+            ))
+            .expect("unexpected error in Point::translate")
     }
 
     /// Get [`Area`]'s top left point.
@@ -115,8 +131,14 @@ impl Area {
         // width and height is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
         self.top_left
             .translate(Offset::new(
-                self.size.width().try_into().expect("unexpected error when converting usize to isize"),
-                self.size.height().try_into().expect("unexpected error when converting usize to isize"),
+                self.size
+                    .width()
+                    .try_into()
+                    .expect("unexpected error when converting usize to isize"),
+                self.size
+                    .height()
+                    .try_into()
+                    .expect("unexpected error when converting usize to isize"),
             ))
             .expect("unexpected error in Point::translate")
     }

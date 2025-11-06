@@ -72,7 +72,7 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
         old_size.width() - new_size.width() - offset.width,
         old_size.height() - new_size.height() - offset.height,
         offset.width,
-    );
+    )?;
 
     #[cfg(not(feature = "parallel"))]
     let image = crop(&image, margin)?;

@@ -72,15 +72,15 @@ mod tests {
     fn test_crop_with_valid_margins() {
         let image = Image::random(Size::new(10, 20).unwrap(), &mut StdRng::from_seed([7u8; 32]));
 
-        let equal = crop(&image, Margin::new(0, 0, 0, 0));
+        let equal = crop(&image, Margin::new(0, 0, 0, 0).unwrap());
         assert!(equal.is_ok());
         assert_eq!(equal.unwrap().size(), Size::new(10, 20).unwrap());
 
-        let top_right = crop(&image, Margin::new(5, 5, 0, 0));
+        let top_right = crop(&image, Margin::new(5, 5, 0, 0).unwrap());
         assert!(top_right.is_ok());
         assert_eq!(top_right.unwrap().size(), Size::new(5, 15).unwrap());
 
-        let bottom_left = crop(&image, Margin::new(0, 0, 5, 5));
+        let bottom_left = crop(&image, Margin::new(0, 0, 5, 5).unwrap());
         assert!(bottom_left.is_ok());
         assert_eq!(bottom_left.unwrap().size(), Size::new(5, 15).unwrap());
     }
@@ -89,25 +89,25 @@ mod tests {
     fn test_crop_with_invalid_margins() {
         let image = Image::random(Size::new(10, 20).unwrap(), &mut StdRng::from_seed([7u8; 32]));
 
-        let shrinked_horizontal = crop(&image, Margin::new(0, 5, 0, 5));
+        let shrinked_horizontal = crop(&image, Margin::new(0, 5, 0, 5).unwrap());
         assert_eq!(shrinked_horizontal.unwrap_err(), SizeCreationError::WidthZero);
 
-        let shrinked_vertical = crop(&image, Margin::new(10, 0, 10, 0));
+        let shrinked_vertical = crop(&image, Margin::new(10, 0, 10, 0).unwrap());
         assert_eq!(shrinked_vertical.unwrap_err(), SizeCreationError::HeightZero);
 
-        let shrinked_both = crop(&image, Margin::new(10, 5, 10, 5));
+        let shrinked_both = crop(&image, Margin::new(10, 5, 10, 5).unwrap());
         assert_eq!(shrinked_both.unwrap_err(), SizeCreationError::WidthZero);
 
-        let top_oob = crop(&image, Margin::new(20, 0, 0, 0));
+        let top_oob = crop(&image, Margin::new(20, 0, 0, 0).unwrap());
         assert_eq!(top_oob.unwrap_err(), SizeCreationError::HeightZero);
 
-        let right_oob = crop(&image, Margin::new(0, 10, 0, 0));
+        let right_oob = crop(&image, Margin::new(0, 10, 0, 0).unwrap());
         assert_eq!(right_oob.unwrap_err(), SizeCreationError::WidthZero);
 
-        let bottom_oob = crop(&image, Margin::new(0, 0, 20, 0));
+        let bottom_oob = crop(&image, Margin::new(0, 0, 20, 0).unwrap());
         assert_eq!(bottom_oob.unwrap_err(), SizeCreationError::HeightZero);
 
-        let left_oob = crop(&image, Margin::new(0, 0, 0, 10));
+        let left_oob = crop(&image, Margin::new(0, 0, 0, 10).unwrap());
         assert_eq!(left_oob.unwrap_err(), SizeCreationError::WidthZero);
     }
 }

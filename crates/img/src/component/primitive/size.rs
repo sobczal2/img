@@ -92,7 +92,7 @@ impl Size {
     /// ```
     pub fn from_radius(radius: usize) -> CreationResult<Self> {
         if radius > DIMENSION_MAX / 2 {
-            return Err(CreationError::WidthTooBig)
+            return Err(CreationError::WidthTooBig);
         }
 
         let diameter = 2 * radius + 1;
@@ -194,15 +194,14 @@ impl Size {
     /// let size = Size::new(10, 20)?;
     ///
     /// // Reduce size by 2 from the top, 3 from the right, 4 from the bottom, 5 from the left.
-    /// let reduced_size = size.shrink_by_margin(Margin::new(2, 3, 4, 5))?;
-    ///
+    /// let reduced_size = size.shrink_by_margin(Margin::new(2, 3, 4, 5)?)?;
     /// assert_eq!(reduced_size.width(), 2);
     /// assert_eq!(reduced_size.height(), 14);
     ///
-    /// let invalid_width_size = size.shrink_by_margin(Margin::new(0, 4, 0, 6));
+    /// let invalid_width_size = size.shrink_by_margin(Margin::new(0, 4, 0, 6)?);
     /// assert_eq!(invalid_width_size, SizeCreationResult::Err(SizeCreationError::WidthZero));
     ///
-    /// let invalid_height_size = size.shrink_by_margin(Margin::new(14, 0, 6, 0));
+    /// let invalid_height_size = size.shrink_by_margin(Margin::new(14, 0, 6, 0)?);
     /// assert_eq!(invalid_height_size, SizeCreationResult::Err(SizeCreationError::HeightZero));
     ///
     /// # Ok(())
@@ -243,15 +242,15 @@ impl Size {
     /// let size = Size::new(10, 20)?;
     ///
     /// // Increase size by 2 from the top, 3 from the right, 4 from the bottom, 5 from the left.
-    /// let increased_size = size.extend_by_margin(Margin::new(2, 3, 4, 5))?;
+    /// let increased_size = size.extend_by_margin(Margin::new(2, 3, 4, 5)?)?;
     ///
     /// assert_eq!(increased_size.width(), 18);
     /// assert_eq!(increased_size.height(), 26);
     ///
-    /// let invalid_width_size = size.extend_by_margin(Margin::new(0, DIMENSION_MAX - 1, 0, 6));
+    /// let invalid_width_size = size.extend_by_margin(Margin::new(0, DIMENSION_MAX - 1, 0, 6)?);
     /// assert_eq!(invalid_width_size, SizeCreationResult::Err(SizeCreationError::WidthTooBig));
     ///
-    /// let invalid_height_size = size.extend_by_margin(Margin::new(DIMENSION_MAX - 1, 0, 6, 0));
+    /// let invalid_height_size = size.extend_by_margin(Margin::new(DIMENSION_MAX - 1, 0, 6, 0)?);
     /// assert_eq!(invalid_height_size, SizeCreationResult::Err(SizeCreationError::HeightTooBig));
     ///
     /// # Ok(())

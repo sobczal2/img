@@ -88,7 +88,7 @@ where
     // SAFETY: `Size::from_radius(2)` is always successful.
     lens.kernel(
         GaussianKernel::new(
-            Size::from_radius(2).expect("unexpected error from Size::from_radius"),
+            Size::from_radius(2).expect("unexpected error in Size::from_radius"),
             2f32,
             ChannelFlags::RGB,
         )

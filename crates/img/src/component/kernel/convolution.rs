@@ -115,9 +115,7 @@ where
                     value * pixel.a_f32(),
                 )
             })
-            .reduce(|l, r| l + r)
-            // SAFETY: iterator is never empty so reduce always returns `Some`.
-            .expect("unexpected error in reduce");
+            .fold(IntermediatePixel(0f32, 0f32, 0f32, 0f32), |acc, item| acc + item);
 
         let mut px = *original.as_ref();
         px.set_with_flags_f32(sum.0, sum.1, sum.2, sum.3, self.flags);

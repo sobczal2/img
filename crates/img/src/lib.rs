@@ -1,4 +1,3 @@
-#![forbid(clippy::unwrap_used)]
 pub mod component;
 pub mod error;
 pub mod image;

@@ -193,7 +193,7 @@ impl Add for IntermediatePixel {
         IntermediatePixel {
             red: self.red + rhs.red,
             green: self.green + rhs.green,
-            blue: self.green + rhs.green,
+            blue: self.blue + rhs.blue,
         }
     }
 }

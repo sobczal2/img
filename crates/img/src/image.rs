@@ -28,6 +28,8 @@ pub enum CreationError {
 
 pub type ResultError<T> = Result<T, CreationError>;
 
+/// Maximum dimension size of an image (width or height).
+/// Guaranted to be less than isize::MAX.
 #[cfg(target_pointer_width = "64")]
 pub const DIMENSION_MAX: usize = (1u64 << 32) as usize - 1;
 
@@ -257,6 +259,8 @@ impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
 
 #[cfg(test)]
 mod tests {
+    use std::{isize, u128};
+
     use itertools::Itertools;
     use rand::{
         SeedableRng,
@@ -266,6 +270,12 @@ mod tests {
     use crate::error::IndexError;
 
     use super::*;
+
+    #[test]
+    fn test_dimension_max() {
+        assert!(DIMENSION_MAX < isize::MAX as usize);
+        assert!((DIMENSION_MAX as u128 * DIMENSION_MAX as u128) < usize::MAX as u128);
+    }
 
     #[test]
     fn test_new_err() {

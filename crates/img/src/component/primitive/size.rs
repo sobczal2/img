@@ -91,6 +91,10 @@ impl Size {
     /// # }
     /// ```
     pub fn from_radius(radius: usize) -> CreationResult<Self> {
+        if radius > DIMENSION_MAX / 2 {
+            return Err(CreationError::WidthTooBig)
+        }
+
         let diameter = 2 * radius + 1;
         Self::new(diameter, diameter)
     }

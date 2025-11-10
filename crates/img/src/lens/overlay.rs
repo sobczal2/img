@@ -39,6 +39,7 @@ where
 
         let overlay_size = overlay.size();
 
+        // TODO: fix
         let bottom_right = Point::new(
             overlay_size.width() + overlay_start.x(),
             overlay_size.height() + overlay_start.y(),

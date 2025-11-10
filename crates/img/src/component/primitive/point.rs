@@ -23,9 +23,9 @@ pub enum PointCreationError {
     XTooBig,
     #[error("y too big")]
     YTooBig,
-    #[error("x too big")]
+    #[error("x negative")]
     XNegative,
-    #[error("y too big")]
+    #[error("y negative")]
     YNegative,
 }
 

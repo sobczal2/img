@@ -312,7 +312,7 @@ mod tests {
     fn test_pixel_ok() {
         let size = Size::new(2, 2).unwrap();
         let image = Image::empty(size);
-        let point = Point::new(1, 1);
+        let point = Point::new(1, 1).unwrap();
         assert_eq!(image.pixel(point).unwrap(), &Pixel::zero());
     }
 
@@ -320,7 +320,7 @@ mod tests {
     fn test_pixel_oob() {
         let size = Size::new(2, 2).unwrap();
         let image = Image::empty(size);
-        let point = Point::new(2, 1);
+        let point = Point::new(2, 1).unwrap();
         assert_eq!(image.pixel(point).unwrap_err(), IndexError::OutOfBounds);
     }
 
@@ -328,7 +328,7 @@ mod tests {
     fn test_pixel_mut_ok() {
         let size = Size::new(2, 2).unwrap();
         let mut image = Image::empty(size);
-        let point = Point::new(1, 1);
+        let point = Point::new(1, 1).unwrap();
         assert_eq!(image.pixel_mut(point).unwrap(), &Pixel::zero());
     }
 
@@ -336,7 +336,7 @@ mod tests {
     fn test_pixel_mut_oob() {
         let size = Size::new(2, 2).unwrap();
         let mut image = Image::empty(size);
-        let point = Point::new(2, 1);
+        let point = Point::new(2, 1).unwrap();
         assert_eq!(image.pixel_mut(point).unwrap_err(), IndexError::OutOfBounds);
     }
 
@@ -359,7 +359,7 @@ mod tests {
 
         assert_eq!(image.size(), lens.size());
         for (x, y) in (0..2).cartesian_product(0..2) {
-            let point = Point::new(x, y);
+            let point = Point::new(x, y).unwrap();
             assert_eq!(image.pixel(point).unwrap(), lens.look(point).unwrap());
         }
     }
@@ -372,7 +372,7 @@ mod tests {
 
         assert_eq!(image1.size(), image2.size());
         for (x, y) in (0..2).cartesian_product(0..2) {
-            let point = Point::new(x, y);
+            let point = Point::new(x, y).unwrap();
             assert_eq!(image1.pixel(point).unwrap(), image2.pixel(point).unwrap());
         }
     }
@@ -387,7 +387,7 @@ mod tests {
 
         assert_eq!(image1.size(), image2.size());
         for (x, y) in (0..2).cartesian_product(0..2) {
-            let point = Point::new(x, y);
+            let point = Point::new(x, y).unwrap();
             assert_eq!(image1.pixel(point).unwrap(), image2.pixel(point).unwrap());
         }
     }

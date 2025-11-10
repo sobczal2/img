@@ -82,11 +82,11 @@ pub trait Lens {
     ///
     /// let lens = image.lens();
     ///
-    /// assert!(lens.look(Point::new(0, 0)).is_ok());
-    /// assert!(lens.look(Point::new(9, 0)).is_ok());
-    /// assert!(lens.look(Point::new(0, 19)).is_ok());
-    /// assert!(lens.look(Point::new(10, 0)).is_err());
-    /// assert!(lens.look(Point::new(0, 20)).is_err());
+    /// assert!(lens.look(Point::new(0, 0)?).is_ok());
+    /// assert!(lens.look(Point::new(9, 0)?).is_ok());
+    /// assert!(lens.look(Point::new(0, 19)?).is_ok());
+    /// assert!(lens.look(Point::new(10, 0)?).is_err());
+    /// assert!(lens.look(Point::new(0, 20)?).is_err());
     ///
     /// # Ok(())
     /// # }
@@ -112,8 +112,8 @@ pub trait Lens {
     ///
     /// assert_eq!(lens.size(), size);
     ///
-    /// let valid_point = Point::new(0, 0);
-    /// let invalid_point = Point::new(10, 0);
+    /// let valid_point = Point::new(0, 0)?;
+    /// let invalid_point = Point::new(10, 0)?;
     ///
     /// assert!(lens.look(valid_point).is_ok());
     /// assert!(lens.size().contains(&valid_point));
@@ -290,7 +290,7 @@ pub trait Lens {
         self,
         overlay: S,
         overlay_start: Point,
-    ) -> overlay::CreationResult<OverlayLens<Self, S>>
+    ) -> overlay::OverlayCreationResult<OverlayLens<Self, S>>
     where
         Self: Sized,
         S: Lens<Item = Self::Item>,

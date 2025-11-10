@@ -9,7 +9,7 @@ use super::{
 };
 
 #[derive(Debug, Error, PartialEq, Eq)]
-pub enum CreationError {
+pub enum SizeCreationError {
     #[error("width is zero")]
     WidthZero,
     #[error("height is zero")]
@@ -20,7 +20,7 @@ pub enum CreationError {
     HeightTooBig,
 }
 
-pub type CreationResult<T> = Result<T, CreationError>;
+pub type SizeCreationResult<T> = Result<T, SizeCreationError>;
 
 /// Represents a 2D size. Minimum size is 1x1.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -46,21 +46,21 @@ impl Size {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn new(width: usize, height: usize) -> CreationResult<Self> {
+    pub fn new(width: usize, height: usize) -> SizeCreationResult<Self> {
         if width > DIMENSION_MAX {
-            return Err(CreationError::WidthTooBig);
+            return Err(SizeCreationError::WidthTooBig);
         }
 
         if width == 0 {
-            return Err(CreationError::WidthZero);
+            return Err(SizeCreationError::WidthZero);
         }
 
         if height > DIMENSION_MAX {
-            return Err(CreationError::HeightTooBig);
+            return Err(SizeCreationError::HeightTooBig);
         }
 
         if height == 0 {
-            return Err(CreationError::HeightZero);
+            return Err(SizeCreationError::HeightZero);
         }
 
         Ok(Self { width, height })
@@ -90,9 +90,9 @@ impl Size {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn from_radius(radius: usize) -> CreationResult<Self> {
+    pub fn from_radius(radius: usize) -> SizeCreationResult<Self> {
         if radius > DIMENSION_MAX / 2 {
-            return Err(CreationError::WidthTooBig);
+            return Err(SizeCreationError::WidthTooBig);
         }
 
         let diameter = 2 * radius + 1;
@@ -127,19 +127,20 @@ impl Size {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let smallest = Size::new(1, 1)?;
-    /// assert_eq!(smallest.middle(), Point::new(0, 0));
+    /// assert_eq!(smallest.middle(), Point::new(0, 0)?);
     ///
     /// let even = Size::new(10, 10)?;
-    /// assert_eq!(even.middle(), Point::new(5, 5));
+    /// assert_eq!(even.middle(), Point::new(5, 5)?);
     ///
     /// let odd = Size::new(11, 11)?;
-    /// assert_eq!(odd.middle(), Point::new(5, 5));
+    /// assert_eq!(odd.middle(), Point::new(5, 5)?);
     ///
     /// # Ok(())
     /// # }
     /// ```
     pub fn middle(&self) -> Point {
-        Point::new(self.width / 2, self.height / 2)
+        // SAFETY: width and height are less than or equal to DIMENSION_MAX
+        Point::new(self.width / 2, self.height / 2).expect("unexpected error in Point::new")
     }
 
     /// Checks if point is within [`Size`] bounds.
@@ -151,21 +152,21 @@ impl Size {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// let small = Size::new(1, 1)?;
-    /// assert!(small.contains(&Point::new(0, 0)));
-    /// assert!(!small.contains(&Point::new(1, 0)));
-    /// assert!(!small.contains(&Point::new(0, 1)));
+    /// assert!(small.contains(&Point::new(0, 0)?));
+    /// assert!(!small.contains(&Point::new(1, 0)?));
+    /// assert!(!small.contains(&Point::new(0, 1)?));
     ///
     /// let medium = Size::new(15, 30)?;
-    /// assert!(medium.contains(&Point::new(0, 0)));
-    /// assert!(medium.contains(&Point::new(14, 29)));
-    /// assert!(!medium.contains(&Point::new(15, 0)));
-    /// assert!(!medium.contains(&Point::new(0, 30)));
+    /// assert!(medium.contains(&Point::new(0, 0)?));
+    /// assert!(medium.contains(&Point::new(14, 29)?));
+    /// assert!(!medium.contains(&Point::new(15, 0)?));
+    /// assert!(!medium.contains(&Point::new(0, 30)?));
     ///
     /// let large = Size::new(1000, 1000)?;
-    /// assert!(large.contains(&Point::new(0, 0)));
-    /// assert!(large.contains(&Point::new(999, 999)));
-    /// assert!(!large.contains(&Point::new(1000, 0)));
-    /// assert!(!large.contains(&Point::new(0, 1000)));
+    /// assert!(large.contains(&Point::new(0, 0)?));
+    /// assert!(large.contains(&Point::new(999, 999)?));
+    /// assert!(!large.contains(&Point::new(1000, 0)?));
+    /// assert!(!large.contains(&Point::new(0, 1000)?));
     ///
     /// # Ok(())
     /// # }
@@ -207,13 +208,13 @@ impl Size {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn shrink_by_margin(&self, margin: Margin) -> CreationResult<Self> {
+    pub fn shrink_by_margin(&self, margin: Margin) -> SizeCreationResult<Self> {
         if margin.left() + margin.right() >= self.width {
-            return Err(CreationError::WidthZero);
+            return Err(SizeCreationError::WidthZero);
         }
 
         if margin.top() + margin.bottom() >= self.height {
-            return Err(CreationError::HeightZero);
+            return Err(SizeCreationError::HeightZero);
         }
 
         let width = self.width - margin.left() - margin.right();
@@ -256,13 +257,13 @@ impl Size {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn extend_by_margin(&self, margin: Margin) -> CreationResult<Self> {
+    pub fn extend_by_margin(&self, margin: Margin) -> SizeCreationResult<Self> {
         if margin.left() + margin.right() + self.width > DIMENSION_MAX {
-            return Err(CreationError::WidthTooBig);
+            return Err(SizeCreationError::WidthTooBig);
         }
 
         if margin.top() + margin.bottom() + self.height > DIMENSION_MAX {
-            return Err(CreationError::HeightTooBig);
+            return Err(SizeCreationError::HeightTooBig);
         }
 
         let width = self.width + margin.left() + margin.right();
@@ -327,10 +328,10 @@ mod tests {
 
     #[test]
     fn new_err() {
-        assert_eq!(Size::new(0, 10).unwrap_err(), CreationError::WidthZero);
-        assert_eq!(Size::new(10, 0).unwrap_err(), CreationError::HeightZero);
-        assert_eq!(Size::new(DIMENSION_MAX + 1, 10).unwrap_err(), CreationError::WidthTooBig);
-        assert_eq!(Size::new(10, DIMENSION_MAX + 1).unwrap_err(), CreationError::HeightTooBig);
+        assert_eq!(Size::new(0, 10).unwrap_err(), SizeCreationError::WidthZero);
+        assert_eq!(Size::new(10, 0).unwrap_err(), SizeCreationError::HeightZero);
+        assert_eq!(Size::new(DIMENSION_MAX + 1, 10).unwrap_err(), SizeCreationError::WidthTooBig);
+        assert_eq!(Size::new(10, DIMENSION_MAX + 1).unwrap_err(), SizeCreationError::HeightTooBig);
     }
 
     #[test]

@@ -1,5 +1,9 @@
 use std::ops::Neg;
 
+use thiserror::Error;
+
+use crate::image::DIMENSION_MAX;
+
 use super::Point;
 
 /// Represents a 2D offset between 2 `Point`s.
@@ -8,6 +12,20 @@ pub struct Offset {
     x: isize,
     y: isize,
 }
+
+#[derive(Debug, Error)]
+pub enum OffsetCreationError {
+    #[error("x too big")]
+    XTooBig,
+    #[error("y too big")]
+    YTooBig,
+    #[error("x too small")]
+    XTooSmall,
+    #[error("y too small")]
+    YTooSmall,
+}
+
+pub type OffsetCreationResult<T> = std::result::Result<T, OffsetCreationError>;
 
 impl Offset {
     /// Create a new [`Offset`] with specified `x` and `y`.
@@ -23,8 +41,21 @@ impl Offset {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn new(x: isize, y: isize) -> Self {
-        Self { x, y }
+    pub fn new(x: isize, y: isize) -> OffsetCreationResult<Self> {
+        if x >= DIMENSION_MAX as isize {
+            return Err(OffsetCreationError::XTooBig);
+        }
+        if x <= -(DIMENSION_MAX as isize) {
+            return Err(OffsetCreationError::XTooSmall);
+        }
+        if y >= DIMENSION_MAX as isize {
+            return Err(OffsetCreationError::YTooBig);
+        }
+        if y <= -(DIMENSION_MAX as isize) {
+            return Err(OffsetCreationError::YTooSmall);
+        }
+
+        Ok(Self { x, y })
     }
 
     /// Returns [`Offset`]'s x.
@@ -40,7 +71,8 @@ impl Offset {
 
 impl From<Point> for Offset {
     fn from(value: Point) -> Self {
-        Self::new(value.x() as isize, value.y() as isize)
+        // SAFETY: point's x and y are less than DIMENSION_MAX
+        Self::new(value.x() as isize, value.y() as isize).expect("unexpected error in Offset::new")
     }
 }
 

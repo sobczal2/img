@@ -77,20 +77,23 @@ impl Kernel<HsvPixel, SelectedQuadrant> for QuadrantSelectionKernel {
         let quadrant_size = Size::new(self.radius + 1, self.radius + 1).expect("TODO");
         let std_dev_q1 = calculate_std_dev(
             source,
-            Point::new(point.x() - self.radius, point.y() - self.radius),
+            // TODO: fix
+            Point::new(point.x() - self.radius, point.y() - self.radius).expect("TODO"),
             quadrant_size,
         );
         let std_dev_q2 = calculate_std_dev(
             source,
-            Point::new(point.x(), point.y() - self.radius),
+            // TODO: fix
+            Point::new(point.x(), point.y() - self.radius).expect("TODO"),
             quadrant_size,
         );
         let std_dev_q3 = calculate_std_dev(
             source,
-            Point::new(point.x() - self.radius, point.y()),
+            // TODO: fix
+            Point::new(point.x() - self.radius, point.y()).expect("TODO"),
             quadrant_size,
         );
-        let std_dev_q4 = calculate_std_dev(source, Point::new(point.x(), point.y()), quadrant_size);
+        let std_dev_q4 = calculate_std_dev(source, point, quadrant_size);
 
         let std_devs = [std_dev_q1, std_dev_q2, std_dev_q3, std_dev_q4];
         let min = std_devs.iter().min_by(|a, b| a.partial_cmp(b).expect("TODO")).expect("TODO");
@@ -118,7 +121,10 @@ where
     let sum: f32 = (0..size.width() as isize)
         .cartesian_product(0..size.height() as isize)
         .map(|(x, y)| {
-            source.look(top_left.translate(Offset::new(x, y)).expect("TODO")).expect("TODO").value()
+            source
+                .look(top_left.translate(Offset::new(x, y).expect("TODO")).expect("TODO"))
+                .expect("TODO")
+                .value()
         })
         .sum();
 
@@ -127,7 +133,10 @@ where
     let variance_numerator: f32 = (0..size.width() as isize)
         .cartesian_product(0..size.height() as isize)
         .map(|(x, y)| {
-            source.look(top_left.translate(Offset::new(x, y)).expect("TODO")).expect("TODO").value()
+            source
+                .look(top_left.translate(Offset::new(x, y).expect("TODO")).expect("TODO"))
+                .expect("TODO")
+                .value()
         })
         .map(|v| (v - mean).powi(2))
         .sum();
@@ -158,22 +167,23 @@ impl Kernel<MeanCalculationInput, Pixel> for MeanCalculationKernel {
         let result = match input.selected_quadrant {
             SelectedQuadrant::TopLeft => calculate_mean(
                 source,
-                Point::new(point.x() - self.radius, point.y() - self.radius),
+                // TODO: fix
+                Point::new(point.x() - self.radius, point.y() - self.radius).expect("TODO"),
                 quadrant_size,
             ),
             SelectedQuadrant::TopRight => calculate_mean(
                 source,
-                Point::new(point.x(), point.y() - self.radius),
+                // TODO: fix
+                Point::new(point.x(), point.y() - self.radius).expect("TODO"),
                 quadrant_size,
             ),
             SelectedQuadrant::BottomLeft => calculate_mean(
                 source,
-                Point::new(point.x() - self.radius, point.y()),
+                // TODO: fix
+                Point::new(point.x() - self.radius, point.y()).expect("TODO"),
                 quadrant_size,
             ),
-            SelectedQuadrant::BottomRight => {
-                calculate_mean(source, Point::new(point.x(), point.y()), quadrant_size)
-            }
+            SelectedQuadrant::BottomRight => calculate_mean(source, point, quadrant_size),
         };
 
         Ok(Pixel::new([result.red as u8, result.green as u8, result.blue as u8, input.pixel.a()]))
@@ -217,7 +227,10 @@ where
     let sum: IntermediatePixel = (0..size.width() as isize)
         .cartesian_product(0..size.height() as isize)
         .map(|(x, y)| {
-            source.look(top_left.translate(Offset::new(x, y)).expect("TODO")).expect("TODO").pixel
+            source
+                .look(top_left.translate(Offset::new(x, y).expect("TODO")).expect("TODO"))
+                .expect("TODO")
+                .pixel
         })
         .map(|p| IntermediatePixel { red: p.r() as u16, green: p.g() as u16, blue: p.b() as u16 })
         .fold(IntermediatePixel { red: 0, green: 0, blue: 0 }, |acc, item| acc + item);

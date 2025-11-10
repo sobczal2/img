@@ -28,7 +28,7 @@ where
 {
     let x: u32 = rng.random::<u32>() % 100;
     let y: u32 = rng.random::<u32>() % 100;
-    let point = Point::new(x as usize, y as usize);
+    let point = Point::new(x as usize, y as usize).unwrap();
     assert_eq!(lens.look(point).is_ok(), lens.size().contains(&point));
 }
 
@@ -40,7 +40,7 @@ where
 {
     let x: u32 = rng.random::<u32>() % 100;
     let y: u32 = rng.random::<u32>() % 100;
-    let point = Point::new(x as usize, y as usize);
+    let point = Point::new(x as usize, y as usize).unwrap();
     assert_eq!(lens.look(point), lens.look(point));
 }
 
@@ -141,7 +141,10 @@ fn prepare_overlay_lens(width: usize, height: usize) -> impl Lens<Item = Pixel> 
     prepare_test_image(width, height)
         .lens()
         .cloned()
-        .overlay(ValueLens::new(Pixel::zero(), Size::new(20, 30).unwrap()), Point::new(20, 10))
+        .overlay(
+            ValueLens::new(Pixel::zero(), Size::new(20, 30).unwrap()),
+            Point::new(20, 10).unwrap(),
+        )
         .unwrap()
 }
 

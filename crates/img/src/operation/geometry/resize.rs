@@ -17,24 +17,33 @@ use crate::{
 };
 
 #[derive(Debug, Error)]
-pub enum CreationError {
+pub enum ResizeCreationError {
     #[error("new size is invalid: {0}")]
     NewSizeInvalid(#[from] SizeCreationError),
 }
 
-pub fn resize_lens<S>(source: S, scale: Scale) -> Result<impl Lens<Item = Pixel>, CreationError>
+pub type ResizeCreationResult<T> = std::result::Result<T, ResizeCreationError>;
+
+pub fn resize_lens<S>(source: S, scale: Scale) -> ResizeCreationResult<impl Lens<Item = Pixel>>
 where
     S: Lens<Item = Pixel>,
 {
     let size = scale.apply(source.size())?;
     let inverse_scale = scale.inverse();
 
-    let lens = source.remap(move |lens, point| lens.look(inverse_scale.translate(point)), size);
+    // SAFETY: if scale.apply was successful, then inverse_scale.translate will always be
+    // successful
+    let lens = source.remap(
+        move |lens, point| {
+            lens.look(inverse_scale.translate(point).expect("unexpected error in Scale::translate"))
+        },
+        size,
+    );
 
     Ok(lens)
 }
 
-pub fn resize(image: &Image, scale: Scale) -> Result<Image, CreationError> {
+pub fn resize(image: &Image, scale: Scale) -> ResizeCreationResult<Image> {
     let lens = resize_lens(image.lens().cloned(), scale)?;
     Ok(Image::from_lens(lens))
 }
@@ -44,7 +53,7 @@ pub fn resize_par(
     image: &Image,
     threads: NonZeroUsize,
     scale: Scale,
-) -> Result<Image, CreationError> {
+) -> ResizeCreationResult<Image> {
     use crate::lens::FromLensPar;
 
     let lens = resize_lens(image.lens().cloned(), scale)?;

@@ -41,19 +41,19 @@ impl Margin {
     /// # }
     /// ```
     pub fn new(top: usize, right: usize, bottom: usize, left: usize) -> MarginCreationResult<Self> {
-        if top > DIMENSION_MAX {
+        if top >= DIMENSION_MAX {
             return Err(MarginCreationError::TopTooBig);
         }
 
-        if right > DIMENSION_MAX {
+        if right >= DIMENSION_MAX {
             return Err(MarginCreationError::RightTooBig);
         }
 
-        if bottom > DIMENSION_MAX {
+        if bottom >= DIMENSION_MAX {
             return Err(MarginCreationError::BottomTooBig);
         }
 
-        if left > DIMENSION_MAX {
+        if left >= DIMENSION_MAX {
             return Err(MarginCreationError::LeftTooBig);
         }
 
@@ -105,28 +105,28 @@ mod tests {
     #[test]
     fn test_new_ok() {
         assert!(Margin::new(0, 0, 0, 0).is_ok());
-        assert!(Margin::new(DIMENSION_MAX, 0, 0, 0).is_ok());
-        assert!(Margin::new(0, DIMENSION_MAX, 0, 0).is_ok());
-        assert!(Margin::new(0, 0, DIMENSION_MAX, 0).is_ok());
-        assert!(Margin::new(0, 0, 0, DIMENSION_MAX).is_ok());
+        assert!(Margin::new(DIMENSION_MAX - 1, 0, 0, 0).is_ok());
+        assert!(Margin::new(0, DIMENSION_MAX - 1, 0, 0).is_ok());
+        assert!(Margin::new(0, 0, DIMENSION_MAX - 1, 0).is_ok());
+        assert!(Margin::new(0, 0, 0, DIMENSION_MAX - 1).is_ok());
     }
 
     #[test]
     fn test_new_err() {
         assert_eq!(
-            Margin::new(DIMENSION_MAX + 1, 0, 0, 0).unwrap_err(),
+            Margin::new(DIMENSION_MAX, 0, 0, 0).unwrap_err(),
             MarginCreationError::TopTooBig
         );
         assert_eq!(
-            Margin::new(0, DIMENSION_MAX + 1, 0, 0).unwrap_err(),
+            Margin::new(0, DIMENSION_MAX, 0, 0).unwrap_err(),
             MarginCreationError::RightTooBig
         );
         assert_eq!(
-            Margin::new(0, 0, DIMENSION_MAX + 1, 0).unwrap_err(),
+            Margin::new(0, 0, DIMENSION_MAX, 0).unwrap_err(),
             MarginCreationError::BottomTooBig
         );
         assert_eq!(
-            Margin::new(0, 0, 0, DIMENSION_MAX + 1).unwrap_err(),
+            Margin::new(0, 0, 0, DIMENSION_MAX).unwrap_err(),
             MarginCreationError::LeftTooBig
         );
     }

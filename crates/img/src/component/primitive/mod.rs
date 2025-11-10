@@ -10,20 +10,24 @@ pub use area::{
     AreaCreationError,
     AreaCreationResult,
 };
-pub use margin::Margin;
+pub use margin::{
+    Margin,
+    MarginCreationError,
+    MarginCreationResult,
+};
 pub use offset::Offset;
 pub use point::{
-    OffsetCreationError as PointCreationError,
-    OffsetCreationResult as PointCreationResult,
     Point,
+    PointCreationError,
+    PointCreationResult,
 };
 pub use scale::{
-    CreationError as ScaleCreationError,
-    CreationResult as ScaleCreationResult,
     Scale,
+    ScaleCreationError,
+    ScaleCreationResult,
 };
 pub use size::{
-    CreationError as SizeCreationError,
-    CreationResult as SizeCreationResult,
     Size,
+    SizeCreationError,
+    SizeCreationResult,
 };

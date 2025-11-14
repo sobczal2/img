@@ -331,3 +331,52 @@ impl TryFrom<Offset> for Point {
         Point::new(x, y)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_new_ok() {
+        assert!(Point::new(0, 0).is_ok());
+        assert!(Point::new(DIMENSION_MAX - 1, 0).is_ok());
+        assert!(Point::new(0, DIMENSION_MAX - 1).is_ok());
+    }
+
+    #[test]
+    fn test_new_err() {
+        assert_eq!(Point::new(DIMENSION_MAX, 0).unwrap_err(), PointCreationError::XTooBig);
+        assert_eq!(Point::new(0, DIMENSION_MAX).unwrap_err(), PointCreationError::YTooBig);
+    }
+
+    #[test]
+    fn test_from_index_ok() {
+        let size = Size::new(DIMENSION_MAX, DIMENSION_MAX).unwrap();
+        assert_eq!(Point::from_index(1, size).unwrap(), Point::new(1, 0).unwrap());
+        assert_eq!(Point::from_index(DIMENSION_MAX + 1, size).unwrap(), Point::new(1, 1).unwrap());
+        assert_eq!(Point::from_index(DIMENSION_MAX * DIMENSION_MAX - 1, size).unwrap(), Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap());
+    }
+
+    #[test]
+    fn test_from_index_err() {
+        assert_eq!(Point::from_index(DIMENSION_MAX * DIMENSION_MAX, Size::new(DIMENSION_MAX, DIMENSION_MAX).unwrap()).unwrap_err(), IndexError::OutOfBounds);
+        assert_eq!(Point::from_index(4, Size::new(2, 2).unwrap()).unwrap_err(), IndexError::OutOfBounds);
+    }
+
+    #[test]
+    fn test_index_ok() {
+        assert_eq!(Point::new(0, 0).unwrap().index(Size::new(1, 1).unwrap()).unwrap(), 0);
+        assert_eq!(Point::new(DIMENSION_MAX - 1, 0).unwrap().index(Size::new(DIMENSION_MAX, 1).unwrap()).unwrap(), DIMENSION_MAX - 1);
+        assert_eq!(Point::new(0, DIMENSION_MAX - 1).unwrap().index(Size::new(1, DIMENSION_MAX).unwrap()).unwrap(), DIMENSION_MAX - 1);
+        assert_eq!(Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().index(Size::new(DIMENSION_MAX, DIMENSION_MAX).unwrap()).unwrap(), DIMENSION_MAX * DIMENSION_MAX - 1);
+    }
+
+    #[test]
+    fn test_index_err() {
+        assert_eq!(Point::new(1, 0).unwrap().index(Size::new(1, 1).unwrap()).unwrap_err(), IndexError::OutOfBounds);
+        assert_eq!(Point::new(DIMENSION_MAX - 1, 1).unwrap().index(Size::new(DIMENSION_MAX, 1).unwrap()).unwrap_err(), IndexError::OutOfBounds);
+        assert_eq!(Point::new(1, DIMENSION_MAX - 1).unwrap().index(Size::new(1, DIMENSION_MAX).unwrap()).unwrap_err(), IndexError::OutOfBounds);
+        assert_eq!(Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().index(Size::new(DIMENSION_MAX, DIMENSION_MAX - 1).unwrap()).unwrap_err(), IndexError::OutOfBounds);
+        assert_eq!(Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().index(Size::new(DIMENSION_MAX - 1, DIMENSION_MAX).unwrap()).unwrap_err(), IndexError::OutOfBounds);
+    }
+}

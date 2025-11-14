@@ -1,4 +1,3 @@
-use std::iter::from_fn;
 #[cfg(feature = "parallel")]
 use std::num::NonZeroUsize;
 
@@ -92,7 +91,9 @@ impl Image {
     /// # }
     /// ```
     pub fn empty(size: Size) -> Self {
-        Self { size, pixels: vec![Pixel::zero(); size.area()].into_boxed_slice() }
+        // SAFETY: pixels guaranted to be correct size
+        Self::new(size, vec![Pixel::zero(); size.area()].into_boxed_slice())
+            .expect("unexpected error in Image::new")
     }
 
     /// Create a random [`Image`] with the given size. Uses [`Pixel::random()`] to create all
@@ -116,8 +117,9 @@ impl Image {
     where
         R: Rng,
     {
-        let pixels = from_fn(|| Some(Pixel::random(rng))).take(size.area()).collect();
-        Self { size, pixels }
+        // SAFETY: pixels guaranted to be correct size
+        Self::new(size, vec![Pixel::random(rng); size.area()].into_boxed_slice())
+            .expect("unexpected error in Image::new")
     }
 
     /// Get [`Image`]'s [`Size`].
@@ -260,11 +262,6 @@ impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
 
 #[cfg(test)]
 mod tests {
-    use std::{
-        isize,
-        u128,
-    };
-
     use itertools::Itertools;
     use rand::{
         SeedableRng,

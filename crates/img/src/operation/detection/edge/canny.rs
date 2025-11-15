@@ -165,22 +165,26 @@ where
         .expect("TODO");
     source.map(|g| (g.magnitude(), g.direction())).remap(
         |s, p| {
-            let p = p.translate(Offset::new(1, 1)).expect("TODO");
+            let p = p.translate(Offset::new(1, 1).expect("TODO")).expect("TODO");
             let gradient_a = s.look(p).expect("TODO");
             let direction = GradientDirection::from_angle(gradient_a.1);
 
             let gradient_b = match direction {
                 GradientDirection::Horizontal => {
-                    s.look(Point::new(p.x() + 1, p.y())).expect("TODO")
+                    s.look(Point::new(p.x() + 1, p.y()).expect("TODO")).expect("TODO")
                 }
-                GradientDirection::Vertical => s.look(Point::new(p.x(), p.y() + 1)).expect("TODO"),
+                GradientDirection::Vertical => {
+                    s.look(Point::new(p.x(), p.y() + 1).expect("TODO")).expect("TODO")
+                }
             };
 
             let gradient_c = match direction {
                 GradientDirection::Horizontal => {
-                    s.look(Point::new(p.x() - 1, p.y())).expect("TODO")
+                    s.look(Point::new(p.x() - 1, p.y()).expect("TODO")).expect("TODO")
                 }
-                GradientDirection::Vertical => s.look(Point::new(p.x(), p.y() - 1)).expect("TODO"),
+                GradientDirection::Vertical => {
+                    s.look(Point::new(p.x(), p.y() - 1).expect("TODO")).expect("TODO")
+                }
             };
 
             if gradient_a.0 > gradient_b.0 && gradient_a.0 > gradient_c.0 {
@@ -216,7 +220,7 @@ impl Kernel<f32, u8> for HysteresisThresholdingKernel {
         let neighbor_exists = (-1..=1)
             .cartesian_product(-1..=1)
             .map(|(x, y)| Offset::new(x, y))
-            .map(|offset| point.translate(offset).expect("TODO"))
+            .map(|offset| point.translate(offset.expect("TODO")).expect("TODO"))
             .map(|point| lens.look(point).expect("TODO"))
             .any(|value| value > self.max);
 

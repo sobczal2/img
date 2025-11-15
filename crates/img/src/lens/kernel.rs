@@ -6,14 +6,20 @@ use crate::{
     component::{
         kernel::Kernel,
         primitive::{
-            Margin,
             Point,
             Size,
             SizeCreationError,
         },
     },
-    error::IndexResult,
+    error::{
+        IndexError,
+        IndexResult,
+    },
     lens::Lens,
+    prelude::{
+        Area,
+        Offset,
+    },
 };
 
 #[derive(Debug, Error)]
@@ -28,8 +34,7 @@ pub enum CreationError {
 pub struct KernelLens<S, K, T> {
     source: S,
     kernel: K,
-    size: Size,
-    margin: Margin,
+    working_area: Area,
     _phantom_data: PhantomData<T>,
 }
 
@@ -47,7 +52,12 @@ where
             _ => unreachable!("unexpected error returned from shrink_by_margin"),
         })?;
 
-        Ok(Self { source, kernel, size, margin, _phantom_data: Default::default() })
+        let top_left =
+            Point::new(margin.left(), margin.top()).expect("unexpected error in Point::new");
+
+        let working_area = Area::new(size, top_left);
+
+        Ok(Self { source, kernel, working_area, _phantom_data: Default::default() })
     }
 }
 
@@ -59,13 +69,16 @@ where
     type Item = T;
 
     fn look(&self, point: Point) -> IndexResult<Self::Item> {
-        let source_point =
-            Point::new(point.x() + self.margin.left(), point.y() + self.margin.top());
+        if !self.working_area.contains(&point) {
+            return Err(IndexError::OutOfBounds);
+        }
+        let offset: Offset = self.working_area.top_left().into();
+        let source_point = point.translate(offset).expect("unexpected error in Point::translate");
 
         self.kernel.apply(&self.source, source_point)
     }
 
     fn size(&self) -> Size {
-        self.size
+        self.working_area.size()
     }
 }

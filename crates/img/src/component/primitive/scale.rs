@@ -6,6 +6,7 @@ use crate::{
     component::primitive::{
         SizeCreationError,
         SizeCreationResult,
+        point::PointCreationResult,
     },
     image::DIMENSION_MAX,
 };
@@ -16,14 +17,14 @@ use super::{
 };
 
 #[derive(Error, Debug)]
-pub enum CreationError {
+pub enum ScaleCreationError {
     #[error("Scale x value {0} is outside valid range [{min_scale}, {max_scale}]", min_scale = Scale::MIN, max_scale = Scale::MAX)]
     ScaleXInvalid(f32),
     #[error("Scale y value {0} is outside valid range [{min_scale}, {max_scale}]", min_scale = Scale::MIN, max_scale = Scale::MAX)]
     ScaleYInvalid(f32),
 }
 
-pub type CreationResult<T> = Result<T, CreationError>;
+pub type ScaleCreationResult<T> = Result<T, ScaleCreationError>;
 
 /// Represents a 2D scale with separate x and y scaling factors.
 #[derive(Debug, Copy, Clone)]
@@ -71,14 +72,14 @@ impl Scale {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn new(x: f32, y: f32) -> CreationResult<Self> {
+    pub fn new(x: f32, y: f32) -> ScaleCreationResult<Self> {
         let valid_range = Self::MIN..=Self::MAX;
         if !valid_range.contains(&x) {
-            return Err(CreationError::ScaleXInvalid(x));
+            return Err(ScaleCreationError::ScaleXInvalid(x));
         }
 
         if !valid_range.contains(&y) {
-            return Err(CreationError::ScaleYInvalid(y));
+            return Err(ScaleCreationError::ScaleYInvalid(y));
         }
 
         Ok(Self(x, y))
@@ -173,16 +174,16 @@ impl Scale {
     /// let half = Scale::new(0.5, 0.5)?;
     /// let uneven = Scale::new(2.0, 1.5)?;
     ///
-    /// let point = Point::new(100, 100);
+    /// let point = Point::new(100, 100)?;
     ///
-    /// assert_eq!(identity.translate(point), Point::new(100, 100));
-    /// assert_eq!(half.translate(point), Point::new(50, 50));
-    /// assert_eq!(uneven.translate(point), Point::new(200, 150));
+    /// assert_eq!(identity.translate(point)?, Point::new(100, 100)?);
+    /// assert_eq!(half.translate(point)?, Point::new(50, 50)?);
+    /// assert_eq!(uneven.translate(point)?, Point::new(200, 150)?);
     ///
     /// # Ok(())
     /// # }
     /// ```
-    pub fn translate(&self, point: Point) -> Point {
+    pub fn translate(&self, point: Point) -> PointCreationResult<Point> {
         let new_x = point.x() as f32 * self.0;
         let new_y = point.y() as f32 * self.1;
 

@@ -1,5 +1,9 @@
 use crate::{
     component::primitive::Point,
+    error::{
+        IndexError,
+        IndexResult,
+    },
     lens::Lens,
 };
 
@@ -29,19 +33,25 @@ where
 
         self.current += 1;
 
-        Some(RowElements::new(self.source, self.current - 1))
+        // SAFETY: max value passed here is height - 1, which is guaranted to be less than
+        // DIMENSION_MAX, since height is less than or equal to DIMENSION_MAX.
+        let elements = RowElements::new(self.source, self.current - 1)
+            .expect("unexpected error in RowElements::new");
+
+        Some(elements)
     }
 }
 
 #[derive(Clone)]
 pub struct RowElements<'a, S> {
     source: &'a S,
-    current: Point,
+    current: Option<Point>,
 }
 
 impl<'a, S> RowElements<'a, S> {
-    fn new(source: &'a S, row: usize) -> Self {
-        Self { source, current: Point::new(0, row) }
+    fn new(source: &'a S, row: usize) -> IndexResult<Self> {
+        let point = Point::new(0, row).map_err(|_| IndexError::OutOfBounds)?;
+        Ok(Self { source, current: Some(point) })
     }
 }
 
@@ -52,14 +62,24 @@ where
     type Item = S::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.current.x() == self.source.size().width() {
-            return None;
+        match self.current {
+            Some(current) => {
+                let value = self.source.look(current).expect("bug in lens implementation");
+                if current.x() + 1 == self.source.size().width() {
+                    self.current = None
+                } else {
+                    // SAFETY: x parameter in point::new is always less than width, which is less
+                    // than or equal to DIMENSION_MAX
+                    self.current = Some(
+                        Point::new(current.x() + 1, current.y())
+                            .expect("unexpected error in Point::new"),
+                    );
+                }
+
+                Some(value)
+            }
+            None => None,
         }
-
-        let value = self.source.look(self.current).expect("bug in lens implementation");
-        self.current = Point::new(self.current.x() + 1, self.current.y());
-
-        Some(value)
     }
 }
 

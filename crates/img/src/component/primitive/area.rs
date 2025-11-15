@@ -33,10 +33,10 @@ impl Area {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// // Create a 1x1 area in without any offset
-    /// let without_offset = Area::new(Size::new(1, 1)?, Point::new(0, 0));
+    /// let without_offset = Area::new(Size::new(1, 1)?, Point::new(0, 0)?);
     ///
     /// // Create a 500x1000 area in with 100x50 offset
-    /// let with_offset = Area::new(Size::new(500, 1000)?, Point::new(100, 50));
+    /// let with_offset = Area::new(Size::new(500, 1000)?, Point::new(100, 50)?);
     ///
     /// # Ok(())
     /// # }
@@ -62,19 +62,21 @@ impl Area {
     /// // Create a 5x10 area in with 15x20 offset
     /// let with_offset = Area::from_cropped_size(Size::new(50, 50)?, Margin::new(20, 30, 20, 15)?)?;
     /// assert_eq!(with_offset.size(), Size::new(5, 10)?);
-    /// assert_eq!(with_offset.top_left(), Point::new(15, 20));
+    /// assert_eq!(with_offset.top_left(), Point::new(15, 20)?);
     ///
     /// // Create a 5x10 area in without offset
     /// let without_offset = Area::from_cropped_size(Size::new(50, 50)?, Margin::new(0, 45, 40, 0)?)?;
     /// assert_eq!(without_offset.size(), Size::new(5, 10)?);
-    /// assert_eq!(without_offset.top_left(), Point::new(0, 0));
+    /// assert_eq!(without_offset.top_left(), Point::new(0, 0)?);
     ///
     /// # Ok(())
     /// # }
     /// ```
     pub fn from_cropped_size(size: Size, margin: Margin) -> AreaCreationResult<Self> {
         let size = size.shrink_by_margin(margin)?;
-        let top_left = Point::new(margin.left(), margin.top());
+        // SAFETY: margin.left() and margin.top() are guaranted to be less than DIMENSION_MAX.
+        let top_left =
+            Point::new(margin.left(), margin.top()).expect("unexpected error in Point::new");
 
         Ok(Self { size, top_left })
     }
@@ -96,13 +98,16 @@ impl Area {
         // offset will also always be positive. Also cast from usize to isize of
         // width is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
         self.top_left
-            .translate(Offset::new(
-                self.size
-                    .width()
-                    .try_into()
-                    .expect("unexpected error when converting usize to isize"),
-                0,
-            ))
+            .translate(
+                Offset::new(
+                    self.size
+                        .width()
+                        .try_into()
+                        .expect("unexpected error when converting usize to isize"),
+                    0,
+                )
+                .expect("unexpected error in Offset::new"),
+            )
             .expect("unexpected error in Point::translate")
     }
 
@@ -113,13 +118,16 @@ impl Area {
         // offset will also always be positive. Also cast from usize to isize of
         // height is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
         self.top_left
-            .translate(Offset::new(
-                0,
-                self.size
-                    .height()
-                    .try_into()
-                    .expect("unexpected error when converting usize to isize"),
-            ))
+            .translate(
+                Offset::new(
+                    0,
+                    self.size
+                        .height()
+                        .try_into()
+                        .expect("unexpected error when converting usize to isize"),
+                )
+                .expect("unexpected error in Offset::new"),
+            )
             .expect("unexpected error in Point::translate")
     }
 
@@ -130,16 +138,19 @@ impl Area {
         // offset will also always be positive. Also cast from usize to isize of
         // width and height is always safe since `width` <= `DIMENSION_MAX` < `isize::MAX`.
         self.top_left
-            .translate(Offset::new(
-                self.size
-                    .width()
-                    .try_into()
-                    .expect("unexpected error when converting usize to isize"),
-                self.size
-                    .height()
-                    .try_into()
-                    .expect("unexpected error when converting usize to isize"),
-            ))
+            .translate(
+                Offset::new(
+                    self.size
+                        .width()
+                        .try_into()
+                        .expect("unexpected error when converting usize to isize"),
+                    self.size
+                        .height()
+                        .try_into()
+                        .expect("unexpected error when converting usize to isize"),
+                )
+                .expect("unexpected error in Offset::new"),
+            )
             .expect("unexpected error in Point::translate")
     }
 
@@ -152,24 +163,24 @@ impl Area {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// // Create a 1x1 area in without any offset
-    /// let without_offset = Area::new(Size::new(1, 1)?, Point::new(0, 0));
+    /// let without_offset = Area::new(Size::new(1, 1)?, Point::new(0, 0)?);
     ///
-    /// assert!(without_offset.contains(&Point::new(0, 0)));
-    /// assert!(!without_offset.contains(&Point::new(0, 1)));
-    /// assert!(!without_offset.contains(&Point::new(1, 0)));
-    /// assert!(!without_offset.contains(&Point::new(1, 1)));
+    /// assert!(without_offset.contains(&Point::new(0, 0)?));
+    /// assert!(!without_offset.contains(&Point::new(0, 1)?));
+    /// assert!(!without_offset.contains(&Point::new(1, 0)?));
+    /// assert!(!without_offset.contains(&Point::new(1, 1)?));
     ///
     /// // Create a 500x1000 area in with 100x50 offset
-    /// let with_offset = Area::new(Size::new(500, 1000)?, Point::new(100, 50));
+    /// let with_offset = Area::new(Size::new(500, 1000)?, Point::new(100, 50)?);
     ///
-    /// assert!(!with_offset.contains(&Point::new(0, 0)));
-    /// assert!(!with_offset.contains(&Point::new(99, 50)));
-    /// assert!(!with_offset.contains(&Point::new(100, 49)));
-    /// assert!(with_offset.contains(&Point::new(100, 50)));
-    /// assert!(with_offset.contains(&Point::new(599, 1049)));
-    /// assert!(!with_offset.contains(&Point::new(600, 1049)));
-    /// assert!(!with_offset.contains(&Point::new(599, 1050)));
-    /// assert!(!with_offset.contains(&Point::new(600, 1050)));
+    /// assert!(!with_offset.contains(&Point::new(0, 0)?));
+    /// assert!(!with_offset.contains(&Point::new(99, 50)?));
+    /// assert!(!with_offset.contains(&Point::new(100, 49)?));
+    /// assert!(with_offset.contains(&Point::new(100, 50)?));
+    /// assert!(with_offset.contains(&Point::new(599, 1049)?));
+    /// assert!(!with_offset.contains(&Point::new(600, 1049)?));
+    /// assert!(!with_offset.contains(&Point::new(599, 1050)?));
+    /// assert!(!with_offset.contains(&Point::new(600, 1050)?));
     ///
     /// # Ok(())
     /// # }

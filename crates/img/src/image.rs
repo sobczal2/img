@@ -1,3 +1,4 @@
+use std::iter::from_fn;
 #[cfg(feature = "parallel")]
 use std::num::NonZeroUsize;
 
@@ -118,7 +119,7 @@ impl Image {
         R: Rng,
     {
         // SAFETY: pixels guaranted to be correct size
-        Self::new(size, vec![Pixel::random(rng); size.area()].into_boxed_slice())
+        Self::new(size, from_fn(|| Some(Pixel::random(rng))).take(size.area()).collect())
             .expect("unexpected error in Image::new")
     }
 

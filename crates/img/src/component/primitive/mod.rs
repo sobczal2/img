@@ -4,6 +4,7 @@ mod offset;
 mod point;
 mod scale;
 mod size;
+mod limits;
 
 pub use area::{
     Area,
@@ -31,3 +32,4 @@ pub use size::{
     SizeCreationError,
     SizeCreationResult,
 };
+pub use limits::DIMENSION_MAX;

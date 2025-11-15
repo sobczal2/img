@@ -41,7 +41,7 @@ impl Size {
     /// use img::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
-    /// let size = Size::new(100, 200).unwrap();
+    /// let size = Size::new(100, 200)?;
     ///
     /// # Ok(())
     /// # }
@@ -321,13 +321,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn new_ok() {
+    fn test_new_ok() {
         assert!(Size::new(10, 20).is_ok());
         assert!(Size::new(DIMENSION_MAX, DIMENSION_MAX).is_ok());
     }
 
     #[test]
-    fn new_err() {
+    fn test_new_err() {
         assert_eq!(Size::new(0, 10).unwrap_err(), SizeCreationError::WidthZero);
         assert_eq!(Size::new(10, 0).unwrap_err(), SizeCreationError::HeightZero);
         assert_eq!(Size::new(DIMENSION_MAX + 1, 10).unwrap_err(), SizeCreationError::WidthTooBig);
@@ -335,8 +335,40 @@ mod tests {
     }
 
     #[test]
-    fn from_radius_ok() {
+    fn test_from_radius_ok() {
         assert!(Size::from_radius(0).is_ok());
         assert!(Size::from_radius(DIMENSION_MAX / 2).is_ok());
+    }
+
+    #[test]
+    fn test_from_radius_err() {
+        assert_eq!(Size::from_radius(DIMENSION_MAX / 2 + 1).unwrap_err(), SizeCreationError::WidthTooBig);
+        assert_eq!(Size::from_radius(usize::MAX).unwrap_err(), SizeCreationError::WidthTooBig);
+    }
+
+    #[test]
+    fn test_area() {
+        assert_eq!(Size::new(DIMENSION_MAX, DIMENSION_MAX).unwrap().area(), DIMENSION_MAX * DIMENSION_MAX);
+        assert_eq!(Size::new(1, 1).unwrap().area(), 1);
+    }
+
+    #[test]
+    fn test_middle() {
+        assert_eq!(Size::new(1, 1).unwrap().middle(), Point::new(0, 0).unwrap());
+        assert_eq!(Size::new(2, 2).unwrap().middle(), Point::new(1, 1).unwrap());
+        assert_eq!(Size::new(3, 3).unwrap().middle(), Point::new(1, 1).unwrap());
+        assert_eq!(Size::new(DIMENSION_MAX, DIMENSION_MAX).unwrap().middle(), Point::new(DIMENSION_MAX / 2, DIMENSION_MAX / 2).unwrap());
+    }
+
+    #[test]
+    fn test_contains() {
+        assert!(Size::new(1, 1).unwrap().contains(&Point::new(0, 0).unwrap()));
+        assert!(!Size::new(1, 1).unwrap().contains(&Point::new(1, 0).unwrap()));
+        assert!(!Size::new(1, 1).unwrap().contains(&Point::new(0, 1).unwrap()));
+        assert!(!Size::new(1, 1).unwrap().contains(&Point::new(1, 1).unwrap()));
+        assert!(Size::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().contains(&Point::new(DIMENSION_MAX - 2, DIMENSION_MAX - 2).unwrap()));
+        assert!(!Size::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().contains(&Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 2).unwrap()));
+        assert!(!Size::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().contains(&Point::new(DIMENSION_MAX - 2, DIMENSION_MAX - 1).unwrap()));
+        assert!(!Size::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().contains(&Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap()));
     }
 }

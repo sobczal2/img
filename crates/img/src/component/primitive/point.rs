@@ -209,15 +209,14 @@ impl Point {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn translate(mut self, offset: Offset) -> PointCreationResult<Self> {
-        // TODO: rewrite
+    pub fn translate(self, offset: Offset) -> PointCreationResult<Self> {
         let x = self.x as isize + offset.x();
         let y = self.y as isize + offset.y();
 
-        self.x = x.try_into().map_err(|_| PointCreationError::XNegative)?;
-        self.y = y.try_into().map_err(|_| PointCreationError::YNegative)?;
+        let new_x = x.try_into().map_err(|_| PointCreationError::XNegative)?;
+        let new_y = y.try_into().map_err(|_| PointCreationError::YNegative)?;
 
-        Ok(self)
+        Self::new(new_x, new_y)
     }
 }
 
@@ -377,6 +376,27 @@ mod test {
         assert_eq!(Point::new(DIMENSION_MAX - 1, 1).unwrap().index(Size::new(DIMENSION_MAX, 1).unwrap()).unwrap_err(), IndexError::OutOfBounds);
         assert_eq!(Point::new(1, DIMENSION_MAX - 1).unwrap().index(Size::new(1, DIMENSION_MAX).unwrap()).unwrap_err(), IndexError::OutOfBounds);
         assert_eq!(Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().index(Size::new(DIMENSION_MAX, DIMENSION_MAX - 1).unwrap()).unwrap_err(), IndexError::OutOfBounds);
-        assert_eq!(Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().index(Size::new(DIMENSION_MAX - 1, DIMENSION_MAX).unwrap()).unwrap_err(), IndexError::OutOfBounds);
+        assert_eq!(Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().index(Size::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap()).unwrap_err(), IndexError::OutOfBounds);
+    }
+
+    #[test]
+    fn test_translate_ok() {
+        assert!(Point::new(0, 0).unwrap().translate(Offset::new(0, 0).unwrap()).is_ok());
+        assert!(Point::new(0, 0).unwrap().translate(Offset::new((DIMENSION_MAX as isize) - 1, (DIMENSION_MAX as isize) - 1).unwrap()).is_ok());
+        assert!(Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().translate(Offset::new(0, 0).unwrap()).is_ok());
+        assert!(Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().translate(Offset::new(-(DIMENSION_MAX as isize) + 1, -(DIMENSION_MAX as isize) + 1).unwrap()).is_ok());
+    }
+
+    #[test]
+    fn test_translate_err() {
+        assert_eq!(Point::new(1, 1).unwrap().translate(Offset::new((DIMENSION_MAX as isize) - 1, (DIMENSION_MAX as isize) - 1).unwrap()).unwrap_err(), PointCreationError::XTooBig);
+        assert_eq!(Point::new(1, 1).unwrap().translate(Offset::new((DIMENSION_MAX as isize) - 1, 0).unwrap()).unwrap_err(), PointCreationError::XTooBig);
+        assert_eq!(Point::new(1, 1).unwrap().translate(Offset::new(0, (DIMENSION_MAX as isize) - 1).unwrap()).unwrap_err(), PointCreationError::YTooBig);
+        assert_eq!(Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().translate(Offset::new(1, 1).unwrap()).unwrap_err(), PointCreationError::XTooBig);
+        assert_eq!(Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().translate(Offset::new(1, 0).unwrap()).unwrap_err(), PointCreationError::XTooBig);
+        assert_eq!(Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().translate(Offset::new(0, 1).unwrap()).unwrap_err(), PointCreationError::YTooBig);
+        assert_eq!(Point::new(0, 0).unwrap().translate(Offset::new(-1, -1).unwrap()).unwrap_err(), PointCreationError::XNegative);
+        assert_eq!(Point::new(0, 0).unwrap().translate(Offset::new(-1, 1).unwrap()).unwrap_err(), PointCreationError::XNegative);
+        assert_eq!(Point::new(0, 0).unwrap().translate(Offset::new(1, -1).unwrap()).unwrap_err(), PointCreationError::YNegative);
     }
 }

@@ -23,13 +23,16 @@ use crate::{
 };
 
 #[derive(Debug, Error)]
-pub enum CreationError {
+pub enum KernelLensCreationError {
     #[error("kernel's width is too big")]
     KernelTooBigX,
     #[error("kernel's height is too big")]
     KernelTooBigY,
 }
 
+pub type KernelLensCreationResult<T> = std::result::Result<T, KernelLensCreationError>;
+
+/// A [`Lens`] that applies [`Kernel`] onto `source`
 #[derive(Clone)]
 pub struct KernelLens<S, K, T> {
     source: S,
@@ -43,12 +46,16 @@ where
     S: Lens,
     K: Kernel<S::Item, T>,
 {
-    pub fn new(source: S, kernel: K) -> Result<Self, CreationError> {
+    /// Create [`KernelLens`] with specified `source` and `kernel`.
+    ///
+    /// Returns [`KernelLens`] if `source`'s size is at least margin.left + margin.right + 1 in
+    /// width and margin.top + margin.bottom + 1.
+    pub fn new(source: S, kernel: K) -> KernelLensCreationResult<Self> {
         let margin = kernel.margin();
 
         let size = source.size().shrink_by_margin(kernel.margin()).map_err(|e| match e {
-            SizeCreationError::WidthZero => CreationError::KernelTooBigX,
-            SizeCreationError::HeightZero => CreationError::KernelTooBigY,
+            SizeCreationError::WidthZero => KernelLensCreationError::KernelTooBigX,
+            SizeCreationError::HeightZero => KernelLensCreationError::KernelTooBigY,
             _ => unreachable!("unexpected error returned from shrink_by_margin"),
         })?;
 

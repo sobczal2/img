@@ -3,16 +3,15 @@ use std::f32::consts::PI;
 use std::num::NonZeroUsize;
 
 use itertools::Itertools;
+use thiserror::Error;
 
 use crate::{
     component::{
         kernel::{
-            Kernel,
-            gaussian::GaussianKernel,
-            sobel::{
+            gaussian::GaussianKernel, sobel::{
                 Gradient,
                 SobelKernel,
-            },
+            }, Kernel
         },
         lens::border::value_border,
         primitive::{
@@ -25,8 +24,7 @@ use crate::{
     error::IndexResult,
     image::Image,
     lens::{
-        FromLens,
-        Lens,
+        overlay::OverlayLensCreationError, FromLens, Lens
     },
     pixel::{
         ChannelFlags,
@@ -34,24 +32,28 @@ use crate::{
     },
 };
 
-// #[derive(Debug, Error)]
-// pub enum CreationError {
-//     #[error("kernel creation error: {0}")]
-//     KernelCreationError(#[from] kernel::CreationError),
-// }
-//
-// pub type CreationResult<T> = std::result::Result<T, CreationError>;
+#[derive(Debug, Error)]
+pub enum CannyCreationError {
+    #[error("Intermediate lens is too big")]
+    IntermediateLensTooBig,
+}
 
-pub fn canny_lens<S>(source: S) -> impl Lens<Item = Pixel>
+pub type CannyCreationResult<T> = std::result::Result<T, CannyCreationError>;
+
+pub fn canny_lens<S>(source: S) -> CannyCreationResult<impl Lens<Item = Pixel>>
 where
     S: Lens<Item = Pixel> + Clone,
 {
     let lens = value_border(
         source,
+        // SAFETY: Margin::unified only fails if argument is >= DIMENSION_MAX
         Margin::unified(2).expect("unexpected error in Margin::unified"),
         Pixel::zero(),
     )
-    .expect("TODO");
+    .map_err(|e| match e {
+        OverlayLensCreationError::OverlayStartOutOfBounds => panic!("unexpected error in value_border"),
+        OverlayLensCreationError::OverlayTooBig => CannyCreationError::IntermediateLensTooBig,
+    })?;
 
     // SAFETY: `Size::from_radius(2)` is always successful.
     lens.kernel(

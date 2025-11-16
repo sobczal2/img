@@ -53,10 +53,10 @@ impl GaussianKernel {
         values
             .iter_mut()
             .enumerate()
-            // SAFETY: we construct the index from the area of size passed to the
-            // index creation, so it is always in bounds.
             .map(|(index, value)| {
                 (
+                    // SAFETY: we construct the index from the area of size passed to the
+                    // index creation, so it is always in bounds.
                     Point::from_index(index, size).expect("unexpected error in Point::from_index"),
                     value,
                 )

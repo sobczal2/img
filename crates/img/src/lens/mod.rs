@@ -290,7 +290,7 @@ pub trait Lens {
         self,
         overlay: S,
         overlay_start: Point,
-    ) -> overlay::OverlayCreationResult<OverlayLens<Self, S>>
+    ) -> overlay::OverlayLensCreationResult<OverlayLens<Self, S>>
     where
         Self: Sized,
         S: Lens<Item = Self::Item>,

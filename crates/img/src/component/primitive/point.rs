@@ -81,13 +81,13 @@ impl Point {
     /// # }
     /// ```
     pub fn zero() -> Self {
-        Self::new(0, 0).unwrap()
+        Self::new(0, 0).expect("unexpected error in Point::new")
     }
 
     /// Creates [`Point`] given 1D index based on [`Size`] of 2D structure represented by 1D array.
     /// Performs bounds check.
     ///
-    /// Returns [`Point`] if successful, [`OutOfBoundsError`] otherwise.
+    /// Returns [`Point`] if successful, [`IndexError`] otherwise.
     ///
     /// # Examples
     ///
@@ -130,7 +130,7 @@ impl Point {
     /// Create 1D index for [`Point`] based on [`Size`] of 2D structure represented by 1D array.
     /// Performs bounds check.
     ///
-    /// Returns `usize` if successful, [`OutOfBoundsError`] otherwise.
+    /// Returns `usize` if successful, [`IndexError`] otherwise.
     ///
     /// # Examples
     ///
@@ -166,12 +166,12 @@ impl Point {
 
     /// Translate [`Point`] by given [`Offset`].
     ///
-    /// Returns [`Point`] if point components are non-negative, [`CreationError`] otherwise.
+    /// Returns [`Point`] if point components are non-negative, [`PointCreationError`] otherwise.
     ///
     /// # Errors
     ///
-    /// * `CreationError::InvalidX` - if x is negative after applying offset.
-    /// * `CreationError::InvalidY` - if y is negative after applying offset.
+    /// * `PointCreationError::InvalidX` - if x is negative after applying offset.
+    /// * `PointCreationError::InvalidY` - if y is negative after applying offset.
     ///
     /// # Examples
     ///
@@ -295,7 +295,7 @@ impl TryFrom<Offset> for Point {
 
     /// Create [`Point`] from [`Offset`].
     ///
-    /// Returns [`Point`] if point components are non-negative, [`CreationError`] otherwise.
+    /// Returns [`Point`] if point components are non-negative, [`PointCreationError`] otherwise.
     ///
     /// # Errors
     ///

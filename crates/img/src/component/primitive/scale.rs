@@ -39,16 +39,16 @@ impl Scale {
 
     /// Create a new [`Scale`] with the specified x and y scaling factors.
     ///
-    /// Both x and y must be within range <[`Scale::MIN`], [`Scale::MAX`]> inclusive.
+    /// Both x and y must be within range <[`Scale::FACTOR_MIN`], [`Scale::FACTOR_MAX`]> inclusive.
     ///
-    /// Returns [`Scale`] if both parameters are valid, [`CreationError`] otherwise.
+    /// Returns [`Scale`] if both parameters are valid, [`ScaleCreationError`] otherwise.
     ///
     /// # Errors
     ///
     /// * `ScaleCreationError::ScaleXInvalid` - if `x` is not within <[`Scale::MIN`],
-    ///   [`Scale::MAX`]>, is [`NAN`], or is [`INFINITY`]
+    ///   [`Scale::FACTOR_MAX`]>, is [`NAN`], [`INFINITY`] or is [`NEG_INFINITY`]
     /// * `ScaleCreationError::ScaleYInvalid` - if `y` is not within <[`Scale::MIN`],
-    ///   [`Scale::MAX`]>, is [`NAN`], or is [`INFINITY`]
+    ///   [`Scale::FACTOR_MAX`]>, is [`NAN`],[`INFINITY`] or is [`NEG_INFINITY`] 
     ///
     /// [`NAN`]: f32::NAN
     /// [`INFINITY`]: f32::INFINITY
@@ -67,7 +67,8 @@ impl Scale {
     /// assert!(Scale::new(0.00009, 1.0).is_err()); // x too small
     /// assert!(Scale::new(1.0, 10000.1).is_err()); // y too large
     /// assert!(Scale::new(f32::NAN, 1.0).is_err()); // NaN not allowed
-    /// assert!(Scale::new(f32::INFINITY, 1.0).is_err()); // NaN not allowed
+    /// assert!(Scale::new(f32::INFINITY, 1.0).is_err()); // Infinity not allowed
+    /// assert!(Scale::new(f32::NEG_INFINITY, 1.0).is_err()); // Negative Infinity not allowed
     ///
     /// # Ok(())
     /// # }
@@ -113,7 +114,7 @@ impl Scale {
     /// # }
     /// ```
     pub fn inverse(&self) -> Scale {
-        // SAFETY: safe because inverse is always within range `[Scale::MIN, Scale::MAX]`
+        // SAFETY: safe because inverse is always within range `[Scale::FACTOR_MIN, Scale::FACTOR_MAX]`
         // inclusive.
         Scale(1.0 / self.0, 1.0 / self.1)
     }
@@ -121,7 +122,7 @@ impl Scale {
     /// Applies the scale transformation to a [`Size`], returning a new scaled [`Size`].
     /// Rounds results to value closer to zero.
     ///
-    /// Returns scaled [`Size`] or [`CreationError`] if resulting Size would not
+    /// Returns scaled [`Size`] or [`SizeCreationError`] if resulting Size would not
     /// be valid.
     ///
     /// # Examples
@@ -191,7 +192,7 @@ impl Scale {
 }
 
 /// [`Eq`] can be safely implemented since we guarantee that [`Scale`] has floats within range
-/// <[`Scale::MIN`], [`Scale::MAX`]>.
+/// <[`Scale::FACTOR_MIN`], [`Scale::FACTOR_MAX`]>.
 impl Eq for Scale {}
 
 impl PartialOrd for Scale {

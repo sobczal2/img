@@ -342,13 +342,19 @@ mod tests {
 
     #[test]
     fn test_from_radius_err() {
-        assert_eq!(Size::from_radius(DIMENSION_MAX / 2 + 1).unwrap_err(), SizeCreationError::WidthTooBig);
+        assert_eq!(
+            Size::from_radius(DIMENSION_MAX / 2 + 1).unwrap_err(),
+            SizeCreationError::WidthTooBig
+        );
         assert_eq!(Size::from_radius(usize::MAX).unwrap_err(), SizeCreationError::WidthTooBig);
     }
 
     #[test]
     fn test_area() {
-        assert_eq!(Size::new(DIMENSION_MAX, DIMENSION_MAX).unwrap().area(), DIMENSION_MAX * DIMENSION_MAX);
+        assert_eq!(
+            Size::new(DIMENSION_MAX, DIMENSION_MAX).unwrap().area(),
+            DIMENSION_MAX * DIMENSION_MAX
+        );
         assert_eq!(Size::new(1, 1).unwrap().area(), 1);
     }
 
@@ -357,7 +363,10 @@ mod tests {
         assert_eq!(Size::new(1, 1).unwrap().middle(), Point::new(0, 0).unwrap());
         assert_eq!(Size::new(2, 2).unwrap().middle(), Point::new(1, 1).unwrap());
         assert_eq!(Size::new(3, 3).unwrap().middle(), Point::new(1, 1).unwrap());
-        assert_eq!(Size::new(DIMENSION_MAX, DIMENSION_MAX).unwrap().middle(), Point::new(DIMENSION_MAX / 2, DIMENSION_MAX / 2).unwrap());
+        assert_eq!(
+            Size::new(DIMENSION_MAX, DIMENSION_MAX).unwrap().middle(),
+            Point::new(DIMENSION_MAX / 2, DIMENSION_MAX / 2).unwrap()
+        );
     }
 
     #[test]
@@ -366,9 +375,25 @@ mod tests {
         assert!(!Size::new(1, 1).unwrap().contains(&Point::new(1, 0).unwrap()));
         assert!(!Size::new(1, 1).unwrap().contains(&Point::new(0, 1).unwrap()));
         assert!(!Size::new(1, 1).unwrap().contains(&Point::new(1, 1).unwrap()));
-        assert!(Size::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().contains(&Point::new(DIMENSION_MAX - 2, DIMENSION_MAX - 2).unwrap()));
-        assert!(!Size::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().contains(&Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 2).unwrap()));
-        assert!(!Size::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().contains(&Point::new(DIMENSION_MAX - 2, DIMENSION_MAX - 1).unwrap()));
-        assert!(!Size::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap().contains(&Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap()));
+        assert!(
+            Size::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1)
+                .unwrap()
+                .contains(&Point::new(DIMENSION_MAX - 2, DIMENSION_MAX - 2).unwrap())
+        );
+        assert!(
+            !Size::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1)
+                .unwrap()
+                .contains(&Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 2).unwrap())
+        );
+        assert!(
+            !Size::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1)
+                .unwrap()
+                .contains(&Point::new(DIMENSION_MAX - 2, DIMENSION_MAX - 1).unwrap())
+        );
+        assert!(
+            !Size::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1)
+                .unwrap()
+                .contains(&Point::new(DIMENSION_MAX - 1, DIMENSION_MAX - 1).unwrap())
+        );
     }
 }

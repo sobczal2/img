@@ -101,23 +101,47 @@ mod tests {
 
     #[test]
     fn test_new_err() {
-        assert_eq!(Offset::new(-(DIMENSION_MAX as isize), 0).unwrap_err(), OffsetCreationError::XTooSmall);
-        assert_eq!(Offset::new(0, -(DIMENSION_MAX as isize)).unwrap_err(), OffsetCreationError::YTooSmall);
-        assert_eq!(Offset::new(DIMENSION_MAX as isize, 0).unwrap_err(), OffsetCreationError::XTooBig);
-        assert_eq!(Offset::new(0, DIMENSION_MAX as isize).unwrap_err(), OffsetCreationError::YTooBig);
+        assert_eq!(
+            Offset::new(-(DIMENSION_MAX as isize), 0).unwrap_err(),
+            OffsetCreationError::XTooSmall
+        );
+        assert_eq!(
+            Offset::new(0, -(DIMENSION_MAX as isize)).unwrap_err(),
+            OffsetCreationError::YTooSmall
+        );
+        assert_eq!(
+            Offset::new(DIMENSION_MAX as isize, 0).unwrap_err(),
+            OffsetCreationError::XTooBig
+        );
+        assert_eq!(
+            Offset::new(0, DIMENSION_MAX as isize).unwrap_err(),
+            OffsetCreationError::YTooBig
+        );
     }
 
     #[test]
     fn test_from_point() {
         assert_eq!(Offset::from(Point::new(0, 0).unwrap()), Offset::new(0, 0).unwrap());
-        assert_eq!(Offset::from(Point::new(DIMENSION_MAX - 1, 0).unwrap()), Offset::new((DIMENSION_MAX as isize) - 1, 0).unwrap());
-        assert_eq!(Offset::from(Point::new(0, DIMENSION_MAX - 1).unwrap()), Offset::new(0, (DIMENSION_MAX as isize) - 1).unwrap());
+        assert_eq!(
+            Offset::from(Point::new(DIMENSION_MAX - 1, 0).unwrap()),
+            Offset::new((DIMENSION_MAX as isize) - 1, 0).unwrap()
+        );
+        assert_eq!(
+            Offset::from(Point::new(0, DIMENSION_MAX - 1).unwrap()),
+            Offset::new(0, (DIMENSION_MAX as isize) - 1).unwrap()
+        );
     }
 
     #[test]
     fn test_neg() {
-        assert_eq!(-Offset::new(0,0).unwrap(), Offset::new(0,0).unwrap());
-        assert_eq!(-Offset::new((DIMENSION_MAX as isize) - 1, 0).unwrap(), Offset::new(-(DIMENSION_MAX as isize) + 1, 0).unwrap());
-        assert_eq!(-Offset::new(0, (DIMENSION_MAX as isize) - 1).unwrap(), Offset::new(0, -(DIMENSION_MAX as isize) + 1).unwrap());
+        assert_eq!(-Offset::new(0, 0).unwrap(), Offset::new(0, 0).unwrap());
+        assert_eq!(
+            -Offset::new((DIMENSION_MAX as isize) - 1, 0).unwrap(),
+            Offset::new(-(DIMENSION_MAX as isize) + 1, 0).unwrap()
+        );
+        assert_eq!(
+            -Offset::new(0, (DIMENSION_MAX as isize) - 1).unwrap(),
+            Offset::new(0, -(DIMENSION_MAX as isize) + 1).unwrap()
+        );
     }
 }

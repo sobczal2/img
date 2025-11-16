@@ -1,16 +1,17 @@
 mod area;
+mod limits;
 mod margin;
 mod offset;
 mod point;
 mod scale;
 mod size;
-mod limits;
 
 pub use area::{
     Area,
     AreaCreationError,
     AreaCreationResult,
 };
+pub use limits::DIMENSION_MAX;
 pub use margin::{
     Margin,
     MarginCreationError,
@@ -32,4 +33,3 @@ pub use size::{
     SizeCreationError,
     SizeCreationResult,
 };
-pub use limits::DIMENSION_MAX;

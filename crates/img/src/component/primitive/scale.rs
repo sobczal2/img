@@ -18,9 +18,9 @@ use super::{
 
 #[derive(Error, Debug, PartialEq)]
 pub enum ScaleCreationError {
-    #[error("Scale x value is outside valid range [{min_scale}, {max_scale}]", min_scale = Scale::DIMENSION_MIN, max_scale = Scale::DIMENSION_MAX)]
+    #[error("Scale x value is outside valid range [{min_scale}, {max_scale}]", min_scale = Scale::FACTOR_MIN, max_scale = Scale::FACTOR_MAX)]
     ScaleXInvalid,
-    #[error("Scale y value is outside valid range [{min_scale}, {max_scale}]", min_scale = Scale::DIMENSION_MIN, max_scale = Scale::DIMENSION_MAX)]
+    #[error("Scale y value is outside valid range [{min_scale}, {max_scale}]", min_scale = Scale::FACTOR_MIN, max_scale = Scale::FACTOR_MAX)]
     ScaleYInvalid,
 }
 
@@ -31,11 +31,11 @@ pub type ScaleCreationResult<T> = Result<T, ScaleCreationError>;
 pub struct Scale(f32, f32);
 
 impl Scale {
-    /// Minimum valid scaling factor.
-    pub const DIMENSION_MAX: f32 = 1e4;
-
     /// Maximum valid scaling factor.
-    pub const DIMENSION_MIN: f32 = 1f32 / Self::DIMENSION_MAX;
+    pub const FACTOR_MAX: f32 = 1e4;
+
+    /// Minimum valid scaling factor.
+    pub const FACTOR_MIN: f32 = 1f32 / Self::FACTOR_MAX;
 
     /// Create a new [`Scale`] with the specified x and y scaling factors.
     ///
@@ -73,7 +73,7 @@ impl Scale {
     /// # }
     /// ```
     pub fn new(x: f32, y: f32) -> ScaleCreationResult<Self> {
-        let valid_range = Self::DIMENSION_MIN..=Self::DIMENSION_MAX;
+        let valid_range = Self::FACTOR_MIN..=Self::FACTOR_MAX;
         if !valid_range.contains(&x) {
             return Err(ScaleCreationError::ScaleXInvalid);
         }
@@ -257,21 +257,21 @@ mod test {
     #[test]
     fn test_new_ok() {
         assert!(Scale::new(1f32, 1f32).is_ok());
-        assert!(Scale::new(Scale::DIMENSION_MIN, 1f32).is_ok());
-        assert!(Scale::new(Scale::DIMENSION_MAX, 1f32).is_ok());
-        assert!(Scale::new(1f32, Scale::DIMENSION_MIN).is_ok());
-        assert!(Scale::new(1f32, Scale::DIMENSION_MAX).is_ok());
+        assert!(Scale::new(Scale::FACTOR_MIN, 1f32).is_ok());
+        assert!(Scale::new(Scale::FACTOR_MAX, 1f32).is_ok());
+        assert!(Scale::new(1f32, Scale::FACTOR_MIN).is_ok());
+        assert!(Scale::new(1f32, Scale::FACTOR_MAX).is_ok());
     }
 
     #[test]
     fn test_new_err() {
-        assert_eq!(Scale::new(Scale::DIMENSION_MIN - 1f32, 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
-        assert_eq!(Scale::new(1f32, Scale::DIMENSION_MIN - 1f32).unwrap_err(), ScaleCreationError::ScaleYInvalid);
-        assert_eq!(Scale::new(Scale::DIMENSION_MIN - 1f32, Scale::DIMENSION_MIN - 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
+        assert_eq!(Scale::new(Scale::FACTOR_MIN - 1f32, 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
+        assert_eq!(Scale::new(1f32, Scale::FACTOR_MIN - 1f32).unwrap_err(), ScaleCreationError::ScaleYInvalid);
+        assert_eq!(Scale::new(Scale::FACTOR_MIN - 1f32, Scale::FACTOR_MIN - 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
 
-        assert_eq!(Scale::new(Scale::DIMENSION_MAX + 1f32, 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
-        assert_eq!(Scale::new(1f32, Scale::DIMENSION_MAX + 1f32).unwrap_err(), ScaleCreationError::ScaleYInvalid);
-        assert_eq!(Scale::new(Scale::DIMENSION_MAX + 1f32, Scale::DIMENSION_MAX + 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
+        assert_eq!(Scale::new(Scale::FACTOR_MAX + 1f32, 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
+        assert_eq!(Scale::new(1f32, Scale::FACTOR_MAX + 1f32).unwrap_err(), ScaleCreationError::ScaleYInvalid);
+        assert_eq!(Scale::new(Scale::FACTOR_MAX + 1f32, Scale::FACTOR_MAX + 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
 
         assert_eq!(Scale::new(f32::INFINITY, 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
         assert_eq!(Scale::new(1f32, f32::INFINITY).unwrap_err(), ScaleCreationError::ScaleYInvalid);
@@ -283,10 +283,10 @@ mod test {
 
     #[test]
     fn test_inverse() {
-        assert_eq!(Scale::new(Scale::DIMENSION_MAX, 1f32).unwrap().inverse(), Scale::new(Scale::DIMENSION_MIN, 1f32).unwrap());
-        assert_eq!(Scale::new(Scale::DIMENSION_MIN, 1f32).unwrap().inverse(), Scale::new(Scale::DIMENSION_MAX, 1f32).unwrap());
-        assert_eq!(Scale::new(1f32, Scale::DIMENSION_MAX).unwrap().inverse(), Scale::new(1f32, Scale::DIMENSION_MIN).unwrap());
-        assert_eq!(Scale::new(1f32, Scale::DIMENSION_MIN).unwrap().inverse(), Scale::new(1f32, Scale::DIMENSION_MAX).unwrap());
+        assert_eq!(Scale::new(Scale::FACTOR_MAX, 1f32).unwrap().inverse(), Scale::new(Scale::FACTOR_MIN, 1f32).unwrap());
+        assert_eq!(Scale::new(Scale::FACTOR_MIN, 1f32).unwrap().inverse(), Scale::new(Scale::FACTOR_MAX, 1f32).unwrap());
+        assert_eq!(Scale::new(1f32, Scale::FACTOR_MAX).unwrap().inverse(), Scale::new(1f32, Scale::FACTOR_MIN).unwrap());
+        assert_eq!(Scale::new(1f32, Scale::FACTOR_MIN).unwrap().inverse(), Scale::new(1f32, Scale::FACTOR_MAX).unwrap());
     }
 
     #[test]
@@ -335,114 +335,114 @@ mod test {
             Some(Ordering::Equal)
         );
         assert_eq!(
-            Scale::new(Scale::DIMENSION_MAX, 1f32)
+            Scale::new(Scale::FACTOR_MAX, 1f32)
                 .unwrap()
-                .partial_cmp(&Scale::new(Scale::DIMENSION_MAX, 1f32).unwrap()),
+                .partial_cmp(&Scale::new(Scale::FACTOR_MAX, 1f32).unwrap()),
             Some(Ordering::Equal)
         );
         assert_eq!(
-            Scale::new(Scale::DIMENSION_MIN, 1f32)
+            Scale::new(Scale::FACTOR_MIN, 1f32)
                 .unwrap()
-                .partial_cmp(&Scale::new(Scale::DIMENSION_MIN, 1f32).unwrap()),
+                .partial_cmp(&Scale::new(Scale::FACTOR_MIN, 1f32).unwrap()),
             Some(Ordering::Equal)
         );
         assert_eq!(
-            Scale::new(1f32, Scale::DIMENSION_MAX)
+            Scale::new(1f32, Scale::FACTOR_MAX)
                 .unwrap()
-                .partial_cmp(&Scale::new(1f32, Scale::DIMENSION_MAX).unwrap()),
+                .partial_cmp(&Scale::new(1f32, Scale::FACTOR_MAX).unwrap()),
             Some(Ordering::Equal)
         );
         assert_eq!(
-            Scale::new(1f32, Scale::DIMENSION_MIN)
+            Scale::new(1f32, Scale::FACTOR_MIN)
                 .unwrap()
-                .partial_cmp(&Scale::new(1f32, Scale::DIMENSION_MIN).unwrap()),
+                .partial_cmp(&Scale::new(1f32, Scale::FACTOR_MIN).unwrap()),
             Some(Ordering::Equal)
         );
         assert_eq!(
-            Scale::new(Scale::DIMENSION_MAX, Scale::DIMENSION_MAX)
+            Scale::new(Scale::FACTOR_MAX, Scale::FACTOR_MAX)
                 .unwrap()
-                .partial_cmp(&Scale::new(Scale::DIMENSION_MAX, Scale::DIMENSION_MAX).unwrap()),
+                .partial_cmp(&Scale::new(Scale::FACTOR_MAX, Scale::FACTOR_MAX).unwrap()),
             Some(Ordering::Equal)
         );
         assert_eq!(
-            Scale::new(Scale::DIMENSION_MIN, Scale::DIMENSION_MIN)
+            Scale::new(Scale::FACTOR_MIN, Scale::FACTOR_MIN)
                 .unwrap()
-                .partial_cmp(&Scale::new(Scale::DIMENSION_MIN, Scale::DIMENSION_MIN).unwrap()),
+                .partial_cmp(&Scale::new(Scale::FACTOR_MIN, Scale::FACTOR_MIN).unwrap()),
             Some(Ordering::Equal)
         );
 
         assert_eq!(
-            Scale::new(Scale::DIMENSION_MIN, 1f32)
+            Scale::new(Scale::FACTOR_MIN, 1f32)
                 .unwrap()
                 .partial_cmp(&Scale::new(1f32, 1f32).unwrap()),
             Some(Ordering::Less)
         );
         assert_eq!(
-            Scale::new(1f32, Scale::DIMENSION_MIN)
+            Scale::new(1f32, Scale::FACTOR_MIN)
                 .unwrap()
                 .partial_cmp(&Scale::new(1f32, 1f32).unwrap()),
             Some(Ordering::Less)
         );
         assert_eq!(
-            Scale::new(Scale::DIMENSION_MIN, Scale::DIMENSION_MIN)
+            Scale::new(Scale::FACTOR_MIN, Scale::FACTOR_MIN)
                 .unwrap()
                 .partial_cmp(&Scale::new(1f32, 1f32).unwrap()),
             Some(Ordering::Less)
         );
         assert_eq!(
-            Scale::new(Scale::DIMENSION_MIN, Scale::DIMENSION_MIN)
+            Scale::new(Scale::FACTOR_MIN, Scale::FACTOR_MIN)
                 .unwrap()
-                .partial_cmp(&Scale::new(Scale::DIMENSION_MIN, 1f32).unwrap()),
+                .partial_cmp(&Scale::new(Scale::FACTOR_MIN, 1f32).unwrap()),
             Some(Ordering::Less)
         );
         assert_eq!(
-            Scale::new(Scale::DIMENSION_MIN, Scale::DIMENSION_MIN)
+            Scale::new(Scale::FACTOR_MIN, Scale::FACTOR_MIN)
                 .unwrap()
-                .partial_cmp(&Scale::new(1f32, Scale::DIMENSION_MIN).unwrap()),
+                .partial_cmp(&Scale::new(1f32, Scale::FACTOR_MIN).unwrap()),
             Some(Ordering::Less)
         );
 
         assert_eq!(
-            Scale::new(Scale::DIMENSION_MAX, 1f32)
+            Scale::new(Scale::FACTOR_MAX, 1f32)
                 .unwrap()
                 .partial_cmp(&Scale::new(1f32, 1f32).unwrap()),
             Some(Ordering::Greater)
         );
         assert_eq!(
-            Scale::new(1f32, Scale::DIMENSION_MAX)
+            Scale::new(1f32, Scale::FACTOR_MAX)
                 .unwrap()
                 .partial_cmp(&Scale::new(1f32, 1f32).unwrap()),
             Some(Ordering::Greater)
         );
         assert_eq!(
-            Scale::new(Scale::DIMENSION_MAX, Scale::DIMENSION_MAX)
+            Scale::new(Scale::FACTOR_MAX, Scale::FACTOR_MAX)
                 .unwrap()
                 .partial_cmp(&Scale::new(1f32, 1f32).unwrap()),
             Some(Ordering::Greater)
         );
         assert_eq!(
-            Scale::new(Scale::DIMENSION_MAX, Scale::DIMENSION_MAX)
+            Scale::new(Scale::FACTOR_MAX, Scale::FACTOR_MAX)
                 .unwrap()
-                .partial_cmp(&Scale::new(Scale::DIMENSION_MAX, 1f32).unwrap()),
+                .partial_cmp(&Scale::new(Scale::FACTOR_MAX, 1f32).unwrap()),
             Some(Ordering::Greater)
         );
         assert_eq!(
-            Scale::new(Scale::DIMENSION_MAX, Scale::DIMENSION_MAX)
+            Scale::new(Scale::FACTOR_MAX, Scale::FACTOR_MAX)
                 .unwrap()
-                .partial_cmp(&Scale::new(1f32, Scale::DIMENSION_MAX).unwrap()),
+                .partial_cmp(&Scale::new(1f32, Scale::FACTOR_MAX).unwrap()),
             Some(Ordering::Greater)
         );
 
         assert_eq!(
-            Scale::new(Scale::DIMENSION_MAX, 1f32)
+            Scale::new(Scale::FACTOR_MAX, 1f32)
                 .unwrap()
-                .partial_cmp(&Scale::new(1f32, Scale::DIMENSION_MAX).unwrap()),
+                .partial_cmp(&Scale::new(1f32, Scale::FACTOR_MAX).unwrap()),
             None
         );
         assert_eq!(
-            Scale::new(1f32, Scale::DIMENSION_MAX)
+            Scale::new(1f32, Scale::FACTOR_MAX)
                 .unwrap()
-                .partial_cmp(&Scale::new(Scale::DIMENSION_MAX, 1f32).unwrap()),
+                .partial_cmp(&Scale::new(Scale::FACTOR_MAX, 1f32).unwrap()),
             None
         );
     }

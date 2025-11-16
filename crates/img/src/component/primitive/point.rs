@@ -241,7 +241,7 @@ impl Sub for Point {
         let x = self.x as isize - rhs.x as isize;
         let y = self.y as isize - rhs.y as isize;
 
-        // SAFETY: subtracting point from another is guaranted to produce |value| < DIMENSION_MAX
+        // SAFETY: subtracting point from another is guaranteed to produce |value| < DIMENSION_MAX
         Offset::new(x, y).expect("unexpected error in Offset::new")
     }
 }

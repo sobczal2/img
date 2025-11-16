@@ -59,7 +59,7 @@ impl Kernel<u8, Gradient> for SobelKernel {
             .enumerate()
             .flat_map(|(y, (row_x, row_y))| {
                 row_x.iter().zip(row_y).enumerate().map(move |(x, (x_value, y_value))| {
-                    (Offset::new(x as isize - 1, y as isize - 1), x_value, y_value)
+                    (Offset::new(x as isize - 1, y as isize - 1).expect("TODO"), x_value, y_value)
                 })
             })
             .map(|(offset, x_value, y_value)| {

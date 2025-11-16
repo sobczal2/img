@@ -163,19 +163,31 @@ mod test {
     #[test]
     fn test_write_read_same_image() {
         let mut image = Image::empty(Size::new(2, 2).unwrap());
-        image.pixel_mut(Point::new(0, 0)).unwrap().set_r(1);
-        image.pixel_mut(Point::new(0, 1)).unwrap().set_r(1);
-        image.pixel_mut(Point::new(1, 0)).unwrap().set_r(1);
-        image.pixel_mut(Point::new(1, 1)).unwrap().set_r(1);
+        image.pixel_mut(Point::new(0, 0).unwrap()).unwrap().set_r(1);
+        image.pixel_mut(Point::new(0, 1).unwrap()).unwrap().set_r(1);
+        image.pixel_mut(Point::new(1, 0).unwrap()).unwrap().set_r(1);
+        image.pixel_mut(Point::new(1, 1).unwrap()).unwrap().set_r(1);
 
         let mut data = Vec::new();
         image.write_png(&mut data).unwrap();
 
         let image2 = Image::read_png(&data[..]).unwrap();
 
-        assert_eq!(image.pixel(Point::new(0, 0)).unwrap(), image2.pixel(Point::new(0, 0)).unwrap());
-        assert_eq!(image.pixel(Point::new(0, 1)).unwrap(), image2.pixel(Point::new(0, 1)).unwrap());
-        assert_eq!(image.pixel(Point::new(1, 0)).unwrap(), image2.pixel(Point::new(1, 0)).unwrap());
-        assert_eq!(image.pixel(Point::new(1, 1)).unwrap(), image2.pixel(Point::new(1, 1)).unwrap());
+        assert_eq!(
+            image.pixel(Point::new(0, 0).unwrap()).unwrap(),
+            image2.pixel(Point::new(0, 0).unwrap()).unwrap()
+        );
+        assert_eq!(
+            image.pixel(Point::new(0, 1).unwrap()).unwrap(),
+            image2.pixel(Point::new(0, 1).unwrap()).unwrap()
+        );
+        assert_eq!(
+            image.pixel(Point::new(1, 0).unwrap()).unwrap(),
+            image2.pixel(Point::new(1, 0).unwrap()).unwrap()
+        );
+        assert_eq!(
+            image.pixel(Point::new(1, 1).unwrap()).unwrap(),
+            image2.pixel(Point::new(1, 1).unwrap()).unwrap()
+        );
     }
 }

@@ -45,7 +45,7 @@ impl SobelKernel {
 }
 
 impl Kernel<u8, Gradient> for SobelKernel {
-    fn apply<P>(&self, lens: &P, point: Point) -> IndexResult<Gradient>
+    fn evaluate<P>(&self, lens: &P, point: Point) -> IndexResult<Gradient>
     where
         P: Lens<Item = u8>,
     {

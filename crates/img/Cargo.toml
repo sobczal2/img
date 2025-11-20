@@ -13,7 +13,7 @@ rand.workspace = true
 turbojpeg = { workspace = true, optional = true }
 
 [features]
-default = ["parallel", "jpeg", "png"]
+default = ["parallel", "png"]
 parallel = []
 jpeg = ["dep:turbojpeg"]
 png = ["dep:png"]

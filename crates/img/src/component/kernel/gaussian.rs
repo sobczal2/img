@@ -32,7 +32,7 @@ pub enum CreationError {
     #[error("invalid sigma")]
     InvalidSigma,
     #[error("invalid convolution kernel params: {0}")]
-    ConvolutionKernelError(#[from] kernel::convolution::CreationError),
+    ConvolutionKernelError(#[from] kernel::convolution::ConvolutionKernelCreationError),
 }
 
 pub type CreationResult = Result<GaussianKernel, CreationError>;
@@ -83,11 +83,11 @@ impl<In> Kernel<In, Pixel> for GaussianKernel
 where
     In: AsRef<Pixel>,
 {
-    fn apply<S>(&self, lens: &S, point: Point) -> IndexResult<Pixel>
+    fn evaluate<S>(&self, lens: &S, point: Point) -> IndexResult<Pixel>
     where
         S: Lens<Item = In>,
     {
-        self.inner.apply(lens, point)
+        self.inner.evaluate(lens, point)
     }
 
     fn margin(&self) -> Margin {

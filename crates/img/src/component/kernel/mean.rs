@@ -24,7 +24,7 @@ use crate::{
 #[derive(Debug, Error)]
 pub enum CreationError {
     #[error("invalid convolution kernel params: {0}")]
-    ConvolutionKernelError(#[from] kernel::convolution::CreationError),
+    ConvolutionKernelError(#[from] kernel::convolution::ConvolutionKernelCreationError),
 }
 
 pub type CreationResult = Result<MeanKernel, CreationError>;
@@ -50,11 +50,11 @@ impl<In> Kernel<In, Pixel> for MeanKernel
 where
     In: AsRef<Pixel>,
 {
-    fn apply<P>(&self, lens: &P, point: Point) -> IndexResult<Pixel>
+    fn evaluate<P>(&self, lens: &P, point: Point) -> IndexResult<Pixel>
     where
         P: Lens<Item = In>,
     {
-        self.inner.apply(lens, point)
+        self.inner.evaluate(lens, point)
     }
 
     fn margin(&self) -> Margin {

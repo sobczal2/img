@@ -9,7 +9,7 @@ use crate::{
             Area,
             Margin,
             Point,
-            Size,
+            Size, SizeCreationError,
         },
     },
     error::{
@@ -25,32 +25,44 @@ use crate::{
 };
 
 #[derive(Debug, Error)]
-pub enum CreationError {
+pub enum ConvolutionKernelCreationError {
     #[error("buffer len is invalid")]
     BufferLenMissmatch,
+    #[error("margin width too big")]
+    MarginWidthTooBig,
+    #[error("margin height too big")]
+    MarginHeightTooBig,
 }
 
-pub type CreationResult = Result<ConvolutionKernel, CreationError>;
+pub type ConvolutionKernelCreationResult = Result<ConvolutionKernel, ConvolutionKernelCreationError>;
 
+/// A [`Kernel`] used to perform convolution on specified margin.
 #[derive(Clone)]
 pub struct ConvolutionKernel {
-    size: Size,
+    margin: Margin,
     buffer: Box<[f32]>,
     flags: ChannelFlags,
 }
 
 impl ConvolutionKernel {
     pub fn new(
-        size: Size,
-        buffer: impl IntoIterator<Item = f32>,
+        margin: Margin,
+        buffer: Box<[f32]>,
         flags: ChannelFlags,
-    ) -> CreationResult {
-        let buffer: Box<[_]> = buffer.into_iter().collect();
+    ) -> ConvolutionKernelCreationResult {
+        let size = Size::new(margin.left() + margin.right() + 1, margin.top() + margin.bottom() + 1)
+            .map_err(|e| {
+                match e {
+                    SizeCreationError::WidthTooBig => ConvolutionKernelCreationError::MarginWidthTooBig,
+                    SizeCreationError::HeightTooBig => ConvolutionKernelCreationError::MarginHeightTooBig,
+                    _ => unreachable!("unexpected error in Size::new")
+                }
+            })?;
         if buffer.len() != size.area() {
-            return Err(CreationError::BufferLenMissmatch);
+            return Err(ConvolutionKernelCreationError::BufferLenMissmatch);
         }
 
-        Ok(Self { size, buffer, flags })
+        Ok(Self { margin, buffer, flags })
     }
 }
 
@@ -69,13 +81,13 @@ impl<In> Kernel<In, Pixel> for ConvolutionKernel
 where
     In: AsRef<Pixel>,
 {
-    fn apply<S>(&self, lens: &S, point: Point) -> IndexResult<Pixel>
+    fn evaluate<S>(&self, lens: &S, point: Point) -> IndexResult<Pixel>
     where
         S: Lens<Item = In>,
     {
         let working_area = Area::from_cropped_size(
             lens.size(),
-            <ConvolutionKernel as Kernel<In, Pixel>>::margin(self),
+            self.margin,
         )
         .expect("failed to create working area, this is either lens or kernel bug");
 

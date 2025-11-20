@@ -70,7 +70,7 @@ struct QuadrantSelectionKernel {
 }
 
 impl Kernel<HsvPixel, SelectedQuadrant> for QuadrantSelectionKernel {
-    fn apply<S>(&self, source: &S, point: Point) -> IndexResult<SelectedQuadrant>
+    fn evaluate<S>(&self, source: &S, point: Point) -> IndexResult<SelectedQuadrant>
     where
         S: Lens<Item = HsvPixel>,
     {
@@ -156,7 +156,7 @@ struct MeanCalculationKernel {
 }
 
 impl Kernel<MeanCalculationInput, Pixel> for MeanCalculationKernel {
-    fn apply<S>(&self, source: &S, point: Point) -> IndexResult<Pixel>
+    fn evaluate<S>(&self, source: &S, point: Point) -> IndexResult<Pixel>
     where
         S: Lens<Item = MeanCalculationInput>,
     {

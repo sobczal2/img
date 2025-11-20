@@ -18,7 +18,7 @@ impl IdentityKernel {
 }
 
 impl<T> Kernel<T, T> for IdentityKernel {
-    fn apply<S>(&self, source: &S, point: Point) -> IndexResult<T>
+    fn evaluate<S>(&self, source: &S, point: Point) -> IndexResult<T>
     where
         S: Lens<Item = T>,
     {

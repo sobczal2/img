@@ -25,9 +25,9 @@ use crate::{
 #[derive(Debug, Error)]
 pub enum KernelLensCreationError {
     #[error("kernel's width is too big")]
-    KernelTooBigX,
+    KernelWidthTooBig,
     #[error("kernel's height is too big")]
-    KernelTooBigY,
+    KernelHeightTooBig,
 }
 
 pub type KernelLensCreationResult<T> = std::result::Result<T, KernelLensCreationError>;
@@ -50,12 +50,12 @@ where
     ///
     /// Returns [`KernelLens`] if `source`'s size is at least margin.left + margin.right + 1 in
     /// width and margin.top + margin.bottom + 1.
-    pub fn new(source: S, kernel: K) -> KernelLensCreationResult<Self> {
+    pub fn new(source: S, kernel: K) -> Result<Self, KernelLensCreationError> {
         let margin = kernel.margin();
 
         let size = source.size().shrink_by_margin(kernel.margin()).map_err(|e| match e {
-            SizeCreationError::WidthZero => KernelLensCreationError::KernelTooBigX,
-            SizeCreationError::HeightZero => KernelLensCreationError::KernelTooBigY,
+            SizeCreationError::WidthZero => KernelLensCreationError::KernelWidthTooBig,
+            SizeCreationError::HeightZero => KernelLensCreationError::KernelHeightTooBig,
             _ => unreachable!("unexpected error returned from shrink_by_margin"),
         })?;
 
@@ -82,7 +82,7 @@ where
         let offset: Offset = self.working_area.top_left().into();
         let source_point = point.translate(offset).expect("unexpected error in Point::translate");
 
-        self.kernel.apply(&self.source, source_point)
+        self.kernel.evaluate(&self.source, source_point)
     }
 
     fn size(&self) -> Size {

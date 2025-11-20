@@ -205,7 +205,7 @@ struct HysteresisThresholdingKernel {
 }
 
 impl Kernel<f32, u8> for HysteresisThresholdingKernel {
-    fn apply<P>(&self, lens: &P, point: Point) -> IndexResult<u8>
+    fn evaluate<P>(&self, lens: &P, point: Point) -> IndexResult<u8>
     where
         P: Lens<Item = f32>,
     {

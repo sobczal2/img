@@ -32,7 +32,7 @@ pub enum GaussianBlurCreationError {
     #[error("failed to create gaussian kernel: {0}")]
     Kernel(#[from] kernel::gaussian::CreationError),
     #[error("failed to create kernel lens: {0}")]
-    KernelLens(#[from] lens::kernel::CreationError),
+    KernelLens(#[from] lens::kernel::KernelLensCreationError),
     #[error("failed to create size: {0}")]
     Size(#[from] SizeCreationError),
 }

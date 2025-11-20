@@ -181,7 +181,7 @@ pub trait Lens {
     /// Get [`KernelLens`] which applies `kernel` to every [`Lens::Item`].
     ///
     /// See [`KernelLens`] and [`Kernel`] for more details.
-    fn kernel<K, T>(self, kernel: K) -> Result<KernelLens<Self, K, T>, kernel::CreationError>
+    fn kernel<K, T>(self, kernel: K) -> Result<KernelLens<Self, K, T>, kernel::KernelLensCreationError>
     where
         Self: Sized,
         K: Kernel<Self::Item, T>,

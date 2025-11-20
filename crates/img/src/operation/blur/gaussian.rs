@@ -5,36 +5,30 @@ use thiserror::Error;
 
 use crate::{
     component::{
-        kernel::{
-            self,
-            gaussian::GaussianKernel,
-        },
+        kernel::gaussian::{GaussianKernel, GaussianKernelCreationError},
         primitive::{
-            Size,
-            SizeCreationError,
+            MarginCreationError,
         },
     },
     image::Image,
     lens::{
-        self,
-        FromLens,
-        Lens,
+        kernel::KernelLensCreationError, FromLens, Lens
     },
     pixel::{
         ChannelFlags,
         Pixel,
-    },
+    }, prelude::Margin,
 };
 
 /// Error returned by mean_blur function
 #[derive(Debug, Error)]
 pub enum GaussianBlurCreationError {
     #[error("failed to create gaussian kernel: {0}")]
-    Kernel(#[from] kernel::gaussian::CreationError),
+    Kernel(#[from] GaussianKernelCreationError),
     #[error("failed to create kernel lens: {0}")]
-    KernelLens(#[from] lens::kernel::KernelLensCreationError),
-    #[error("failed to create size: {0}")]
-    Size(#[from] SizeCreationError),
+    KernelLens(#[from] KernelLensCreationError),
+    #[error("failed to create margin: {0}")]
+    Size(#[from] MarginCreationError),
 }
 
 pub type GaussianBlurCreationResult<T> = std::result::Result<T, GaussianBlurCreationError>;
@@ -49,7 +43,7 @@ where
     S: Lens,
     S::Item: AsRef<Pixel>,
 {
-    let kernel = GaussianKernel::new(Size::from_radius(radius)?, sigma, flags)?;
+    let kernel = GaussianKernel::new(Margin::unified(radius)?, sigma, flags)?;
     let lens = source.kernel(kernel)?;
 
     Ok(lens)

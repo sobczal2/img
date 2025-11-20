@@ -16,7 +16,7 @@ use crate::{
             Elements,
             Rows,
         },
-        kernel::KernelLens,
+        kernel::{KernelLens, KernelLensCreationResult},
         map::MapLens,
         materialize::MaterializeLens,
         overlay::OverlayLens,
@@ -181,7 +181,7 @@ pub trait Lens {
     /// Get [`KernelLens`] which applies `kernel` to every [`Lens::Item`].
     ///
     /// See [`KernelLens`] and [`Kernel`] for more details.
-    fn kernel<K, T>(self, kernel: K) -> Result<KernelLens<Self, K, T>, kernel::KernelLensCreationError>
+    fn kernel<K, T>(self, kernel: K) -> KernelLensCreationResult<KernelLens<Self, K, T>>
     where
         Self: Sized,
         K: Kernel<Self::Item, T>,

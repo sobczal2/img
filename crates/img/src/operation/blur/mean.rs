@@ -6,34 +6,30 @@ use thiserror::Error;
 use crate::{
     component::{
         kernel::{
-            self,
-            mean::MeanKernel,
+            mean::{MeanKernel, MeanKernelCreationError},
         },
         primitive::{
-            Size,
-            SizeCreationError,
+            MarginCreationError,
         },
     },
     image::Image,
     lens::{
-        self,
-        FromLens,
-        Lens,
+        kernel::KernelLensCreationError, FromLens, Lens
     },
     pixel::{
         ChannelFlags,
         Pixel,
-    },
+    }, prelude::Margin,
 };
 
 #[derive(Debug, Error)]
 pub enum MeanCreationError {
     #[error("failed to create mean kernel: {0}")]
-    Kernel(#[from] kernel::mean::CreationError),
+    Kernel(#[from] MeanKernelCreationError),
     #[error("failed to create kernel lens: {0}")]
-    KernelLens(#[from] lens::kernel::KernelLensCreationError),
-    #[error("failed to create size: {0}")]
-    Size(#[from] SizeCreationError),
+    KernelLens(#[from] KernelLensCreationError),
+    #[error("failed to create margin: {0}")]
+    Size(#[from] MarginCreationError),
 }
 
 pub type MeanCreationResult<T> = std::result::Result<T, MeanCreationError>;
@@ -47,7 +43,7 @@ where
     S: Lens,
     S::Item: AsRef<Pixel>,
 {
-    let kernel = MeanKernel::new(Size::from_radius(radius)?, flags)?;
+    let kernel = MeanKernel::new(Margin::unified(radius)?, flags)?;
     let lens = source.kernel(kernel)?;
     Ok(lens)
 }

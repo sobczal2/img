@@ -40,6 +40,10 @@ impl<T> MaterializeLens<T> {
         S: Lens<Item = T> + Send + Sync,
         T: Send,
     {
+        if threads.get() == 1 {
+            return Self::new(source)
+        }
+
         use std::thread;
 
         let size = source.size();

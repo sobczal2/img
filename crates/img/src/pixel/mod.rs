@@ -16,7 +16,7 @@ bitflags! {
     ///
     /// Some operations suppport this as a parameter to specify which channel should be
     /// affected.
-    #[derive(Clone, Copy, Debug)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
     pub struct ChannelFlags: u8 {
         const RED = 0b1000;
         const GREEN = 0b0100;

@@ -35,10 +35,9 @@ pub fn subcommand() -> Command {
 
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     let image = read_image(matches.get_one::<PathBuf>(input::ARG_NAME).unwrap())?;
-    let image = canny(&image);
 
     #[cfg(not(feature = "parallel"))]
-    let image = canny(&image);
+    let image = canny(&image, Default::default())?;
 
     #[cfg(feature = "parallel")]
     let image = {
@@ -48,8 +47,8 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
         };
 
         let threads = matches.get_one::<Threads>(threads::ARG_NAME).unwrap();
-        canny_par(&image, threads.number())
-    };
+        canny_par(&image, Default::default(), threads.number())
+    }?;
 
     write_image(&image, matches.get_one::<PathBuf>(output::ARG_NAME).unwrap())?;
     Ok(())

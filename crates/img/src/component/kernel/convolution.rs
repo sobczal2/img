@@ -39,6 +39,7 @@ pub type ConvolutionKernelCreationResult = Result<ConvolutionKernel, Convolution
 /// A [`Kernel`] used to perform convolution on specified margin.
 #[derive(Clone)]
 pub struct ConvolutionKernel {
+    size: Size,
     margin: Margin,
     buffer: Box<[f32]>,
     flags: ChannelFlags,
@@ -50,7 +51,9 @@ impl ConvolutionKernel {
         buffer: Box<[f32]>,
         flags: ChannelFlags,
     ) -> ConvolutionKernelCreationResult {
-        let size = Size::new(margin.left() + margin.right() + 1, margin.top() + margin.bottom() + 1)
+        // SAFETY: 1x1 size creation should never fail
+        let size = Size::new(1, 1).expect("Unexpected error in Size::new")
+            .extend_by_margin(margin)
             .map_err(|e| {
                 match e {
                     SizeCreationError::WidthTooBig => ConvolutionKernelCreationError::MarginWidthTooBig,
@@ -62,7 +65,7 @@ impl ConvolutionKernel {
             return Err(ConvolutionKernelCreationError::BufferLenMissmatch);
         }
 
-        Ok(Self { margin, buffer, flags })
+        Ok(Self { size, margin, buffer, flags })
     }
 }
 
@@ -95,7 +98,7 @@ where
             return Err(IndexError::OutOfBounds);
         }
 
-        let center = self.size.middle();
+        let center = Point::new(self.margin.left(), self.margin.top()).expect("unexpected error in Point::new");
 
         // SAFETY: `Lens::look` always returns a value when in bounds.
         let original = lens.look(point).expect("unexpected error in Lens::look");
@@ -136,20 +139,6 @@ where
     }
 
     fn margin(&self) -> Margin {
-        let (left, right) = if self.size.width().is_multiple_of(2) {
-            (self.size.width() / 2, self.size.width() / 2 - 1)
-        } else {
-            (self.size.width() / 2, self.size.width() / 2)
-        };
-
-        let (top, bottom) = if self.size.height().is_multiple_of(2) {
-            (self.size.height() / 2, self.size.height() / 2 - 1)
-        } else {
-            (self.size.height() / 2, self.size.height() / 2)
-        };
-
-        // SAFETY: all parameters are halves of some size which is guaranted to be
-        // less than or equal to DIMENSION_MAX.
-        Margin::new(top, right, bottom, left).expect("unexpected error in Margin::new")
+        self.margin
     }
 }

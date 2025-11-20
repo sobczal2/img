@@ -8,7 +8,7 @@ use thiserror::Error;
 use crate::{
     component::{
         kernel::{
-            gaussian::GaussianKernel, sobel::{
+            gaussian::{GaussianKernel, GaussianKernelCreationError}, sobel::{
                 Gradient,
                 SobelKernel,
             }, Kernel
@@ -18,13 +18,12 @@ use crate::{
             Margin,
             Offset,
             Point,
-            Size,
         },
     },
     error::IndexResult,
     image::Image,
     lens::{
-        overlay::OverlayLensCreationError, FromLens, Lens
+        kernel::KernelLensCreationError, overlay::OverlayLensCreationError, FromLens, Lens
     },
     pixel::{
         ChannelFlags,
@@ -32,39 +31,89 @@ use crate::{
     },
 };
 
+pub struct CannyLensOptions {
+    pub gaussian_radius: usize,
+    pub gaussian_sigma: f32,
+}
+
+impl Default for CannyLensOptions {
+    fn default() -> Self {
+        Self {
+            gaussian_radius: 2,
+            gaussian_sigma: 2.0,
+        }
+    }
+}
+
+impl CannyLensOptions {
+    pub fn builder() -> CannyLensOptionsBuilder {
+        CannyLensOptionsBuilder::new()
+    }
+}
+
+pub struct CannyLensOptionsBuilder {
+    options: CannyLensOptions,
+}
+
+impl CannyLensOptionsBuilder {
+    pub fn new() -> Self {
+        Self {
+            options: CannyLensOptions::default(),
+        }
+    }
+
+    pub fn gaussian_radius(mut self, radius: usize) -> Self {
+        self.options.gaussian_radius = radius;
+        self
+    }
+
+    pub fn gaussian_sigma(mut self, sigma: f32) -> Self {
+        self.options.gaussian_sigma = sigma;
+        self
+    }
+
+    pub fn build(self) -> CannyLensOptions {
+        self.options
+    }
+}
+
 #[derive(Debug, Error)]
 pub enum CannyCreationError {
     #[error("Intermediate lens is too big")]
     IntermediateLensTooBig,
+    #[error("gaussian radius too big")]
+    GaussianRadiusTooBig,
+    #[error("gaussian kernel creation error: {0}")]
+    GaussianKernelCreation(#[from] GaussianKernelCreationError),
+    #[error("gaussian kernel lens creation error: {0}")]
+    KernelLensCreation(#[from] KernelLensCreationError),
 }
 
 pub type CannyCreationResult<T> = std::result::Result<T, CannyCreationError>;
 
-pub fn canny_lens<S>(source: S) -> CannyCreationResult<impl Lens<Item = Pixel>>
+pub fn canny_lens<S>(source: S, options: CannyLensOptions) -> CannyCreationResult<impl Lens<Item = Pixel>>
 where
     S: Lens<Item = Pixel> + Clone,
 {
+    // SAFETY: Margin::unified only fails if argument is >= DIMENSION_MAX
+    let margin = Margin::unified(options.gaussian_radius).map_err(|_| CannyCreationError::GaussianRadiusTooBig)?;
     let lens = value_border(
         source,
-        // SAFETY: Margin::unified only fails if argument is >= DIMENSION_MAX
-        Margin::unified(2).expect("unexpected error in Margin::unified"),
+        margin,
         Pixel::zero(),
     )
     .map_err(|e| match e {
-        OverlayLensCreationError::OverlayStartOutOfBounds => panic!("unexpected error in value_border"),
         OverlayLensCreationError::OverlayTooBig => CannyCreationError::IntermediateLensTooBig,
+        _ => unreachable!("Unexpected error in value_border")
     })?;
 
-    // SAFETY: `Size::from_radius(2)` is always successful.
-    lens.kernel(
+    Ok(lens.kernel(
         GaussianKernel::new(
-            Size::from_radius(2).expect("unexpected error in Size::from_radius"),
-            2f32,
+            margin,
+            options.gaussian_sigma,
             ChannelFlags::RGB,
-        )
-        .expect("TODO"),
-    )
-    .expect("TODO")
+        )?
+    )?
     .materialize()
     .split4(
         |s| single_channel_lens(s.map(|p| p.r())),
@@ -72,31 +121,33 @@ where
         |s| single_channel_lens(s.map(|p| p.b())),
         |s| s.map(|p| p.a()),
     )
-    .map(|(r, g, b, a)| Pixel::new([r, g, b, a]))
+    .map(|(r, g, b, a)| Pixel::new([r, g, b, a])))
 }
 
 #[cfg(feature = "parallel")]
-pub fn canny_lens_par<S>(source: S, threads: NonZeroUsize) -> impl Lens<Item = Pixel>
+pub fn canny_lens_par<S>(source: S, options: CannyLensOptions, threads: NonZeroUsize) -> CannyCreationResult<impl Lens<Item = Pixel>>
 where
     S: Lens<Item = Pixel> + Clone + Send + Sync,
 {
+    // SAFETY: Margin::unified only fails if argument is >= DIMENSION_MAX
+    let margin = Margin::unified(options.gaussian_radius).map_err(|_| CannyCreationError::GaussianRadiusTooBig)?;
     let lens = value_border(
         source,
-        Margin::unified(2).expect("unexpected error in Margin::unified"),
+        margin,
         Pixel::zero(),
     )
-    .expect("TODO");
+    .map_err(|e| match e {
+        OverlayLensCreationError::OverlayTooBig => CannyCreationError::IntermediateLensTooBig,
+        _ => unreachable!("Unexpected error in value_border")
+    })?;
 
-    // SAFETY: `Size::from_radius(2)` is always successful.
-    lens.kernel(
+    Ok(lens.kernel(
         GaussianKernel::new(
-            Size::from_radius(2).expect("unexpected error in Size::from_radius"),
-            2f32,
+            margin,
+            options.gaussian_sigma,
             ChannelFlags::RGB,
-        )
-        .expect("TODO"),
-    )
-    .expect("TODO")
+        )?
+    )?
     .materialize_par(threads)
     .split4(
         |s| single_channel_lens(s.map(|p| p.r())),
@@ -104,20 +155,20 @@ where
         |s| single_channel_lens(s.map(|p| p.b())),
         |s| s.map(|p| p.a()),
     )
-    .map(|(r, g, b, a)| Pixel::new([r, g, b, a]))
+    .map(|(r, g, b, a)| Pixel::new([r, g, b, a])))
 }
 
-pub fn canny(image: &Image) -> Image {
-    let lens = canny_lens(image.lens().cloned());
-    Image::from_lens(lens)
+pub fn canny(image: &Image, options: CannyLensOptions) -> CannyCreationResult<Image> {
+    let lens = canny_lens(image.lens().cloned(), options)?;
+    Ok(Image::from_lens(lens))
 }
 
 #[cfg(feature = "parallel")]
-pub fn canny_par(image: &Image, threads: NonZeroUsize) -> Image {
+pub fn canny_par(image: &Image, options: CannyLensOptions, threads: NonZeroUsize) -> CannyCreationResult<Image> {
     use crate::lens::FromLensPar;
 
-    let lens = canny_lens_par(image.lens().cloned(), threads);
-    Image::from_lens_par(lens, threads)
+    let lens = canny_lens_par(image.lens().cloned(), options, threads)?;
+    Ok(Image::from_lens_par(lens, threads))
 }
 
 fn single_channel_lens<S>(source: S) -> impl Lens<Item = u8>
@@ -125,19 +176,29 @@ where
     S: Lens<Item = u8>,
 {
     let lens =
+        // SAFETY: 1x1x1x1 margin creation should never fail
         value_border(source, Margin::unified(1).expect("unexpected error in Margin::unified"), 0u8)
-            .expect("TODO");
-    let lens = lens.kernel(SobelKernel::new()).expect("TODO");
+        // SAFETY: Only case where this fails is if lens size exceeds DIMENSION_MAX, which
+        // is not possible here due to previous checks
+            .expect("unexpected error in value_border");
+
+    // SAFETY: kernel expects at least 3x3 image which is guaranteed by adding the margin above
+    let lens = lens.kernel(SobelKernel::new()).expect("unexpected error in SobelKernel::new");
     let lens = value_border(
         lens,
+        // SAFETY: 1x1x1x1 margin creation should never fail
         Margin::unified(1).expect("unexpected error in Margin::unified"),
         Default::default(),
     )
-    .expect("TODO");
+    // SAFETY: Only case where this fails is if lens size exceeds DIMENSION_MAX, which
+    // is not possible here due to previous checks
+    .expect("unexpected error in value_border");
     let lens = non_maximum_suppression_lens(lens);
     let lens =
         value_border(lens, Margin::unified(1).expect("unexpected error in Margin::unified"), 0f32)
-            .expect("TODO");
+    // SAFETY: Only case where this fails is if lens size exceeds DIMENSION_MAX, which
+    // is not possible here due to previous checks
+            .expect("unexpected error in value_border");
     hysteresis_thresholding_lens(lens)
 }
 

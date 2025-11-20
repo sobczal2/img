@@ -8,15 +8,13 @@ use thiserror::Error;
 use crate::{
     component::{
         kernel::{
-            self,
-            Kernel,
-            convolution::ConvolutionKernel,
+            convolution::{ConvolutionKernel, ConvolutionKernelCreationError}, Kernel
         },
         primitive::{
             Margin,
             Offset,
             Point,
-            Size,
+            Size, SizeCreationError,
         },
     },
     error::IndexResult,
@@ -28,14 +26,18 @@ use crate::{
 };
 
 #[derive(Debug, Error)]
-pub enum CreationError {
+pub enum GaussianKernelCreationError {
     #[error("invalid sigma")]
     InvalidSigma,
     #[error("invalid convolution kernel params: {0}")]
-    ConvolutionKernelError(#[from] kernel::convolution::ConvolutionKernelCreationError),
+    ConvolutionKernelError(#[from] ConvolutionKernelCreationError),
+    #[error("margin width too big")]
+    MarginWidthTooBig,
+    #[error("margin height too big")]
+    MarginHeightTooBig,
 }
 
-pub type CreationResult = Result<GaussianKernel, CreationError>;
+pub type GaussianKernelCreationResult = Result<GaussianKernel, GaussianKernelCreationError>;
 
 #[derive(Clone)]
 pub struct GaussianKernel {
@@ -43,12 +45,25 @@ pub struct GaussianKernel {
 }
 
 impl GaussianKernel {
-    pub fn new(size: Size, sigma: f32, flags: ChannelFlags) -> CreationResult {
+    pub fn new(margin: Margin, sigma: f32, flags: ChannelFlags) -> GaussianKernelCreationResult {
         if !sigma.is_finite() || sigma <= 0f32 {
-            return Err(CreationError::InvalidSigma);
+            return Err(GaussianKernelCreationError::InvalidSigma);
         }
+        // SAFETY: 1x1 size creation should never fail
+        let size = Size::new(1, 1)
+            .expect("unexpected error in Size::new")
+            .extend_by_margin(margin)
+            .map_err(|e| {
+                match e {
+                    SizeCreationError::WidthTooBig => GaussianKernelCreationError::MarginWidthTooBig,
+                    SizeCreationError::HeightTooBig => GaussianKernelCreationError::MarginHeightTooBig,
+                    _ => unreachable!("unexpected error in Size::extend_by_margin")
+                }
+            })?;
         let mut values = vec![0f32; size.area()];
-        let center = size.middle();
+        let center = Point::new(margin.left(), margin.top())
+            // SAFETY: margin.left and margin.top are guaranteed to be < DIMENSION_MAX
+            .expect("unexpected error in Point::new");
 
         values
             .iter_mut()
@@ -67,7 +82,7 @@ impl GaussianKernel {
         let correction = 1f32 / sum;
         values.iter_mut().for_each(|value| *value *= correction);
 
-        Ok(Self { inner: ConvolutionKernel::new(size, values, flags)? })
+        Ok(Self { inner: ConvolutionKernel::new(margin, values.into_boxed_slice(), flags)? })
     }
 }
 

@@ -186,12 +186,12 @@ impl<T: Into<Pixel>> FromLens<T> for Image {
     /// # Ok(())
     /// # }
     /// ```
-    fn from_lens<S>(lens: S) -> Self
+    fn from_lens<S>(source: S) -> Self
     where
         S: Lens<Item = T>,
     {
-        let size = lens.size();
-        let pixels = Box::from_iter(lens.elements().map(Into::into));
+        let size = source.size();
+        let pixels = Box::from_iter(source.elements().map(Into::into));
 
         // SAFETY: both size and pixels come from one Lens, which is guaranted
         // to return correct values.
@@ -224,14 +224,18 @@ impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
     /// # Ok(())
     /// # }
     /// ```
-    fn from_lens_par<S>(lens: S, threads: NonZeroUsize) -> Self
+    fn from_lens_par<S>(source: S, threads: NonZeroUsize) -> Self
     where
         S: Lens<Item = T> + Send + Sync,
         S::Item: Send,
     {
+        if threads.get() == 1 {
+            return Self::from_lens(source);
+        }
+
         use std::thread;
 
-        let size = lens.size();
+        let size = source.size();
         let threads = threads.get();
         let chunk_size = (size.area() as f32 / threads as f32).ceil() as usize;
 
@@ -241,7 +245,7 @@ impl<T: Into<Pixel> + Send> FromLensPar<T> for Image {
 
         thread::scope(|scope| {
             image_chunks.enumerate().for_each(|(index, chunk)| {
-                let lens = &lens;
+                let lens = &source;
                 scope.spawn(move || {
                     let starting_index = index * chunk_size;
                     chunk.iter_mut().enumerate().for_each(|(index, pixel)| {

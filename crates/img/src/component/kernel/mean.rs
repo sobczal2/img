@@ -3,14 +3,12 @@ use thiserror::Error;
 use crate::{
     component::{
         kernel::{
-            self,
-            Kernel,
-            convolution::ConvolutionKernel,
+            self, convolution::ConvolutionKernel, Kernel
         },
         primitive::{
             Margin,
             Point,
-            Size,
+            Size, SizeCreationError,
         },
     },
     error::IndexResult,
@@ -22,12 +20,16 @@ use crate::{
 };
 
 #[derive(Debug, Error)]
-pub enum CreationError {
+pub enum MeanKernelCreationError {
     #[error("invalid convolution kernel params: {0}")]
     ConvolutionKernelError(#[from] kernel::convolution::ConvolutionKernelCreationError),
+    #[error("margin width too big")]
+    MarginWidthTooBig,
+    #[error("margin height too big")]
+    MarginHeightTooBig,
 }
 
-pub type CreationResult = Result<MeanKernel, CreationError>;
+pub type MeanKernelCreationResult = Result<MeanKernel, MeanKernelCreationError>;
 
 #[derive(Clone)]
 pub struct MeanKernel {
@@ -35,11 +37,22 @@ pub struct MeanKernel {
 }
 
 impl MeanKernel {
-    pub fn new(size: Size, flags: ChannelFlags) -> CreationResult {
+    pub fn new(margin: Margin, flags: ChannelFlags) -> MeanKernelCreationResult {
+        // SAFETY: 1x1 size creation should never change
+        let size = Size::new(1, 1)
+            .expect("Unexpected error in Size::new")
+            .extend_by_margin(margin)
+            .map_err(|e| {
+                match e {
+                    SizeCreationError::WidthTooBig => MeanKernelCreationError::MarginWidthTooBig,
+                    SizeCreationError::HeightTooBig => MeanKernelCreationError::MarginHeightTooBig,
+                    _ => unreachable!("unexpected error in Size::new")
+                }
+            })?;
         Ok(Self {
             inner: ConvolutionKernel::new(
-                size,
-                vec![1f32 / size.area() as f32; size.area()],
+                margin,
+                vec![1f32 / size.area() as f32; size.area()].into_boxed_slice(),
                 flags,
             )?,
         })

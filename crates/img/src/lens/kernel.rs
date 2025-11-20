@@ -76,7 +76,7 @@ where
     type Item = T;
 
     fn look(&self, point: Point) -> IndexResult<Self::Item> {
-        if !self.working_area.contains(&point) {
+        if !self.working_area.size().contains(&point) {
             return Err(IndexError::OutOfBounds);
         }
         let offset: Offset = self.working_area.top_left().into();

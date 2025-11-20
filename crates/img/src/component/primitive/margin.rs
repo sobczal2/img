@@ -132,22 +132,14 @@ mod tests {
     }
 
     #[test]
-    fn test_top() {
-        assert_eq!(Margin::new(1, 2, 3, 4).unwrap().top(), 1);
+    fn test_unified_ok() {
+        assert!(Margin::unified(0).is_ok());
+        assert!(Margin::unified(DIMENSION_MAX - 1).is_ok());
     }
 
     #[test]
-    fn test_right() {
-        assert_eq!(Margin::new(1, 2, 3, 4).unwrap().right(), 2);
-    }
-
-    #[test]
-    fn test_bottom() {
-        assert_eq!(Margin::new(1, 2, 3, 4).unwrap().bottom(), 3);
-    }
-
-    #[test]
-    fn test_left() {
-        assert_eq!(Margin::new(1, 2, 3, 4).unwrap().left(), 4);
+    fn test_unified_err() {
+        assert_eq!(Margin::unified(DIMENSION_MAX).unwrap_err(), MarginCreationError::TopTooBig);
+        assert_eq!(Margin::unified(usize::MAX).unwrap_err(), MarginCreationError::TopTooBig);
     }
 }

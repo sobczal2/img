@@ -1,0 +1,28 @@
+image: rust:latest
+
+variables:
+  CARGO_TERM_COLOR: always
+
+stages:
+  - build
+  - test
+
+before_script:
+  - apt-get update -yqq
+  - apt-get install -yqq nasm cmake build-essential
+
+build-rust:
+  stage: build
+  script:
+    - cargo build --verbose
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+test-rust:
+  stage: test
+  script:
+    - cargo test --verbose
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"

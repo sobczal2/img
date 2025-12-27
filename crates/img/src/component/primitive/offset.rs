@@ -70,6 +70,26 @@ impl Offset {
 }
 
 impl From<Point> for Offset {
+    /// Create an [`Offset`] from a [`Point`].
+    ///
+    /// Converts the point's coordinates to an offset, treating the point as a vector
+    /// from the origin (0, 0) to the point's coordinates.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let point = Point::new(100, 200)?;
+    /// let offset = Offset::from(point);
+    ///
+    /// assert_eq!(offset.x(), 100);
+    /// assert_eq!(offset.y(), 200);
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
     fn from(value: Point) -> Self {
         // SAFETY: point's x and y are less than DIMENSION_MAX
         Self::new(value.x() as isize, value.y() as isize).expect("unexpected error in Offset::new")
@@ -79,6 +99,29 @@ impl From<Point> for Offset {
 impl Neg for Offset {
     type Output = Offset;
 
+    /// Negate an [`Offset`], reversing its direction.
+    ///
+    /// Returns a new offset with both x and y components multiplied by -1.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let offset = Offset::new(100, 200)?;
+    /// let negated = -offset;
+    ///
+    /// assert_eq!(negated.x(), -100);
+    /// assert_eq!(negated.y(), -200);
+    ///
+    /// let zero = -Offset::new(0, 0)?;
+    /// assert_eq!(zero.x(), 0);
+    /// assert_eq!(zero.y(), 0);
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
     fn neg(mut self) -> Self::Output {
         self.x = -self.x;
         self.y = -self.y;

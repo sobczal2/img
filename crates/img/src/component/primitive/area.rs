@@ -91,7 +91,24 @@ impl Area {
         self.top_left
     }
 
-    /// Get [`Area`]'s top left point.
+    /// Get [`Area`]'s top right point.
+    ///
+    /// Returns the point at the top right corner of the area (top_left.x + width - 1, top_left.y).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let area = Area::new(Size::new(10, 20)?, Point::new(100, 50)?);
+    /// let top_right = area.top_right();
+    ///
+    /// assert_eq!(top_right, Point::new(109, 50)?);
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn top_right(&self) -> Point {
         // SAFETY: translate returns Err only if resulting offset is negative,
         // here offset we apply has always positive values, so the resulting
@@ -100,8 +117,7 @@ impl Area {
         self.top_left
             .translate(
                 Offset::new(
-                    self.size
-                        .width()
+                    (self.size.width() - 1)
                         .try_into()
                         .expect("unexpected error when converting usize to isize"),
                     0,
@@ -111,7 +127,24 @@ impl Area {
             .expect("unexpected error in Point::translate")
     }
 
-    /// Get [`Area`]'s top left point.
+    /// Get [`Area`]'s bottom left point.
+    ///
+    /// Returns point at bottom left corner of area (top_left.x, top_left.y + height - 1).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let area = Area::new(Size::new(10, 20)?, Point::new(100, 50)?);
+    /// let bottom_left = area.bottom_left();
+    ///
+    /// assert_eq!(bottom_left, Point::new(100, 69)?);
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn bottom_left(&self) -> Point {
         // SAFETY: translate returns Err only if resulting offset is negative,
         // here offset we apply has always positive values, so the resulting
@@ -121,8 +154,7 @@ impl Area {
             .translate(
                 Offset::new(
                     0,
-                    self.size
-                        .height()
+                    (self.size.height() - 1)
                         .try_into()
                         .expect("unexpected error when converting usize to isize"),
                 )
@@ -131,7 +163,25 @@ impl Area {
             .expect("unexpected error in Point::translate")
     }
 
-    /// Get [`Area`]'s top left point.
+    /// Get [`Area`]'s bottom right point.
+    ///
+    /// Returns the point at the bottom right corner of the area 
+    /// (top_left.x + width - 1, top_left.y + height - 1).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let area = Area::new(Size::new(10, 20)?, Point::new(100, 50)?);
+    /// let bottom_right = area.bottom_right();
+    ///
+    /// assert_eq!(bottom_right, Point::new(109, 69)?);
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn bottom_right(&self) -> Point {
         // SAFETY: translate returns Err only if resulting offset is negative,
         // here offset we apply has always positive values, so the resulting
@@ -140,12 +190,10 @@ impl Area {
         self.top_left
             .translate(
                 Offset::new(
-                    self.size
-                        .width()
+                    (self.size.width() - 1)
                         .try_into()
                         .expect("unexpected error when converting usize to isize"),
-                    self.size
-                        .height()
+                    (self.size.height() - 1)
                         .try_into()
                         .expect("unexpected error when converting usize to isize"),
                 )
@@ -194,5 +242,127 @@ impl Area {
         };
 
         self.size.contains(&relative)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new() {
+        let size = Size::new(100, 200).unwrap();
+        let top_left = Point::new(50, 75).unwrap();
+        let area = Area::new(size, top_left);
+
+        assert_eq!(area.size(), size);
+        assert_eq!(area.top_left(), top_left);
+    }
+
+    #[test]
+    fn test_from_cropped_size_ok() {
+        let size = Size::new(50, 50).unwrap();
+        let margin = Margin::new(20, 30, 20, 15).unwrap();
+        let area = Area::from_cropped_size(size, margin).unwrap();
+
+        assert_eq!(area.size(), Size::new(5, 10).unwrap());
+        assert_eq!(area.top_left(), Point::new(15, 20).unwrap());
+
+        // Test zero margins
+        let zero_margin = Margin::new(0, 0, 0, 0).unwrap();
+        let unchanged = Area::from_cropped_size(size, zero_margin).unwrap();
+        assert_eq!(unchanged.size(), size);
+        assert_eq!(unchanged.top_left(), Point::new(0, 0).unwrap());
+    }
+
+    #[test]
+    fn test_from_cropped_size_err() {
+        let size = Size::new(10, 20).unwrap();
+        
+        // Test invalid margin that would make width zero
+        let margin_width_zero = Margin::new(0, 5, 0, 5).unwrap();
+        assert!(Area::from_cropped_size(size, margin_width_zero).is_err());
+
+        // Test invalid margin that would make height zero
+        let margin_height_zero = Margin::new(10, 0, 10, 0).unwrap();
+        assert!(Area::from_cropped_size(size, margin_height_zero).is_err());
+    }
+
+    #[test]
+    fn test_size() {
+        let size = Size::new(100, 200).unwrap();
+        let area = Area::new(size, Point::new(50, 75).unwrap());
+        assert_eq!(area.size(), size);
+    }
+
+    #[test]
+    fn test_top_left() {
+        let top_left = Point::new(100, 200).unwrap();
+        let area = Area::new(Size::new(50, 75).unwrap(), top_left);
+        assert_eq!(area.top_left(), top_left);
+    }
+
+    #[test]
+    fn test_top_right() {
+        let area = Area::new(Size::new(10, 20).unwrap(), Point::new(100, 50).unwrap());
+        let top_right = area.top_right();
+        
+        // top_right should be (100 + 10 - 1, 50) = (109, 50)
+        assert_eq!(top_right, Point::new(109, 50).unwrap());
+
+        // Test 1x1 area
+        let single = Area::new(Size::new(1, 1).unwrap(), Point::new(5, 10).unwrap());
+        assert_eq!(single.top_right(), Point::new(5, 10).unwrap());
+    }
+
+    #[test]
+    fn test_bottom_left() {
+        let area = Area::new(Size::new(10, 20).unwrap(), Point::new(100, 50).unwrap());
+        let bottom_left = area.bottom_left();
+        
+        // bottom_left should be (100, 50 + 20 - 1) = (100, 69)
+        assert_eq!(bottom_left, Point::new(100, 69).unwrap());
+
+        // Test 1x1 area
+        let single = Area::new(Size::new(1, 1).unwrap(), Point::new(5, 10).unwrap());
+        assert_eq!(single.bottom_left(), Point::new(5, 10).unwrap());
+    }
+
+    #[test]
+    fn test_bottom_right() {
+        let area = Area::new(Size::new(10, 20).unwrap(), Point::new(100, 50).unwrap());
+        let bottom_right = area.bottom_right();
+        
+        // bottom_right should be (100 + 10 - 1, 50 + 20 - 1) = (109, 69)
+        assert_eq!(bottom_right, Point::new(109, 69).unwrap());
+
+        // Test 1x1 area
+        let single = Area::new(Size::new(1, 1).unwrap(), Point::new(5, 10).unwrap());
+        assert_eq!(single.bottom_right(), Point::new(5, 10).unwrap());
+    }
+
+    #[test]
+    fn test_contains() {
+        let area = Area::new(Size::new(500, 1000).unwrap(), Point::new(100, 50).unwrap());
+        
+        // Test corners (should be contained)
+        assert!(area.contains(&Point::new(100, 50).unwrap())); // top_left
+        assert!(area.contains(&Point::new(599, 50).unwrap())); // top_right
+        assert!(area.contains(&Point::new(100, 1049).unwrap())); // bottom_left
+        assert!(area.contains(&Point::new(599, 1049).unwrap())); // bottom_right
+        
+        // Test outside corners (should not be contained)
+        assert!(!area.contains(&Point::new(99, 50).unwrap())); // left of area
+        assert!(!area.contains(&Point::new(600, 50).unwrap())); // right of area
+        assert!(!area.contains(&Point::new(100, 49).unwrap())); // above area
+        assert!(!area.contains(&Point::new(100, 1050).unwrap())); // below area
+        
+        // Test 1x1 area
+        let single = Area::new(Size::new(1, 1).unwrap(), Point::new(5, 10).unwrap());
+        assert!(single.contains(&Point::new(5, 10).unwrap()));
+        assert!(!single.contains(&Point::new(4, 10).unwrap()));
+        assert!(!single.contains(&Point::new(6, 10).unwrap()));
+        assert!(!single.contains(&Point::new(5, 9).unwrap()));
+        assert!(!single.contains(&Point::new(5, 11).unwrap()));
     }
 }

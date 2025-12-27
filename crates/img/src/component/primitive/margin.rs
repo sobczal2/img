@@ -150,4 +150,37 @@ mod tests {
     fn test_left() {
         assert_eq!(Margin::new(1, 2, 3, 4).unwrap().left(), 4);
     }
+
+    #[test]
+    fn test_unified_ok() {
+        // Test zero value
+        let zero = Margin::unified(0).unwrap();
+        assert_eq!(zero.top(), 0);
+        assert_eq!(zero.right(), 0);
+        assert_eq!(zero.bottom(), 0);
+        assert_eq!(zero.left(), 0);
+
+        // Test small value
+        let small = Margin::unified(5).unwrap();
+        assert_eq!(small.top(), 5);
+        assert_eq!(small.right(), 5);
+        assert_eq!(small.bottom(), 5);
+        assert_eq!(small.left(), 5);
+
+        // Test maximum valid value
+        let max = Margin::unified(DIMENSION_MAX - 1).unwrap();
+        assert_eq!(max.top(), DIMENSION_MAX - 1);
+        assert_eq!(max.right(), DIMENSION_MAX - 1);
+        assert_eq!(max.bottom(), DIMENSION_MAX - 1);
+        assert_eq!(max.left(), DIMENSION_MAX - 1);
+    }
+
+    #[test]
+    fn test_unified_err() {
+        // Test value too big
+        assert_eq!(
+            Margin::unified(DIMENSION_MAX).unwrap_err(),
+            MarginCreationError::TopTooBig
+        );
+    }
 }

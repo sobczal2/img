@@ -192,7 +192,8 @@ impl Scale {
 }
 
 /// [`Eq`] can be safely implemented since we guarantee that [`Scale`] has floats within range
-/// <[`Scale::FACTOR_MIN`], [`Scale::FACTOR_MAX`]>.
+/// <[`Scale::FACTOR_MIN`], [`Scale::FACTOR_MAX`]>. This means two scales are equal
+/// if and only if their x and y components are exactly equal.
 impl Eq for Scale {}
 
 impl PartialOrd for Scale {

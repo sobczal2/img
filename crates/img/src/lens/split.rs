@@ -37,6 +37,26 @@ where
 
         Self { lens1, lens2, size }
     }
+
+    pub fn new_with_error<S, F1, F2, E>(source: S, factory1: F1, factory2: F2) -> std::result::Result<Self, E>
+    where
+        S: Lens + Clone,
+        F1: Fn(S) -> Result<L1, E>,
+        F2: Fn(S) -> Result<L2, E>,
+    {
+        let lens1 = (factory1)(source.clone())?;
+        let lens2 = (factory2)(source.clone())?;
+
+        // SAFETY: taking minimum of `Lens` `Size`'s each dimension produces
+        // a valid `Size`.
+        let size = Size::new(
+            lens1.size().width().min(lens2.size().width()),
+            lens1.size().height().min(lens2.size().height()),
+        )
+        .expect("unexpected error from Size::new");
+
+        Ok(Self { lens1, lens2, size })
+    }
 }
 
 impl<L1, L2, D1, D2> Lens for SplitLens2<L1, L2>
@@ -88,6 +108,28 @@ where
         .expect("unexpected error from Size::new");
 
         Self { lens1, lens2, lens3, size }
+    }
+
+    pub fn new_with_error<S, F1, F2, F3, E>(source: S, factory1: F1, factory2: F2, factory3: F3) -> std::result::Result<Self, E>
+    where
+        S: Lens + Clone,
+        F1: Fn(S) -> Result<L1, E>,
+        F2: Fn(S) -> Result<L2, E>,
+        F3: Fn(S) -> Result<L3, E>,
+    {
+        let lens1 = (factory1)(source.clone())?;
+        let lens2 = (factory2)(source.clone())?;
+        let lens3 = (factory3)(source.clone())?;
+
+        // SAFETY: taking minimum of `Lens` `Size`'s each dimension produces
+        // a valid `Size`.
+        let size = Size::new(
+            lens1.size().width().min(lens2.size().width()).min(lens3.size().width()),
+            lens1.size().height().min(lens2.size().height()).min(lens3.size().height()),
+        )
+        .expect("unexpected error from Size::new");
+
+        Ok(Self { lens1, lens2, lens3, size })
     }
 }
 
@@ -161,6 +203,46 @@ where
         .expect("unexpected error from Size::new");
 
         Self { lens1, lens2, lens3, lens4, size }
+    }
+
+    pub fn new_with_error<S, F1, F2, F3, F4, E>(
+        source: S,
+        factory1: F1,
+        factory2: F2,
+        factory3: F3,
+        factory4: F4,
+    ) -> std::result::Result<Self, E>
+    where
+        S: Lens + Clone,
+        F1: Fn(S) -> Result<L1, E>,
+        F2: Fn(S) -> Result<L2, E>,
+        F3: Fn(S) -> Result<L3, E>,
+        F4: Fn(S) -> Result<L4, E>,
+    {
+        let lens1 = (factory1)(source.clone())?;
+        let lens2 = (factory2)(source.clone())?;
+        let lens3 = (factory3)(source.clone())?;
+        let lens4 = (factory4)(source.clone())?;
+
+        // SAFETY: taking minimum of `Lens` `Size`'s each dimension produces
+        // a valid `Size`.
+        let size = Size::new(
+            lens1
+                .size()
+                .width()
+                .min(lens2.size().width())
+                .min(lens3.size().width())
+                .min(lens4.size().width()),
+            lens1
+                .size()
+                .height()
+                .min(lens2.size().height())
+                .min(lens3.size().height())
+                .min(lens4.size().height()),
+        )
+        .expect("unexpected error from Size::new");
+
+        Ok(Self { lens1, lens2, lens3, lens4, size })
     }
 }
 

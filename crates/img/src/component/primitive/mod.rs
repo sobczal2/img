@@ -1,4 +1,5 @@
 mod area;
+pub mod histogram;
 mod limits;
 mod margin;
 mod offset;

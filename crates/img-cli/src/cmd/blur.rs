@@ -31,6 +31,8 @@ const MEAN_CMD_ALIAS2: &str = "avg";
 const GAUSSIAN_CMD_NAME: &str = "gaussian";
 const GAUSSIAN_CMD_ALIAS1: &str = "gauss";
 
+const MEDIAN_CMD_NAME: &str = "median";
+
 fn mean_subcommand() -> Command {
     #[cfg(not(feature = "parallel"))]
     {
@@ -105,12 +107,42 @@ fn gaussian_subcommand() -> Command {
     }
 }
 
+fn median_subcommand() -> Command {
+    #[cfg(not(feature = "parallel"))]
+    {
+        Command::new(MEDIAN_CMD_NAME)
+            .about("apply median blur")
+            .arg(
+                arg!(-r --radius <radius> "kernel radius")
+                    .default_value("2")
+                    .value_parser(value_parser!(usize)),
+            )
+            .arg(channel_flags::arg())
+    }
+
+    #[cfg(feature = "parallel")]
+    {
+        use crate::param::threads;
+
+        Command::new(MEDIAN_CMD_NAME)
+            .about("apply median blur")
+            .arg(
+                arg!(-r --radius <radius> "kernel radius")
+                    .default_value("2")
+                    .value_parser(value_parser!(usize)),
+            )
+            .arg(channel_flags::arg())
+            .arg(threads::arg())
+    }
+}
+
 pub fn subcommand() -> Command {
     Command::new(CMD_NAME)
         .arg(input::arg())
         .arg(output::arg())
         .subcommand(mean_subcommand())
         .subcommand(gaussian_subcommand())
+        .subcommand(median_subcommand())
 }
 
 pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
@@ -118,6 +150,7 @@ pub fn action(matches: &ArgMatches) -> anyhow::Result<()> {
     let image = match matches.subcommand().ok_or(anyhow::anyhow!("no subcommand provided"))? {
         (MEAN_CMD_NAME | MEAN_CMD_ALIAS1 | MEAN_CMD_ALIAS2, m) => apply_mean(&image, m)?,
         (GAUSSIAN_CMD_NAME | GAUSSIAN_CMD_ALIAS1, m) => apply_gauss(&image, m)?,
+        (MEDIAN_CMD_NAME, m) => apply_median(&image, m)?,
         _ => unreachable!(),
     };
     write_image(&image, matches.get_one::<PathBuf>(output::ARG_NAME).unwrap())?;
@@ -162,6 +195,27 @@ fn apply_gauss(image: &Image, matches: &ArgMatches) -> anyhow::Result<Image> {
 
         let threads = matches.get_one::<Threads>(threads::ARG_NAME).unwrap();
         gaussian_blur_par(image, threads.number(), *target_radius, *sigma, channel_flags.into())?
+    };
+
+    Ok(image)
+}
+
+fn apply_median(image: &Image, matches: &ArgMatches) -> anyhow::Result<Image> {
+    let target_radius = matches.get_one::<usize>("radius").unwrap();
+    let channel_flags = *matches.get_one::<ChannelFlags>(channel_flags::ARG_NAME).unwrap();
+
+    #[cfg(not(feature = "parallel"))]
+    let image = median_blur(image, *target_radius, channel_flags.into())?;
+
+    #[cfg(feature = "parallel")]
+    let image = {
+        use crate::param::threads::{
+            self,
+            Threads,
+        };
+
+        let threads = matches.get_one::<Threads>(threads::ARG_NAME).unwrap();
+        median_blur_par(image, threads.number(), *target_radius, channel_flags.into())?
     };
 
     Ok(image)

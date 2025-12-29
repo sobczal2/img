@@ -16,6 +16,7 @@ pub use crate::{
             gaussian_blur,
             kuwahara,
             mean_blur,
+            median_blur,
         },
         color::{
             gamma_correction,
@@ -43,6 +44,7 @@ pub use crate::operation::{
         gaussian_blur_par,
         kuwahara_par,
         mean_blur_par,
+        median_blur_par,
     },
     color::{
         gamma_correction_par,

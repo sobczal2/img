@@ -32,7 +32,7 @@ pub enum CreationError {
     #[error("invalid sigma")]
     InvalidSigma,
     #[error("invalid convolution kernel params: {0}")]
-    ConvolutionKernelError(#[from] kernel::convolution::CreationError),
+    ConvolutionKernelError(#[from] kernel::convolution::ConvolutionKernelCreationError),
 }
 
 pub type CreationResult = Result<GaussianKernel, CreationError>;

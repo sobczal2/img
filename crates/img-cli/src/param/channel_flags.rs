@@ -68,22 +68,22 @@ impl FromStr for ChannelFlags {
 impl From<ChannelFlags> for img::prelude::ChannelFlags {
     fn from(value: ChannelFlags) -> Self {
         let red = if value.red {
-            img::prelude::ChannelFlags::RED
+            img::prelude::ChannelFlags::R
         } else {
             img::prelude::ChannelFlags::empty()
         };
         let green = if value.green {
-            img::prelude::ChannelFlags::GREEN
+            img::prelude::ChannelFlags::G
         } else {
             img::prelude::ChannelFlags::empty()
         };
         let blue = if value.blue {
-            img::prelude::ChannelFlags::BLUE
+            img::prelude::ChannelFlags::B
         } else {
             img::prelude::ChannelFlags::empty()
         };
         let alpha = if value.alpha {
-            img::prelude::ChannelFlags::ALPHA
+            img::prelude::ChannelFlags::A
         } else {
             img::prelude::ChannelFlags::empty()
         };

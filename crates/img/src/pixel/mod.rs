@@ -18,13 +18,13 @@ bitflags! {
     /// affected.
     #[derive(Clone, Copy, Debug)]
     pub struct ChannelFlags: u8 {
-        const RED = 0b1000;
-        const GREEN = 0b0100;
-        const BLUE = 0b0010;
-        const ALPHA = 0b0001;
+        const R = 0b1000;
+        const G = 0b0100;
+        const B = 0b0010;
+        const A = 0b0001;
 
-        const RGB = Self::RED.bits() | Self::GREEN.bits() | Self::BLUE.bits();
-        const RGBA = Self::RGB.bits() | Self::ALPHA.bits();
+        const RGB = Self::R.bits() | Self::G.bits() | Self::B.bits();
+        const RGBA = Self::RGB.bits() | Self::A.bits();
     }
 }
 
@@ -105,7 +105,7 @@ impl Pixel {
     /// use img::prelude::*;
     /// let mut pixel = Pixel::zero();
     ///
-    /// pixel.set_with_flags(1, 2, 3, 4, ChannelFlags::RED | ChannelFlags::BLUE);
+    /// pixel.set_with_flags(1, 2, 3, 4, ChannelFlags::R | ChannelFlags::B);
     ///
     /// assert_eq!(1, pixel.r());
     /// assert_eq!(0, pixel.g());
@@ -113,19 +113,19 @@ impl Pixel {
     /// assert_eq!(0, pixel.a());
     /// ```
     pub fn set_with_flags(&mut self, r: u8, g: u8, b: u8, a: u8, flags: ChannelFlags) {
-        if flags.contains(ChannelFlags::RED) {
+        if flags.contains(ChannelFlags::R) {
             self.set_r(r);
         }
 
-        if flags.contains(ChannelFlags::GREEN) {
+        if flags.contains(ChannelFlags::G) {
             self.set_g(g);
         }
 
-        if flags.contains(ChannelFlags::BLUE) {
+        if flags.contains(ChannelFlags::B) {
             self.set_b(b);
         }
 
-        if flags.contains(ChannelFlags::ALPHA) {
+        if flags.contains(ChannelFlags::A) {
             self.set_a(a);
         }
     }
@@ -216,7 +216,7 @@ impl PixelRgbaf32 for Pixel {
     /// use img::prelude::*;
     /// let mut pixel = Pixel::zero();
     ///
-    /// pixel.set_with_flags_f32(0.1, 0.2, 0.3, 0.4, ChannelFlags::RED | ChannelFlags::BLUE);
+    /// pixel.set_with_flags_f32(0.1, 0.2, 0.3, 0.4, ChannelFlags::R | ChannelFlags::B);
     ///
     /// assert!((pixel.r_f32() - 0.1).abs() < 1e-2);
     /// assert!((pixel.g_f32() - 0.0).abs() < 1e-2);
@@ -224,19 +224,19 @@ impl PixelRgbaf32 for Pixel {
     /// assert!((pixel.a_f32() - 0.0).abs() < 1e-2);
     /// ```
     fn set_with_flags_f32(&mut self, r: f32, g: f32, b: f32, a: f32, flags: ChannelFlags) {
-        if flags.contains(ChannelFlags::RED) {
+        if flags.contains(ChannelFlags::R) {
             self.set_r_f32(r);
         }
 
-        if flags.contains(ChannelFlags::GREEN) {
+        if flags.contains(ChannelFlags::G) {
             self.set_g_f32(g);
         }
 
-        if flags.contains(ChannelFlags::BLUE) {
+        if flags.contains(ChannelFlags::B) {
             self.set_b_f32(b);
         }
 
-        if flags.contains(ChannelFlags::ALPHA) {
+        if flags.contains(ChannelFlags::A) {
             self.set_a_f32(a);
         }
     }
@@ -298,6 +298,99 @@ impl From<HsvPixel> for Pixel {
         pixel.set_a(value.alpha());
 
         pixel
+    }
+}
+
+#[derive(Debug)]
+pub struct ChannelStore<T> {
+    r: T,
+    g: T,
+    b: T,
+    a: T,
+}
+
+impl<T> ChannelStore<T> {
+    pub fn new(r: T, g: T, b: T, a: T) -> Self {
+        Self { r, g, b, a }
+    }
+
+    pub fn from_fn<F>(f: F) -> Self
+    where
+        F: Fn() -> T,
+    {
+        Self::new(f(), f(), f(), f())
+    }
+
+    pub fn r(&self) -> &T {
+        &self.r
+    }
+
+    pub fn g(&self) -> &T {
+        &self.g
+    }
+
+    pub fn b(&self) -> &T {
+        &self.b
+    }
+
+    pub fn a(&self) -> &T {
+        &self.a
+    }
+
+    pub fn r_mut(&mut self) -> &mut T {
+        &mut self.r
+    }
+
+    pub fn g_mut(&mut self) -> &mut T {
+        &mut self.g
+    }
+
+    pub fn b_mut(&mut self) -> &mut T {
+        &mut self.b
+    }
+
+    pub fn a_mut(&mut self) -> &mut T {
+        &mut self.a
+    }
+    
+    pub fn zip_active<U, F, E>(
+        &mut self,
+        other: &ChannelStore<U>,
+        flags: ChannelFlags,
+        mut f: F,
+    ) -> Result<(), E>
+    where
+        F: FnMut(&mut T, &U) -> Result<(), E>,
+    {
+        if flags.contains(ChannelFlags::R) { f(&mut self.r, &other.r)?; }
+        if flags.contains(ChannelFlags::G) { f(&mut self.g, &other.g)?; }
+        if flags.contains(ChannelFlags::B) { f(&mut self.b, &other.b)?; }
+        if flags.contains(ChannelFlags::A) { f(&mut self.a, &other.a)?; }
+        Ok(())
+    }
+
+    pub fn map_with<U, R, F>(&self, other: ChannelStore<U>, mut f: F) -> ChannelStore<R>
+    where
+        F: FnMut(&T, U, ChannelFlags) -> R,
+    {
+        ChannelStore {
+            r: f(&self.r, other.r, ChannelFlags::R),
+            g: f(&self.g, other.g, ChannelFlags::G),
+            b: f(&self.b, other.b, ChannelFlags::B),
+            a: f(&self.a, other.a, ChannelFlags::A),
+        }
+    }
+}
+
+impl From<Pixel> for ChannelStore<u8> {
+    fn from(value: Pixel) -> Self {
+        ChannelStore { r: value.r(), g: value.g(), b: value.b(), a: value.a() }
+    }
+}
+
+impl<T> From<ChannelStore<T>> for [T; 4] {
+    fn from(value: ChannelStore<T>) -> Self {
+        [value.r, value.g, value.b, value.a]
     }
 }
 

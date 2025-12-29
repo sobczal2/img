@@ -189,6 +189,23 @@ pub trait Lens {
         KernelLens::new(self, kernel)
     }
 
+    /// Get [`KernelLensPar`] which applies a lazily created `kernel` to every [`Lens::Item`].
+    /// The kernel factory function is called for each thread, allowing thread-local kernel
+    /// instances.
+    ///
+    /// See [`KernelLensPar`] and [`Kernel`] for more details.
+    fn kernel_par<F, K, T>(
+        self,
+        kernel_factory: F,
+    ) -> Result<kernel::KernelLensPar<Self, F, K, T>, kernel::CreationError>
+    where
+        Self: Sized,
+        F: Fn() -> K + Send + Sync,
+        K: Kernel<Self::Item, T>,
+    {
+        kernel::KernelLensPar::new(self, kernel_factory)
+    }
+
     /// Get [`MaterializeLens`] which evaluates [`Lens::look`] for every [`Lens::Item`], saves
     /// results and provides those values using [`Lens`] interface.
     ///
@@ -234,6 +251,26 @@ pub trait Lens {
         SplitLens2::new(self, factory1, factory2)
     }
 
+    /// Get [`SplitLens2`] which splits lens into two seperate lens and returns [`Lens`]
+    /// with `(D1, D2)` [`Lens::Item`]. Unlike [`Lens::split2`], this allows factories to return
+    /// errors.
+    ///
+    /// See [`SplitLens2::new_with_error`] for more details.
+    fn split2_with_error<F1, F2, L1, L2, D1, D2, E>(
+        self,
+        factory1: F1,
+        factory2: F2,
+    ) -> Result<SplitLens2<L1, L2>, E>
+    where
+        Self: Sized + Clone,
+        F1: Fn(Self) -> Result<L1, E>,
+        F2: Fn(Self) -> Result<L2, E>,
+        L1: Lens<Item = D1>,
+        L2: Lens<Item = D2>,
+    {
+        SplitLens2::new_with_error(self, factory1, factory2)
+    }
+
     /// Get [`SplitLens3`] which splits lens into three seperate lens and returns [`Lens`]
     /// with `(D1, D2, D3)` [`Lens::Item`].
     ///
@@ -254,6 +291,29 @@ pub trait Lens {
         L3: Lens<Item = D3>,
     {
         SplitLens3::new(self, factory1, factory2, factory3)
+    }
+
+    /// Get [`SplitLens3`] which splits lens into three seperate lens and returns [`Lens`]
+    /// with `(D1, D2, D3)` [`Lens::Item`]. Unlike [`Lens::split3`], this allows factories to return
+    /// errors.
+    ///
+    /// See [`SplitLens3::new_with_error`] for more details.
+    fn split3_with_error<F1, F2, F3, L1, L2, L3, D1, D2, D3, E>(
+        self,
+        factory1: F1,
+        factory2: F2,
+        factory3: F3,
+    ) -> Result<SplitLens3<L1, L2, L3>, E>
+    where
+        Self: Sized + Clone,
+        F1: Fn(Self) -> Result<L1, E>,
+        F2: Fn(Self) -> Result<L2, E>,
+        F3: Fn(Self) -> Result<L3, E>,
+        L1: Lens<Item = D1>,
+        L2: Lens<Item = D2>,
+        L3: Lens<Item = D3>,
+    {
+        SplitLens3::new_with_error(self, factory1, factory2, factory3)
     }
 
     /// Get [`SplitLens4`] which splits lens into four seperate lens and returns [`Lens`]
@@ -279,6 +339,32 @@ pub trait Lens {
         L4: Lens<Item = D4>,
     {
         SplitLens4::new(self, factory1, factory2, factory3, factory4)
+    }
+
+    /// Get [`SplitLens4`] which splits lens into four seperate lens and returns [`Lens`]
+    /// with `(D1, D2, D3, D4)` [`Lens::Item`]. Unlike [`Lens::split4`], this allows factories to
+    /// return errors.
+    ///
+    /// See [`SplitLens4::new_with_error`] for more details.
+    fn split4_with_error<F1, F2, F3, F4, L1, L2, L3, L4, D1, D2, D3, D4, E>(
+        self,
+        factory1: F1,
+        factory2: F2,
+        factory3: F3,
+        factory4: F4,
+    ) -> Result<SplitLens4<L1, L2, L3, L4>, E>
+    where
+        Self: Sized + Clone,
+        F1: Fn(Self) -> Result<L1, E>,
+        F2: Fn(Self) -> Result<L2, E>,
+        F3: Fn(Self) -> Result<L3, E>,
+        F4: Fn(Self) -> Result<L4, E>,
+        L1: Lens<Item = D1>,
+        L2: Lens<Item = D2>,
+        L3: Lens<Item = D3>,
+        L4: Lens<Item = D4>,
+    {
+        SplitLens4::new_with_error(self, factory1, factory2, factory3, factory4)
     }
 
     /// Get [`OverlayLens`] which combines two [`Lens`] by overlaying `overlay` on top of

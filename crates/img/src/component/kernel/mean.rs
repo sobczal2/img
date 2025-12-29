@@ -22,12 +22,12 @@ use crate::{
 };
 
 #[derive(Debug, Error)]
-pub enum CreationError {
+pub enum MeanKernelCreationError {
     #[error("invalid convolution kernel params: {0}")]
-    ConvolutionKernelError(#[from] kernel::convolution::CreationError),
+    ConvolutionKernelError(#[from] kernel::convolution::ConvolutionKernelCreationError),
 }
 
-pub type CreationResult = Result<MeanKernel, CreationError>;
+pub type MeanKernelCreationResult = Result<MeanKernel, MeanKernelCreationError>;
 
 #[derive(Clone)]
 pub struct MeanKernel {
@@ -35,7 +35,7 @@ pub struct MeanKernel {
 }
 
 impl MeanKernel {
-    pub fn new(size: Size, flags: ChannelFlags) -> CreationResult {
+    pub fn new(size: Size, flags: ChannelFlags) -> MeanKernelCreationResult {
         Ok(Self {
             inner: ConvolutionKernel::new(
                 size,

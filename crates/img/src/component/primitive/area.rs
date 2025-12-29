@@ -165,7 +165,7 @@ impl Area {
 
     /// Get [`Area`]'s bottom right point.
     ///
-    /// Returns the point at the bottom right corner of the area 
+    /// Returns the point at the bottom right corner of the area
     /// (top_left.x + width - 1, top_left.y + height - 1).
     ///
     /// # Examples
@@ -243,6 +243,16 @@ impl Area {
 
         self.size.contains(&relative)
     }
+
+    pub fn points(&self) -> impl Iterator<Item = Point> {
+        (self.top_left().y()..=self.bottom_left().y())
+            .map(|y| ((self.top_left().x()..=self.top_right().x()), y))
+            .flat_map(|(horizontal, y)| {
+                horizontal
+                    .into_iter()
+                    .map(move |x| Point::new(x, y).expect("unexpected error in Point::new"))
+            })
+    }
 }
 
 #[cfg(test)]
@@ -278,7 +288,7 @@ mod tests {
     #[test]
     fn test_from_cropped_size_err() {
         let size = Size::new(10, 20).unwrap();
-        
+
         // Test invalid margin that would make width zero
         let margin_width_zero = Margin::new(0, 5, 0, 5).unwrap();
         assert!(Area::from_cropped_size(size, margin_width_zero).is_err());
@@ -306,7 +316,7 @@ mod tests {
     fn test_top_right() {
         let area = Area::new(Size::new(10, 20).unwrap(), Point::new(100, 50).unwrap());
         let top_right = area.top_right();
-        
+
         // top_right should be (100 + 10 - 1, 50) = (109, 50)
         assert_eq!(top_right, Point::new(109, 50).unwrap());
 
@@ -319,7 +329,7 @@ mod tests {
     fn test_bottom_left() {
         let area = Area::new(Size::new(10, 20).unwrap(), Point::new(100, 50).unwrap());
         let bottom_left = area.bottom_left();
-        
+
         // bottom_left should be (100, 50 + 20 - 1) = (100, 69)
         assert_eq!(bottom_left, Point::new(100, 69).unwrap());
 
@@ -332,7 +342,7 @@ mod tests {
     fn test_bottom_right() {
         let area = Area::new(Size::new(10, 20).unwrap(), Point::new(100, 50).unwrap());
         let bottom_right = area.bottom_right();
-        
+
         // bottom_right should be (100 + 10 - 1, 50 + 20 - 1) = (109, 69)
         assert_eq!(bottom_right, Point::new(109, 69).unwrap());
 
@@ -344,19 +354,19 @@ mod tests {
     #[test]
     fn test_contains() {
         let area = Area::new(Size::new(500, 1000).unwrap(), Point::new(100, 50).unwrap());
-        
+
         // Test corners (should be contained)
         assert!(area.contains(&Point::new(100, 50).unwrap())); // top_left
         assert!(area.contains(&Point::new(599, 50).unwrap())); // top_right
         assert!(area.contains(&Point::new(100, 1049).unwrap())); // bottom_left
         assert!(area.contains(&Point::new(599, 1049).unwrap())); // bottom_right
-        
+
         // Test outside corners (should not be contained)
         assert!(!area.contains(&Point::new(99, 50).unwrap())); // left of area
         assert!(!area.contains(&Point::new(600, 50).unwrap())); // right of area
         assert!(!area.contains(&Point::new(100, 49).unwrap())); // above area
         assert!(!area.contains(&Point::new(100, 1050).unwrap())); // below area
-        
+
         // Test 1x1 area
         let single = Area::new(Size::new(1, 1).unwrap(), Point::new(5, 10).unwrap());
         assert!(single.contains(&Point::new(5, 10).unwrap()));

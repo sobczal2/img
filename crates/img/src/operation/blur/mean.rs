@@ -27,22 +27,22 @@ use crate::{
 };
 
 #[derive(Debug, Error)]
-pub enum MeanCreationError {
+pub enum MeanBlurCreationError {
     #[error("failed to create mean kernel: {0}")]
-    Kernel(#[from] kernel::mean::CreationError),
+    Kernel(#[from] kernel::mean::MeanKernelCreationError),
     #[error("failed to create kernel lens: {0}")]
     KernelLens(#[from] lens::kernel::CreationError),
     #[error("failed to create size: {0}")]
     Size(#[from] SizeCreationError),
 }
 
-pub type MeanCreationResult<T> = std::result::Result<T, MeanCreationError>;
+pub type MeanBlurCreationResult<T> = std::result::Result<T, MeanBlurCreationError>;
 
 pub fn mean_blur_lens<S>(
     source: S,
     radius: usize,
     flags: ChannelFlags,
-) -> MeanCreationResult<impl Lens<Item = Pixel>>
+) -> MeanBlurCreationResult<impl Lens<Item = Pixel>>
 where
     S: Lens,
     S::Item: AsRef<Pixel>,
@@ -52,7 +52,11 @@ where
     Ok(lens)
 }
 
-pub fn mean_blur(image: &Image, radius: usize, flags: ChannelFlags) -> MeanCreationResult<Image> {
+pub fn mean_blur(
+    image: &Image,
+    radius: usize,
+    flags: ChannelFlags,
+) -> MeanBlurCreationResult<Image> {
     let lens = mean_blur_lens(image.lens(), radius, flags)?;
     Ok(Image::from_lens(lens))
 }
@@ -63,7 +67,7 @@ pub fn mean_blur_par(
     threads: NonZeroUsize,
     radius: usize,
     flags: ChannelFlags,
-) -> MeanCreationResult<Image> {
+) -> MeanBlurCreationResult<Image> {
     use crate::lens::FromLensPar;
 
     let lens = mean_blur_lens(image.lens(), radius, flags)?;

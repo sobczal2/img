@@ -178,9 +178,6 @@ mod tests {
     #[test]
     fn test_unified_err() {
         // Test value too big
-        assert_eq!(
-            Margin::unified(DIMENSION_MAX).unwrap_err(),
-            MarginCreationError::TopTooBig
-        );
+        assert_eq!(Margin::unified(DIMENSION_MAX).unwrap_err(), MarginCreationError::TopTooBig);
     }
 }

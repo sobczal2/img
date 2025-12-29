@@ -38,7 +38,11 @@ where
         Self { lens1, lens2, size }
     }
 
-    pub fn new_with_error<S, F1, F2, E>(source: S, factory1: F1, factory2: F2) -> std::result::Result<Self, E>
+    pub fn new_with_error<S, F1, F2, E>(
+        source: S,
+        factory1: F1,
+        factory2: F2,
+    ) -> std::result::Result<Self, E>
     where
         S: Lens + Clone,
         F1: Fn(S) -> Result<L1, E>,
@@ -110,7 +114,12 @@ where
         Self { lens1, lens2, lens3, size }
     }
 
-    pub fn new_with_error<S, F1, F2, F3, E>(source: S, factory1: F1, factory2: F2, factory3: F3) -> std::result::Result<Self, E>
+    pub fn new_with_error<S, F1, F2, F3, E>(
+        source: S,
+        factory1: F1,
+        factory2: F2,
+        factory3: F3,
+    ) -> std::result::Result<Self, E>
     where
         S: Lens + Clone,
         F1: Fn(S) -> Result<L1, E>,

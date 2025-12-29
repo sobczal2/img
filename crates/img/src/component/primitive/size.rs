@@ -402,15 +402,15 @@ mod tests {
         let size = Size::new(10, 20).unwrap();
         let margin = Margin::new(2, 3, 4, 5).unwrap();
         let result = size.shrink_by_margin(margin).unwrap();
-        
+
         assert_eq!(result.width(), 2);
         assert_eq!(result.height(), 14);
-        
+
         // Test zero margins
         let zero_margin = Margin::new(0, 0, 0, 0).unwrap();
         let unchanged = size.shrink_by_margin(zero_margin).unwrap();
         assert_eq!(unchanged, size);
-        
+
         // Test maximum valid margins
         let max_size = Size::new(DIMENSION_MAX, DIMENSION_MAX).unwrap();
         let max_margin = Margin::new(0, 0, 0, DIMENSION_MAX - 1).unwrap();
@@ -422,21 +422,21 @@ mod tests {
     #[test]
     fn test_shrink_by_margin_err() {
         let size = Size::new(10, 20).unwrap();
-        
+
         // Test width zero
         let margin_width_zero = Margin::new(0, 5, 0, 5).unwrap();
         assert_eq!(
             size.shrink_by_margin(margin_width_zero).unwrap_err(),
             SizeCreationError::WidthZero
         );
-        
+
         // Test height zero
         let margin_height_zero = Margin::new(10, 0, 10, 0).unwrap();
         assert_eq!(
             size.shrink_by_margin(margin_height_zero).unwrap_err(),
             SizeCreationError::HeightZero
         );
-        
+
         // Test both zero
         let margin_both_zero = Margin::new(5, 5, 5, 5).unwrap();
         assert_eq!(
@@ -450,15 +450,15 @@ mod tests {
         let size = Size::new(10, 20).unwrap();
         let margin = Margin::new(2, 3, 4, 5).unwrap();
         let result = size.extend_by_margin(margin).unwrap();
-        
+
         assert_eq!(result.width(), 18);
         assert_eq!(result.height(), 26);
-        
+
         // Test zero margins
         let zero_margin = Margin::new(0, 0, 0, 0).unwrap();
         let unchanged = size.extend_by_margin(zero_margin).unwrap();
         assert_eq!(unchanged, size);
-        
+
         // Test small extension
         let small_margin = Margin::new(1, 1, 1, 1).unwrap();
         let extended = size.extend_by_margin(small_margin).unwrap();
@@ -469,14 +469,14 @@ mod tests {
     #[test]
     fn test_extend_by_margin_err() {
         let size = Size::new(10, 20).unwrap();
-        
+
         // Test width too big
         let margin_width_big = Margin::new(0, DIMENSION_MAX - 1, 0, 1).unwrap();
         assert_eq!(
             size.extend_by_margin(margin_width_big).unwrap_err(),
             SizeCreationError::WidthTooBig
         );
-        
+
         // Test height too big
         let margin_height_big = Margin::new(DIMENSION_MAX - 1, 0, 1, 0).unwrap();
         assert_eq!(
@@ -492,7 +492,7 @@ mod tests {
             Size::new(10, 10).unwrap().partial_cmp(&Size::new(10, 10).unwrap()),
             Some(Ordering::Equal)
         );
-        
+
         // Less
         assert_eq!(
             Size::new(10, 10).unwrap().partial_cmp(&Size::new(20, 20).unwrap()),
@@ -506,7 +506,7 @@ mod tests {
             Size::new(10, 10).unwrap().partial_cmp(&Size::new(20, 10).unwrap()),
             Some(Ordering::Less)
         );
-        
+
         // Greater
         assert_eq!(
             Size::new(20, 20).unwrap().partial_cmp(&Size::new(10, 10).unwrap()),
@@ -520,15 +520,9 @@ mod tests {
             Size::new(10, 20).unwrap().partial_cmp(&Size::new(10, 10).unwrap()),
             Some(Ordering::Greater)
         );
-        
+
         // None (incomparable)
-        assert_eq!(
-            Size::new(20, 10).unwrap().partial_cmp(&Size::new(10, 20).unwrap()),
-            None
-        );
-        assert_eq!(
-            Size::new(10, 20).unwrap().partial_cmp(&Size::new(20, 10).unwrap()),
-            None
-        );
+        assert_eq!(Size::new(20, 10).unwrap().partial_cmp(&Size::new(10, 20).unwrap()), None);
+        assert_eq!(Size::new(10, 20).unwrap().partial_cmp(&Size::new(20, 10).unwrap()), None);
     }
 }

@@ -4,7 +4,10 @@ use thiserror::Error;
 
 use crate::{
     component::{
-        kernel::Kernel,
+        kernel::{
+            Kernel,
+            kernel_margin_for_size,
+        },
         primitive::{
             Area,
             Margin,
@@ -25,12 +28,13 @@ use crate::{
 };
 
 #[derive(Debug, Error)]
-pub enum CreationError {
+pub enum ConvolutionKernelCreationError {
     #[error("buffer len is invalid")]
     BufferLenMissmatch,
 }
 
-pub type CreationResult = Result<ConvolutionKernel, CreationError>;
+pub type ConvolutionKernelCreationResult =
+    Result<ConvolutionKernel, ConvolutionKernelCreationError>;
 
 #[derive(Clone)]
 pub struct ConvolutionKernel {
@@ -44,10 +48,10 @@ impl ConvolutionKernel {
         size: Size,
         buffer: impl IntoIterator<Item = f32>,
         flags: ChannelFlags,
-    ) -> CreationResult {
+    ) -> ConvolutionKernelCreationResult {
         let buffer: Box<[_]> = buffer.into_iter().collect();
         if buffer.len() != size.area() {
-            return Err(CreationError::BufferLenMissmatch);
+            return Err(ConvolutionKernelCreationError::BufferLenMissmatch);
         }
 
         Ok(Self { size, buffer, flags })
@@ -69,12 +73,12 @@ impl<In> Kernel<In, Pixel> for ConvolutionKernel
 where
     In: AsRef<Pixel>,
 {
-    fn apply<S>(&self, lens: &S, point: Point) -> IndexResult<Pixel>
+    fn apply<S>(&self, source: &S, point: Point) -> IndexResult<Pixel>
     where
         S: Lens<Item = In>,
     {
         let working_area = Area::from_cropped_size(
-            lens.size(),
+            source.size(),
             <ConvolutionKernel as Kernel<In, Pixel>>::margin(self),
         )
         .expect("failed to create working area, this is either lens or kernel bug");
@@ -86,7 +90,7 @@ where
         let center = self.size.middle();
 
         // SAFETY: `Lens::look` always returns a value when in bounds.
-        let original = lens.look(point).expect("unexpected error in Lens::look");
+        let original = source.look(point).expect("unexpected error in Lens::look");
         let sum = self
             .buffer
             .iter()
@@ -105,7 +109,7 @@ where
                 let translated =
                     point.translate(offset).expect("unexpected error in Point::translate");
                 // SAFETY: `Lens::look` always returns a value when in bounds.
-                let current = lens.look(translated).expect("unexpected error in Lens::look");
+                let current = source.look(translated).expect("unexpected error in Lens::look");
                 let pixel = current.as_ref();
 
                 IntermediatePixel(
@@ -124,20 +128,6 @@ where
     }
 
     fn margin(&self) -> Margin {
-        let (left, right) = if self.size.width().is_multiple_of(2) {
-            (self.size.width() / 2, self.size.width() / 2 - 1)
-        } else {
-            (self.size.width() / 2, self.size.width() / 2)
-        };
-
-        let (top, bottom) = if self.size.height().is_multiple_of(2) {
-            (self.size.height() / 2, self.size.height() / 2 - 1)
-        } else {
-            (self.size.height() / 2, self.size.height() / 2)
-        };
-
-        // SAFETY: all parameters are halves of some size which is guaranted to be
-        // less than or equal to DIMENSION_MAX.
-        Margin::new(top, right, bottom, left).expect("unexpected error in Margin::new")
+        kernel_margin_for_size(self.size)
     }
 }

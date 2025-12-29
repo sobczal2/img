@@ -48,7 +48,7 @@ impl Scale {
     /// * `ScaleCreationError::ScaleXInvalid` - if `x` is not within <[`Scale::MIN`],
     ///   [`Scale::FACTOR_MAX`]>, is [`NAN`], [`INFINITY`] or is [`NEG_INFINITY`]
     /// * `ScaleCreationError::ScaleYInvalid` - if `y` is not within <[`Scale::MIN`],
-    ///   [`Scale::FACTOR_MAX`]>, is [`NAN`],[`INFINITY`] or is [`NEG_INFINITY`] 
+    ///   [`Scale::FACTOR_MAX`]>, is [`NAN`],[`INFINITY`] or is [`NEG_INFINITY`]
     ///
     /// [`NAN`]: f32::NAN
     /// [`INFINITY`]: f32::INFINITY
@@ -114,8 +114,8 @@ impl Scale {
     /// # }
     /// ```
     pub fn inverse(&self) -> Scale {
-        // SAFETY: safe because inverse is always within range `[Scale::FACTOR_MIN, Scale::FACTOR_MAX]`
-        // inclusive.
+        // SAFETY: safe because inverse is always within range `[Scale::FACTOR_MIN,
+        // Scale::FACTOR_MAX]` inclusive.
         Scale(1.0 / self.0, 1.0 / self.1)
     }
 
@@ -251,8 +251,8 @@ impl PartialOrd for Scale {
 
 #[cfg(test)]
 mod test {
-    use core::f32;
     use crate::component::primitive::PointCreationError;
+    use core::f32;
 
     use super::*;
 
@@ -267,67 +267,190 @@ mod test {
 
     #[test]
     fn test_new_err() {
-        assert_eq!(Scale::new(Scale::FACTOR_MIN - 1f32, 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
-        assert_eq!(Scale::new(1f32, Scale::FACTOR_MIN - 1f32).unwrap_err(), ScaleCreationError::ScaleYInvalid);
-        assert_eq!(Scale::new(Scale::FACTOR_MIN - 1f32, Scale::FACTOR_MIN - 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
+        assert_eq!(
+            Scale::new(Scale::FACTOR_MIN - 1f32, 1f32).unwrap_err(),
+            ScaleCreationError::ScaleXInvalid
+        );
+        assert_eq!(
+            Scale::new(1f32, Scale::FACTOR_MIN - 1f32).unwrap_err(),
+            ScaleCreationError::ScaleYInvalid
+        );
+        assert_eq!(
+            Scale::new(Scale::FACTOR_MIN - 1f32, Scale::FACTOR_MIN - 1f32).unwrap_err(),
+            ScaleCreationError::ScaleXInvalid
+        );
 
-        assert_eq!(Scale::new(Scale::FACTOR_MAX + 1f32, 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
-        assert_eq!(Scale::new(1f32, Scale::FACTOR_MAX + 1f32).unwrap_err(), ScaleCreationError::ScaleYInvalid);
-        assert_eq!(Scale::new(Scale::FACTOR_MAX + 1f32, Scale::FACTOR_MAX + 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
+        assert_eq!(
+            Scale::new(Scale::FACTOR_MAX + 1f32, 1f32).unwrap_err(),
+            ScaleCreationError::ScaleXInvalid
+        );
+        assert_eq!(
+            Scale::new(1f32, Scale::FACTOR_MAX + 1f32).unwrap_err(),
+            ScaleCreationError::ScaleYInvalid
+        );
+        assert_eq!(
+            Scale::new(Scale::FACTOR_MAX + 1f32, Scale::FACTOR_MAX + 1f32).unwrap_err(),
+            ScaleCreationError::ScaleXInvalid
+        );
 
         assert_eq!(Scale::new(f32::INFINITY, 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
         assert_eq!(Scale::new(1f32, f32::INFINITY).unwrap_err(), ScaleCreationError::ScaleYInvalid);
-        assert_eq!(Scale::new(f32::NEG_INFINITY, 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
-        assert_eq!(Scale::new(1f32, f32::NEG_INFINITY).unwrap_err(), ScaleCreationError::ScaleYInvalid);
+        assert_eq!(
+            Scale::new(f32::NEG_INFINITY, 1f32).unwrap_err(),
+            ScaleCreationError::ScaleXInvalid
+        );
+        assert_eq!(
+            Scale::new(1f32, f32::NEG_INFINITY).unwrap_err(),
+            ScaleCreationError::ScaleYInvalid
+        );
         assert_eq!(Scale::new(f32::NAN, 1f32).unwrap_err(), ScaleCreationError::ScaleXInvalid);
         assert_eq!(Scale::new(1f32, f32::NAN).unwrap_err(), ScaleCreationError::ScaleYInvalid);
     }
 
     #[test]
     fn test_inverse() {
-        assert_eq!(Scale::new(Scale::FACTOR_MAX, 1f32).unwrap().inverse(), Scale::new(Scale::FACTOR_MIN, 1f32).unwrap());
-        assert_eq!(Scale::new(Scale::FACTOR_MIN, 1f32).unwrap().inverse(), Scale::new(Scale::FACTOR_MAX, 1f32).unwrap());
-        assert_eq!(Scale::new(1f32, Scale::FACTOR_MAX).unwrap().inverse(), Scale::new(1f32, Scale::FACTOR_MIN).unwrap());
-        assert_eq!(Scale::new(1f32, Scale::FACTOR_MIN).unwrap().inverse(), Scale::new(1f32, Scale::FACTOR_MAX).unwrap());
+        assert_eq!(
+            Scale::new(Scale::FACTOR_MAX, 1f32).unwrap().inverse(),
+            Scale::new(Scale::FACTOR_MIN, 1f32).unwrap()
+        );
+        assert_eq!(
+            Scale::new(Scale::FACTOR_MIN, 1f32).unwrap().inverse(),
+            Scale::new(Scale::FACTOR_MAX, 1f32).unwrap()
+        );
+        assert_eq!(
+            Scale::new(1f32, Scale::FACTOR_MAX).unwrap().inverse(),
+            Scale::new(1f32, Scale::FACTOR_MIN).unwrap()
+        );
+        assert_eq!(
+            Scale::new(1f32, Scale::FACTOR_MIN).unwrap().inverse(),
+            Scale::new(1f32, Scale::FACTOR_MAX).unwrap()
+        );
     }
 
     #[test]
     fn test_apply_ok() {
-        assert_eq!(Scale::new(1f32, 1f32).unwrap().apply(Size::new(1, 1).unwrap()).unwrap(), Size::new(1, 1).unwrap());
-        assert_eq!(Scale::new(2f32, 1f32).unwrap().apply(Size::new(1, 1).unwrap()).unwrap(), Size::new(2, 1).unwrap());
-        assert_eq!(Scale::new(1f32, 2f32).unwrap().apply(Size::new(1, 1).unwrap()).unwrap(), Size::new(1, 2).unwrap());
-        assert_eq!(Scale::new(0.5f32, 0.5f32).unwrap().apply(Size::new(2, 2).unwrap()).unwrap(), Size::new(1, 1).unwrap());
-        assert_eq!(Scale::new(1f32, 1f32).unwrap().apply(Size::new(DIMENSION_MAX, 1).unwrap()).unwrap(), Size::new(DIMENSION_MAX, 1).unwrap());
-        assert_eq!(Scale::new(1f32, 1f32).unwrap().apply(Size::new(1, DIMENSION_MAX).unwrap()).unwrap(), Size::new(1, DIMENSION_MAX).unwrap());
-        assert_eq!(Scale::new(1f32, 1f32).unwrap().apply(Size::new(DIMENSION_MAX, DIMENSION_MAX).unwrap()).unwrap(), Size::new(DIMENSION_MAX, DIMENSION_MAX).unwrap());
+        assert_eq!(
+            Scale::new(1f32, 1f32).unwrap().apply(Size::new(1, 1).unwrap()).unwrap(),
+            Size::new(1, 1).unwrap()
+        );
+        assert_eq!(
+            Scale::new(2f32, 1f32).unwrap().apply(Size::new(1, 1).unwrap()).unwrap(),
+            Size::new(2, 1).unwrap()
+        );
+        assert_eq!(
+            Scale::new(1f32, 2f32).unwrap().apply(Size::new(1, 1).unwrap()).unwrap(),
+            Size::new(1, 2).unwrap()
+        );
+        assert_eq!(
+            Scale::new(0.5f32, 0.5f32).unwrap().apply(Size::new(2, 2).unwrap()).unwrap(),
+            Size::new(1, 1).unwrap()
+        );
+        assert_eq!(
+            Scale::new(1f32, 1f32).unwrap().apply(Size::new(DIMENSION_MAX, 1).unwrap()).unwrap(),
+            Size::new(DIMENSION_MAX, 1).unwrap()
+        );
+        assert_eq!(
+            Scale::new(1f32, 1f32).unwrap().apply(Size::new(1, DIMENSION_MAX).unwrap()).unwrap(),
+            Size::new(1, DIMENSION_MAX).unwrap()
+        );
+        assert_eq!(
+            Scale::new(1f32, 1f32)
+                .unwrap()
+                .apply(Size::new(DIMENSION_MAX, DIMENSION_MAX).unwrap())
+                .unwrap(),
+            Size::new(DIMENSION_MAX, DIMENSION_MAX).unwrap()
+        );
     }
 
     #[test]
     fn test_apply_err() {
-        assert_eq!(Scale::new(2f32, 1f32).unwrap().apply(Size::new(DIMENSION_MAX / 2 + 1, 1).unwrap()).unwrap_err(), SizeCreationError::WidthTooBig);
-        assert_eq!(Scale::new(1f32, 2f32).unwrap().apply(Size::new(1, DIMENSION_MAX / 2 + 1).unwrap()).unwrap_err(), SizeCreationError::HeightTooBig);
-        assert_eq!(Scale::new(0.5f32, 1f32).unwrap().apply(Size::new(1, 1).unwrap()).unwrap_err(), SizeCreationError::WidthZero);
-        assert_eq!(Scale::new(1f32, 0.5f32).unwrap().apply(Size::new(1, 1).unwrap()).unwrap_err(), SizeCreationError::HeightZero);
+        assert_eq!(
+            Scale::new(2f32, 1f32)
+                .unwrap()
+                .apply(Size::new(DIMENSION_MAX / 2 + 1, 1).unwrap())
+                .unwrap_err(),
+            SizeCreationError::WidthTooBig
+        );
+        assert_eq!(
+            Scale::new(1f32, 2f32)
+                .unwrap()
+                .apply(Size::new(1, DIMENSION_MAX / 2 + 1).unwrap())
+                .unwrap_err(),
+            SizeCreationError::HeightTooBig
+        );
+        assert_eq!(
+            Scale::new(0.5f32, 1f32).unwrap().apply(Size::new(1, 1).unwrap()).unwrap_err(),
+            SizeCreationError::WidthZero
+        );
+        assert_eq!(
+            Scale::new(1f32, 0.5f32).unwrap().apply(Size::new(1, 1).unwrap()).unwrap_err(),
+            SizeCreationError::HeightZero
+        );
     }
 
     #[test]
     fn test_translate_ok() {
-        assert_eq!(Scale::new(1f32, 1f32).unwrap().translate(Point::new(1, 1).unwrap()).unwrap(), Point::new(1, 1).unwrap());
-        assert_eq!(Scale::new(0.5f32, 1f32).unwrap().translate(Point::new(1, 1).unwrap()).unwrap(), Point::new(0, 1).unwrap());
-        assert_eq!(Scale::new(1f32, 0.5f32).unwrap().translate(Point::new(1, 1).unwrap()).unwrap(), Point::new(1, 0).unwrap());
-        assert_eq!(Scale::new(2f32, 1f32).unwrap().translate(Point::new(1, 1).unwrap()).unwrap(), Point::new(2, 1).unwrap());
-        assert_eq!(Scale::new(1f32, 2f32).unwrap().translate(Point::new(1, 1).unwrap()).unwrap(), Point::new(1, 2).unwrap());
-        assert_eq!(Scale::new(1.5f32, 1f32).unwrap().translate(Point::new(1, 1).unwrap()).unwrap(), Point::new(1, 1).unwrap());
-        assert_eq!(Scale::new(1f32, 1.5f32).unwrap().translate(Point::new(1, 1).unwrap()).unwrap(), Point::new(1, 1).unwrap());
-        assert_eq!(Scale::new(1f32, 1f32).unwrap().translate(Point::new(DIMENSION_MAX - 1, 1).unwrap()).unwrap(), Point::new(DIMENSION_MAX - 1, 1).unwrap());
-        assert_eq!(Scale::new(1f32, 1f32).unwrap().translate(Point::new(1, DIMENSION_MAX - 1).unwrap()).unwrap(), Point::new(1, DIMENSION_MAX - 1).unwrap());
+        assert_eq!(
+            Scale::new(1f32, 1f32).unwrap().translate(Point::new(1, 1).unwrap()).unwrap(),
+            Point::new(1, 1).unwrap()
+        );
+        assert_eq!(
+            Scale::new(0.5f32, 1f32).unwrap().translate(Point::new(1, 1).unwrap()).unwrap(),
+            Point::new(0, 1).unwrap()
+        );
+        assert_eq!(
+            Scale::new(1f32, 0.5f32).unwrap().translate(Point::new(1, 1).unwrap()).unwrap(),
+            Point::new(1, 0).unwrap()
+        );
+        assert_eq!(
+            Scale::new(2f32, 1f32).unwrap().translate(Point::new(1, 1).unwrap()).unwrap(),
+            Point::new(2, 1).unwrap()
+        );
+        assert_eq!(
+            Scale::new(1f32, 2f32).unwrap().translate(Point::new(1, 1).unwrap()).unwrap(),
+            Point::new(1, 2).unwrap()
+        );
+        assert_eq!(
+            Scale::new(1.5f32, 1f32).unwrap().translate(Point::new(1, 1).unwrap()).unwrap(),
+            Point::new(1, 1).unwrap()
+        );
+        assert_eq!(
+            Scale::new(1f32, 1.5f32).unwrap().translate(Point::new(1, 1).unwrap()).unwrap(),
+            Point::new(1, 1).unwrap()
+        );
+        assert_eq!(
+            Scale::new(1f32, 1f32)
+                .unwrap()
+                .translate(Point::new(DIMENSION_MAX - 1, 1).unwrap())
+                .unwrap(),
+            Point::new(DIMENSION_MAX - 1, 1).unwrap()
+        );
+        assert_eq!(
+            Scale::new(1f32, 1f32)
+                .unwrap()
+                .translate(Point::new(1, DIMENSION_MAX - 1).unwrap())
+                .unwrap(),
+            Point::new(1, DIMENSION_MAX - 1).unwrap()
+        );
         // TODO: checks for large numbers
     }
 
     #[test]
     fn test_translate_err() {
-        assert_eq!(Scale::new(1.5f32, 1f32).unwrap().translate(Point::new(DIMENSION_MAX - 1, 1).unwrap()).unwrap_err(), PointCreationError::XTooBig);
-        assert_eq!(Scale::new(1f32, 1.5f32).unwrap().translate(Point::new(1, DIMENSION_MAX - 1).unwrap()).unwrap_err(), PointCreationError::YTooBig);
+        assert_eq!(
+            Scale::new(1.5f32, 1f32)
+                .unwrap()
+                .translate(Point::new(DIMENSION_MAX - 1, 1).unwrap())
+                .unwrap_err(),
+            PointCreationError::XTooBig
+        );
+        assert_eq!(
+            Scale::new(1f32, 1.5f32)
+                .unwrap()
+                .translate(Point::new(1, DIMENSION_MAX - 1).unwrap())
+                .unwrap_err(),
+            PointCreationError::YTooBig
+        );
     }
 
     #[test]

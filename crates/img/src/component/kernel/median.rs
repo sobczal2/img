@@ -95,7 +95,8 @@ impl MedianKernel {
         for point in kernel_area.points() {
             let current = source.look(point).expect("unexpected error in Lens::look");
             let current: ChannelStore<_> = (*current.as_ref()).into();
-            histograms.zip_active(&current, self.flags, |h, c| h.insert_index((*c).into()))
+            histograms
+                .zip_active(&current, self.flags, |h, c| h.insert_index((*c).into()))
                 .expect("unexpected error in Histogram::insert_index");
         }
 
@@ -147,7 +148,8 @@ impl MedianKernel {
         }) {
             let current = source.look(point).expect("unexpected error in Lens::look");
             let current: ChannelStore<_> = (*current.as_ref()).into();
-            histograms.zip_active(&current, self.flags, |h, c| h.remove_index((*c).into()))
+            histograms
+                .zip_active(&current, self.flags, |h, c| h.remove_index((*c).into()))
                 .expect("unexpected error in Histogram::insert_index");
         }
 
@@ -156,7 +158,8 @@ impl MedianKernel {
         }) {
             let current = source.look(point).expect("unexpected error in Lens::look");
             let current: ChannelStore<_> = (*current.as_ref()).into();
-            histograms.zip_active(&current, self.flags, |h, c| h.insert_index((*c).into()))
+            histograms
+                .zip_active(&current, self.flags, |h, c| h.insert_index((*c).into()))
                 .expect("unexpected error in Histogram::insert_index");
         }
 

@@ -5,9 +5,7 @@ use thiserror::Error;
 use crate::{
     component::{
         kernel::median::MedianKernel,
-        primitive::{
-            SizeCreationError,
-        },
+        primitive::SizeCreationError,
     },
     image::Image,
     lens::{

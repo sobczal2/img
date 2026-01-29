@@ -5,25 +5,11 @@ mod printing;
 
 use std::process::exit;
 
-use clap::{
-    Command,
-    command,
-};
-use cmd::{
-    crop,
-    gamma_correction,
-    grayscale,
-    resize,
-    sepia,
-};
+use clap::{Command, command};
+use cmd::{crop, gamma_correction, grayscale, resize, sepia};
 use printing::print_error;
 
-use crate::cmd::{
-    blur,
-    canny,
-    kuwahara,
-    negative,
-};
+use crate::cmd::{blur, brightness, canny, kuwahara, negative};
 
 fn main() {
     let command = command!()
@@ -36,7 +22,8 @@ fn main() {
         .subcommand(gamma_correction::subcommand())
         .subcommand(canny::subcommand())
         .subcommand(kuwahara::subcommand())
-        .subcommand(negative::subcommand());
+        .subcommand(negative::subcommand())
+        .subcommand(brightness::subcommand());
 
     if let Err(e) = execute_command(command) {
         print_error(e.to_string());
@@ -56,6 +43,7 @@ fn execute_command(command: Command) -> anyhow::Result<()> {
         (canny::CMD_NAME, m) => canny::action(m),
         (kuwahara::CMD_NAME, m) => kuwahara::action(m),
         (negative::CMD_NAME, m) => negative::action(m),
+        (brightness::CMD_NAME, m) => brightness::action(m),
         _ => unreachable!(),
     }
 }

@@ -1,4 +1,5 @@
 pub mod blur;
+pub mod brightness;
 pub mod canny;
 pub mod crop;
 pub mod gamma_correction;

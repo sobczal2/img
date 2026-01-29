@@ -36,11 +36,37 @@ impl Pixel {
     /// Create a [`Pixel`] from given array.
     ///
     /// It uses RGBA layout.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let pixel = Pixel::new([255, 128, 64, 200]);
+    ///
+    /// assert_eq!(pixel.r(), 255);
+    /// assert_eq!(pixel.g(), 128);
+    /// assert_eq!(pixel.b(), 64);
+    /// assert_eq!(pixel.a(), 200);
+    /// ```
     pub const fn new(value: [u8; PIXEL_SIZE]) -> Self {
         Self(value)
     }
 
     /// Create a [`Pixel`] with zeroed channels.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let pixel = Pixel::zero();
+    ///
+    /// assert_eq!(pixel.r(), 0);
+    /// assert_eq!(pixel.g(), 0);
+    /// assert_eq!(pixel.b(), 0);
+    /// assert_eq!(pixel.a(), 0);
+    /// ```
     pub const fn zero() -> Self {
         Self([0; PIXEL_SIZE])
     }
@@ -54,46 +80,131 @@ impl Pixel {
     }
 
     /// Get red component.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let pixel = Pixel::new([100, 0, 0, 0]);
+    /// assert_eq!(pixel.r(), 100);
+    /// ```
     pub fn r(&self) -> u8 {
         self.0[0]
     }
 
     /// Get green component.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let pixel = Pixel::new([0, 100, 0, 0]);
+    /// assert_eq!(pixel.g(), 100);
+    /// ```
     pub fn g(&self) -> u8 {
         self.0[1]
     }
 
     /// Get blue component.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let pixel = Pixel::new([0, 0, 100, 0]);
+    /// assert_eq!(pixel.b(), 100);
+    /// ```
     pub fn b(&self) -> u8 {
         self.0[2]
     }
 
     /// Get alpha component.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let pixel = Pixel::new([0, 0, 0, 100]);
+    /// assert_eq!(pixel.a(), 100);
+    /// ```
     pub fn a(&self) -> u8 {
         self.0[3]
     }
 
     /// Set red component.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let mut pixel = Pixel::zero();
+    /// pixel.set_r(100);
+    /// assert_eq!(pixel.r(), 100);
+    /// ```
     pub fn set_r(&mut self, value: u8) {
         self.0[0] = value;
     }
 
     /// Set green component.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let mut pixel = Pixel::zero();
+    /// pixel.set_g(100);
+    /// assert_eq!(pixel.g(), 100);
+    /// ```
     pub fn set_g(&mut self, value: u8) {
         self.0[1] = value;
     }
 
     /// Set blue component.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let mut pixel = Pixel::zero();
+    /// pixel.set_b(100);
+    /// assert_eq!(pixel.b(), 100);
+    /// ```
     pub fn set_b(&mut self, value: u8) {
         self.0[2] = value;
     }
 
     /// Set alpha component.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let mut pixel = Pixel::zero();
+    /// pixel.set_a(100);
+    /// assert_eq!(pixel.a(), 100);
+    /// ```
     pub fn set_a(&mut self, value: u8) {
         self.0[3] = value;
     }
 
     /// Get underlying array.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let pixel = Pixel::new([10, 20, 30, 40]);
+    /// assert_eq!(pixel.buffer(), &[10, 20, 30, 40]);
+    /// ```
     pub fn buffer(&self) -> &[u8; PIXEL_SIZE] {
         &self.0
     }
@@ -162,21 +273,60 @@ pub trait PixelRgbaf32 {
 
 impl PixelRgbaf32 for Pixel {
     /// Get 0-1 normalized red component.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let pixel = Pixel::new([255, 0, 0, 0]);
+    /// assert!((pixel.r_f32() - 1.0).abs() < 1e-6);
+    ///
+    /// let pixel = Pixel::new([128, 0, 0, 0]);
+    /// assert!((pixel.r_f32() - 0.502).abs() < 1e-2);
+    /// ```
     fn r_f32(&self) -> f32 {
         self.r() as f32 / 255.0
     }
 
     /// Get 0-1 normalized green component.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let pixel = Pixel::new([0, 255, 0, 0]);
+    /// assert!((pixel.g_f32() - 1.0).abs() < 1e-6);
+    /// ```
     fn g_f32(&self) -> f32 {
         self.g() as f32 / 255.0
     }
 
     /// Get 0-1 normalized blue component.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let pixel = Pixel::new([0, 0, 255, 0]);
+    /// assert!((pixel.b_f32() - 1.0).abs() < 1e-6);
+    /// ```
     fn b_f32(&self) -> f32 {
         self.b() as f32 / 255.0
     }
 
     /// Get 0-1 normalized alpha component.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let pixel = Pixel::new([0, 0, 0, 255]);
+    /// assert!((pixel.a_f32() - 1.0).abs() < 1e-6);
+    /// ```
     fn a_f32(&self) -> f32 {
         self.a() as f32 / 255.0
     }
@@ -184,6 +334,22 @@ impl PixelRgbaf32 for Pixel {
     /// Set 0-1 normalized red component.
     ///
     /// This clamps the result if it is not in 0-1 range.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let mut pixel = Pixel::zero();
+    /// pixel.set_r_f32(0.5);
+    /// assert_eq!(pixel.r(), 128);
+    ///
+    /// // Values are clamped
+    /// pixel.set_r_f32(2.0);
+    /// assert_eq!(pixel.r(), 255);
+    /// pixel.set_r_f32(-1.0);
+    /// assert_eq!(pixel.r(), 0);
+    /// ```
     fn set_r_f32(&mut self, value: f32) {
         self.set_r((value * 255.0).round().clamp(0f32, 255f32) as u8);
     }
@@ -191,13 +357,33 @@ impl PixelRgbaf32 for Pixel {
     /// Set 0-1 normalized green component.
     ///
     /// This clamps the result if it is not in 0-1 range.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let mut pixel = Pixel::zero();
+    /// pixel.set_g_f32(0.5);
+    /// assert_eq!(pixel.g(), 128);
+    /// ```
     fn set_g_f32(&mut self, value: f32) {
         self.set_g((value * 255.0).round().clamp(0f32, 255f32) as u8);
     }
 
-    /// Set 0-1 normalized alpha component.
+    /// Set 0-1 normalized blue component.
     ///
     /// This clamps the result if it is not in 0-1 range.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let mut pixel = Pixel::zero();
+    /// pixel.set_b_f32(0.5);
+    /// assert_eq!(pixel.b(), 128);
+    /// ```
     fn set_b_f32(&mut self, value: f32) {
         self.set_b((value * 255.0).round().clamp(0f32, 255f32) as u8);
     }
@@ -205,6 +391,16 @@ impl PixelRgbaf32 for Pixel {
     /// Set 0-1 normalized alpha component.
     ///
     /// This clamps the result if it is not in 0-1 range.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use img::prelude::*;
+    ///
+    /// let mut pixel = Pixel::zero();
+    /// pixel.set_a_f32(0.5);
+    /// assert_eq!(pixel.a(), 128);
+    /// ```
     fn set_a_f32(&mut self, value: f32) {
         self.set_a((value * 255.0).round().clamp(0f32, 255f32) as u8);
     }
@@ -304,6 +500,126 @@ impl From<HsvPixel> for Pixel {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_new() {
+        let pixel = Pixel::new([10, 20, 30, 40]);
+        assert_eq!(pixel.r(), 10);
+        assert_eq!(pixel.g(), 20);
+        assert_eq!(pixel.b(), 30);
+        assert_eq!(pixel.a(), 40);
+    }
+
+    #[test]
+    fn test_zero() {
+        let pixel = Pixel::zero();
+        assert_eq!(pixel.r(), 0);
+        assert_eq!(pixel.g(), 0);
+        assert_eq!(pixel.b(), 0);
+        assert_eq!(pixel.a(), 0);
+    }
+
+    #[test]
+    fn test_default() {
+        let pixel = Pixel::default();
+        assert_eq!(pixel, Pixel::zero());
+    }
+
+    #[test]
+    fn test_getters_setters() {
+        let mut pixel = Pixel::zero();
+
+        pixel.set_r(100);
+        assert_eq!(pixel.r(), 100);
+
+        pixel.set_g(150);
+        assert_eq!(pixel.g(), 150);
+
+        pixel.set_b(200);
+        assert_eq!(pixel.b(), 200);
+
+        pixel.set_a(250);
+        assert_eq!(pixel.a(), 250);
+    }
+
+    #[test]
+    fn test_buffer() {
+        let pixel = Pixel::new([1, 2, 3, 4]);
+        assert_eq!(pixel.buffer(), &[1, 2, 3, 4]);
+    }
+
+    #[test]
+    fn test_set_with_flags_all() {
+        let mut pixel = Pixel::zero();
+        pixel.set_with_flags(10, 20, 30, 40, ChannelFlags::RGBA);
+        assert_eq!(pixel, Pixel::new([10, 20, 30, 40]));
+    }
+
+    #[test]
+    fn test_set_with_flags_partial() {
+        let mut pixel = Pixel::new([255, 255, 255, 255]);
+        pixel.set_with_flags(0, 0, 0, 0, ChannelFlags::RED | ChannelFlags::ALPHA);
+        assert_eq!(pixel, Pixel::new([0, 255, 255, 0]));
+    }
+
+    #[test]
+    fn test_f32_getters() {
+        let pixel = Pixel::new([0, 128, 255, 64]);
+        assert!((pixel.r_f32() - 0.0).abs() < 1e-6);
+        assert!((pixel.g_f32() - 0.502).abs() < 1e-2);
+        assert!((pixel.b_f32() - 1.0).abs() < 1e-6);
+        assert!((pixel.a_f32() - 0.251).abs() < 1e-2);
+    }
+
+    #[test]
+    fn test_f32_setters() {
+        let mut pixel = Pixel::zero();
+        pixel.set_r_f32(0.0);
+        pixel.set_g_f32(0.5);
+        pixel.set_b_f32(1.0);
+        pixel.set_a_f32(0.25);
+        assert_eq!(pixel.r(), 0);
+        assert_eq!(pixel.g(), 128);
+        assert_eq!(pixel.b(), 255);
+        assert_eq!(pixel.a(), 64);
+    }
+
+    #[test]
+    fn test_f32_setters_clamping() {
+        let mut pixel = Pixel::zero();
+
+        // Test upper clamping
+        pixel.set_r_f32(2.0);
+        assert_eq!(pixel.r(), 255);
+
+        // Test lower clamping
+        pixel.set_g_f32(-1.0);
+        assert_eq!(pixel.g(), 0);
+    }
+
+    #[test]
+    fn test_equality() {
+        let p1 = Pixel::new([10, 20, 30, 40]);
+        let p2 = Pixel::new([10, 20, 30, 40]);
+        let p3 = Pixel::new([10, 20, 30, 41]);
+
+        assert_eq!(p1, p2);
+        assert_ne!(p1, p3);
+    }
+
+    #[test]
+    fn test_clone() {
+        let p1 = Pixel::new([10, 20, 30, 40]);
+        let p2 = p1.clone();
+        assert_eq!(p1, p2);
+    }
+
+    #[test]
+    fn test_as_ref() {
+        let pixel = Pixel::new([1, 2, 3, 4]);
+        let pixel_ref: &Pixel = pixel.as_ref();
+        assert_eq!(pixel_ref.r(), 1);
+    }
 
     #[test]
     fn test_pixel_from_hsv_pixel() {

@@ -8,7 +8,7 @@ use img::prelude::*;
 
 mod common;
 
-operation_bench!(crop[Margin::unified(3)]);
+operation_bench!(crop[Margin::unified(3).unwrap()]);
 
 criterion_group!(benches, crop_benchmark);
 criterion_main!(benches);

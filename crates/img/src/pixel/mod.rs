@@ -548,7 +548,7 @@ impl<T> ChannelStore<T> {
     pub fn a_mut(&mut self) -> &mut T {
         &mut self.a
     }
-    
+
     pub fn zip_active<U, F, E>(
         &mut self,
         other: &ChannelStore<U>,
@@ -558,10 +558,18 @@ impl<T> ChannelStore<T> {
     where
         F: FnMut(&mut T, &U) -> Result<(), E>,
     {
-        if flags.contains(ChannelFlags::R) { f(&mut self.r, &other.r)?; }
-        if flags.contains(ChannelFlags::G) { f(&mut self.g, &other.g)?; }
-        if flags.contains(ChannelFlags::B) { f(&mut self.b, &other.b)?; }
-        if flags.contains(ChannelFlags::A) { f(&mut self.a, &other.a)?; }
+        if flags.contains(ChannelFlags::R) {
+            f(&mut self.r, &other.r)?;
+        }
+        if flags.contains(ChannelFlags::G) {
+            f(&mut self.g, &other.g)?;
+        }
+        if flags.contains(ChannelFlags::B) {
+            f(&mut self.b, &other.b)?;
+        }
+        if flags.contains(ChannelFlags::A) {
+            f(&mut self.a, &other.a)?;
+        }
         Ok(())
     }
 
@@ -651,7 +659,7 @@ mod tests {
     #[test]
     fn test_set_with_flags_partial() {
         let mut pixel = Pixel::new([255, 255, 255, 255]);
-        pixel.set_with_flags(0, 0, 0, 0, ChannelFlags::RED | ChannelFlags::ALPHA);
+        pixel.set_with_flags(0, 0, 0, 0, ChannelFlags::R | ChannelFlags::A);
         assert_eq!(pixel, Pixel::new([0, 255, 255, 0]));
     }
 
